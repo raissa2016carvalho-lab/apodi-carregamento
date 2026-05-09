@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Apodi — Registro de Carregamento</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f7f5f0;
+    --surface: #ffffff;
+    --surface2: #f0ede6;
+    --border: #ddd9d0;
+    --accent: #d4420a;
+    --text: #1a1a1a;
+    --muted: #888070;
+    --success: #1a7a4a;
+    --radius: 10px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Mono', monospace; background: var(--bg); color: var(--text); min-height: 100vh; }
+  body::before { content:''; position:fixed; top:0;left:0;right:0; height:4px; background:linear-gradient(90deg,var(--accent),#ff8c42,var(--accent)); z-index:100; }
+
+  .wrapper { max-width: 1100px; margin: 0 auto; padding: 36px 20px 80px; }
+
+  header { display:flex; align-items:center; gap:18px; margin-bottom:32px; }
+  .logo { width:54px;height:54px;background:var(--accent);border-radius:12px;display:grid;place-items:center;font-family:'Syne',sans-serif;font-weight:800;font-size:22px;color:#fff;flex-shrink:0;box-shadow:0 4px 16px rgba(212,66,10,.3); }
+  .header-text h1 { font-family:'Syne',sans-serif;font-weight:800;font-size:1.5rem;letter-spacing:-0.03em; }
+  .header-text p { font-size:.72rem;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin-top:2px; }
+
+  /* CONFIG BADGE */
+  #cfg-badge { margin-left:auto;font-size:.68rem;padding:5px 14px;border-radius:999px;font-family:'Syne',sans-serif;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;border:none;transition:all .2s; }
+  #cfg-badge.ok  { background:#e8f5ee;border:1px solid #a8dbb8;color:var(--success); }
+  #cfg-badge.nok { background:#fff0e8;border:1px solid #ffd0b8;color:var(--accent); }
+
+  /* MODAL CONFIG */
+  .modal-overlay { display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;align-items:center;justify-content:center; }
+  .modal-overlay.open { display:flex; }
+  .modal { background:var(--surface);border-radius:16px;padding:32px;width:100%;max-width:480px;box-shadow:0 20px 60px rgba(0,0,0,.2); }
+  .modal h2 { font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;margin-bottom:6px; }
+  .modal p  { font-size:.75rem;color:var(--muted);margin-bottom:20px;line-height:1.6; }
+  .modal label { font-size:.62rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);display:block;margin-bottom:5px; }
+  .modal input { width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 13px;font-family:'DM Mono',monospace;font-size:.82rem;color:var(--text);outline:none;margin-bottom:16px; }
+  .modal input:focus { border-color:var(--accent); }
+  .modal-hint { background:#fff8e8;border:1px solid #ffe0a0;border-radius:8px;padding:10px 14px;font-size:.72rem;color:#8a6000;margin-bottom:20px;line-height:1.6; }
+
+  .tabs { display:flex;gap:2px;margin-bottom:24px;background:var(--surface2);border-radius:10px;padding:4px;width:fit-content; }
+  .tab { padding:9px 20px;background:transparent;border:none;color:var(--muted);font-family:'Syne',sans-serif;font-weight:700;font-size:.78rem;border-radius:8px;cursor:pointer;transition:all .2s;letter-spacing:.03em; }
+  .tab.active { background:var(--surface);color:var(--accent);box-shadow:0 1px 4px rgba(0,0,0,.1); }
+  .tab-content { display:none; }
+  .tab-content.active { display:block; }
+
+  .layout { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+  @media(max-width:800px){ .layout { grid-template-columns:1fr; } }
+
+  .card { background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:22px;margin-bottom:18px;box-shadow:0 2px 8px rgba(0,0,0,.04); }
+  .card-title { font-family:'Syne',sans-serif;font-weight:700;font-size:.7rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:14px;display:flex;align-items:center;gap:8px; }
+  .card-title::after { content:'';flex:1;height:1px;background:var(--border); }
+
+  .upload-zone { border:2px dashed var(--border);border-radius:var(--radius);padding:32px 20px;text-align:center;cursor:pointer;position:relative;transition:all .2s;background:var(--surface2); }
+  .upload-zone:hover,.upload-zone.drag-over { border-color:var(--accent);background:#fff5f0; }
+  .upload-zone input[type=file] { position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%; }
+  .upload-icon { font-size:2.2rem;display:block;margin-bottom:10px; }
+  .upload-zone h2 { font-family:'Syne',sans-serif;font-weight:700;font-size:.95rem;margin-bottom:4px; }
+  .upload-zone p  { color:var(--muted);font-size:.73rem; }
+
+  #preview-wrap { display:none;margin-top:14px;border-radius:var(--radius);overflow:hidden;border:1px solid var(--border);max-height:400px; }
+  #preview-wrap img { width:100%;max-height:400px;object-fit:contain;background:#f0ede6; }
+
+  /* OCR STATUS */
+  #ocr-status { display:none;margin-top:14px;padding:12px 16px;border-radius:9px;font-size:.78rem;align-items:center;gap:10px;line-height:1.5; }
+  #ocr-status.running { display:flex;background:#fff8e8;border:1px solid #ffe0a0;color:#8a6000; }
+  #ocr-status.done    { display:flex;background:#e8f5ee;border:1px solid #a8dbb8;color:var(--success); }
+  #ocr-status.error   { display:flex;background:#fff0f0;border:1px solid #ffcccc;color:#cc3333; }
+
+  .progress-wrap { height:4px;background:var(--border);border-radius:999px;overflow:hidden;margin-top:10px;display:none; }
+  .progress-bar  { height:100%;background:var(--accent);border-radius:999px;width:0%;transition:width .4s; }
+
+  .spin { display:inline-block;animation:spin .8s linear infinite; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+
+  .fields-grid { display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-bottom:16px; }
+  .field { display:flex;flex-direction:column;gap:4px; }
+  .field label { font-size:.6rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted); }
+  .field input { background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 11px;font-family:'DM Mono',monospace;font-size:.8rem;color:var(--text);outline:none;transition:border-color .2s;width:100%; }
+  .field input:focus { border-color:var(--accent);background:#fff; }
+  .field input.filled { border-color:#a8dbb8;background:#f0fff6; }
+  .field.span2 { grid-column:span 2; }
+
+  .btn { display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:9px;font-family:'Syne',sans-serif;font-weight:700;font-size:.83rem;cursor:pointer;transition:all .2s;border:none;letter-spacing:.02em; }
+  .btn-primary { background:var(--accent);color:#fff; }
+  .btn-primary:hover { background:#b83508;transform:translateY(-1px);box-shadow:0 6px 20px rgba(212,66,10,.25); }
+  .btn-primary:disabled { opacity:.4;cursor:not-allowed;transform:none;box-shadow:none; }
+  .btn-ghost { background:transparent;border:1px solid var(--border);color:var(--text); }
+  .btn-ghost:hover { border-color:var(--accent);color:var(--accent); }
+  .btn-success { background:var(--success);color:#fff; }
+  .btn-success:hover { background:#155e39;transform:translateY(-1px); }
+  .btn-danger { background:transparent;border:1px solid #ffcccc;color:#cc3333;font-size:.73rem;padding:6px 14px; }
+  .btn-danger:hover { background:#fff0f0; }
+  .action-row { display:flex;gap:10px;flex-wrap:wrap;margin-top:6px; }
+
+  .stats-row { display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-bottom:22px; }
+  .stat-card { background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px;box-shadow:0 1px 4px rgba(0,0,0,.04); }
+  .stat-card .val { font-family:'Syne',sans-serif;font-size:1.9rem;font-weight:800;color:var(--accent);line-height:1; }
+  .stat-card .lbl { font-size:.6rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-top:4px; }
+
+  .filter-row { display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;align-items:center; }
+  .filter-row input { background:var(--surface);border:1px solid var(--border);color:var(--text);font-family:'DM Mono',monospace;font-size:.76rem;padding:8px 11px;border-radius:8px;outline:none;transition:border-color .2s; }
+  .filter-row input:focus { border-color:var(--accent); }
+
+  .table-wrap { overflow-x:auto;border-radius:12px;border:1px solid var(--border);box-shadow:0 1px 4px rgba(0,0,0,.04); }
+  table { width:100%;border-collapse:collapse;font-size:.74rem; }
+  thead { background:var(--surface2); }
+  th { padding:10px 12px;text-align:left;font-family:'Syne',sans-serif;font-size:.58rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);border-bottom:1px solid var(--border);white-space:nowrap; }
+  td { padding:9px 12px;border-bottom:1px solid var(--border);color:var(--text);white-space:nowrap; }
+  tr:last-child td { border-bottom:none; }
+  tr:hover td { background:var(--surface2); }
+  .tag { display:inline-block;padding:2px 10px;border-radius:999px;font-size:.6rem;font-family:'Syne',sans-serif;font-weight:700;background:#fff0e8;color:var(--accent);border:1px solid #ffd0b8; }
+  #empty-state { padding:60px 20px;text-align:center;color:var(--muted);font-size:.8rem; }
+  #empty-state span { display:block;font-size:2.4rem;margin-bottom:10px; }
+  .del-btn { background:none;border:none;cursor:pointer;color:#ccc;font-size:.95rem;padding:2px 6px;border-radius:4px;transition:color .2s; }
+  .del-btn:hover { color:#cc3333; }
+
+  #toast { position:fixed;bottom:28px;right:28px;background:#1a1a2e;color:#fff;padding:12px 18px;border-radius:10px;font-size:.76rem;z-index:999;opacity:0;transform:translateY(10px);transition:all .3s;pointer-events:none;max-width:320px; }
+  #toast.show { opacity:1;transform:translateY(0); }
+  #toast.ok  { background:var(--success); }
+  #toast.err { background:#cc3333; }
+
+  .hint { font-size:.68rem;color:var(--muted);margin-top:8px;font-style:italic;line-height:1.5; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════ MODAL CONFIG ═══════════ -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
+    <h2>🔑 Configurar Chave da API</h2>
+    <p>Para leitura automática com alta precisão (inclusive caligrafia), informe sua chave da API Anthropic. Ela fica salva <strong>só no seu navegador</strong>.</p>
+    <div class="modal-hint">
+      👉 Obtenha sua chave em <strong>console.anthropic.com</strong> → API Keys → Create Key<br>
+      Custo médio: <strong>~R$ 0,02 por foto</strong>
+    </div>
+    <label>Sua chave Anthropic (sk-ant-...)</label>
+    <input type="password" id="input-apikey" placeholder="sk-ant-api03-...">
+    <div class="action-row">
+      <button class="btn btn-primary" onclick="salvarChave()">💾 Salvar chave</button>
+      <button class="btn btn-ghost" onclick="fecharModal()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<div class="wrapper">
+
+  <header>
+    <div class="logo">A</div>
+    <div class="header-text">
+      <h1>Apodi Carregamento</h1>
+      <p>IA Vision · Caligrafia · Export Excel</p>
+    </div>
+    <button id="cfg-badge" class="nok" onclick="abrirModal()">⚙ Configurar API</button>
+  </header>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('cadastro',this)">📝 Novo Registro</button>
+    <button class="tab" onclick="switchTab('registros',this)">📋 Registros (<span id="tab-count">0</span>)</button>
+  </div>
+
+  <!-- ═══════════ CADASTRO ═══════════ -->
+  <div class="tab-content active" id="tab-cadastro">
+    <div class="layout">
+
+      <!-- ESQUERDA: UPLOAD -->
+      <div>
+        <div class="card">
+          <div class="card-title">📷 Foto do documento</div>
+          <div class="upload-zone" id="drop-zone">
+            <input type="file" id="file-input" accept="image/*">
+            <span class="upload-icon">📄</span>
+            <h2>Arraste ou clique para enviar</h2>
+            <p>A IA lê texto impresso e caligrafia automaticamente</p>
+          </div>
+          <div class="progress-wrap" id="prog-wrap"><div class="progress-bar" id="prog-bar"></div></div>
+          <div id="ocr-status"></div>
+          <div id="preview-wrap"><img id="preview-img" src="" alt="Doc"></div>
+          <p class="hint">💡 Após o preenchimento automático, revise os campos antes de salvar.<br>Campos em <span style="color:var(--success)">verde</span> foram preenchidos pela IA.</p>
+        </div>
+      </div>
+
+      <!-- DIREITA: FORMULÁRIO -->
+      <div>
+        <div class="card">
+          <div class="card-title">📋 Cabeçalho</div>
+          <div class="fields-grid">
+            <div class="field"><label>Nº Autorização</label><input id="f_autorizacao" placeholder="ex: 583998"></div>
+            <div class="field"><label>Data Emissão</label><input id="f_emissao" placeholder="ex: 05/01/26"></div>
+            <div class="field"><label>Emissor</label><input id="f_emissor" placeholder="ex: La sousa"></div>
+            <div class="field"><label>Cód. Motorista</label><input id="f_motorista_cod" placeholder="ex: 04828293620"></div>
+            <div class="field span2"><label>Nome Motorista</label><input id="f_motorista_nome" placeholder="ex: Samuel Barbosa Lopes"></div>
+            <div class="field"><label>Placa Veículo</label><input id="f_placa" placeholder="ex: nzz7d91"></div>
+            <div class="field"><label>Transportador</label><input id="f_transp_nome" placeholder="ex: DESTINATARIO"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">📦 Mercadoria</div>
+          <div class="fields-grid">
+            <div class="field span2"><label>Descrição do Item</label><input id="f_item" placeholder="ex: Cimento Portland - CP V ARI"></div>
+            <div class="field"><label>Quantidade</label><input id="f_qtd" placeholder="ex: 35"></div>
+            <div class="field"><label>Unidade</label><input id="f_un" placeholder="ex: T"></div>
+            <div class="field"><label>Peso</label><input id="f_peso" placeholder="ex: 35000"></div>
+            <div class="field"><label>Nº Pedido</label><input id="f_pedido" placeholder="ex: 833968"></div>
+            <div class="field span2"><label>Cliente</label><input id="f_cliente" placeholder="ex: 63445-DELTAM083"></div>
+            <div class="field"><label>FRT</label><input id="f_frt" placeholder="ex: FOB"></div>
+            <div class="field"><label>Cidade / UF</label><input id="f_cidade" placeholder="ex: Teresina/PI"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">🔒 Lacres & TMCI</div>
+          <div class="fields-grid">
+            <div class="field span2"><label>Lacres (separados por vírgula)</label><input id="f_lacres" placeholder="ex: 260025, 250492, 250441"></div>
+            <div class="field"><label>Hora Inicial</label><input id="f_hora_ini" placeholder="ex: 03:22"></div>
+            <div class="field"><label>Hora Final</label><input id="f_hora_fin" placeholder="ex: 03:48"></div>
+            <div class="field"><label>Matrícula TMCI</label><input id="f_matricula" placeholder="ex: 90"></div>
+            <div class="field span2"><label>Observação</label><input id="f_obs" placeholder="ex: Pedido 40"></div>
+          </div>
+        </div>
+
+        <div class="action-row">
+          <button class="btn btn-primary" id="btn-add" onclick="adicionarRegistro()">➕ Adicionar à lista</button>
+          <button class="btn btn-ghost" onclick="limparFormulario()">🗑 Limpar</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══════════ REGISTROS ═══════════ -->
+  <div class="tab-content" id="tab-registros">
+    <div class="stats-row">
+      <div class="stat-card"><div class="val" id="stat-total">0</div><div class="lbl">Total</div></div>
+      <div class="stat-card"><div class="val" id="stat-peso">—</div><div class="lbl">Peso (T)</div></div>
+      <div class="stat-card"><div class="val" id="stat-hoje">0</div><div class="lbl">Hoje</div></div>
+    </div>
+
+    <div class="filter-row">
+      <input type="text" id="search-input" placeholder="🔍  Buscar…" style="flex:1;min-width:180px" oninput="filtrar()">
+      <input type="date" id="filter-date" onchange="filtrar()">
+      <button class="btn btn-success" onclick="exportarExcel()">📥 Exportar Excel</button>
+      <button class="btn btn-danger" onclick="limparTudo()">🗑 Limpar tudo</button>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th><th>Autorização</th><th>Emissão</th><th>Motorista</th><th>Placa</th>
+            <th>Item</th><th>QTD</th><th>Peso</th><th>Pedido</th><th>Cliente</th>
+            <th>Cidade/UF</th><th>Lacres</th><th>H.Ini</th><th>H.Fin</th>
+            <th>Matrí.</th><th>Obs</th><th>Salvo em</th><th></th>
+          </tr>
+        </thead>
+        <tbody id="table-body"></tbody>
+      </table>
+      <div id="empty-state"><span>📭</span>Nenhum registro ainda.<br>Vá em "Novo Registro" e adicione o primeiro!</div>
+    </div>
+  </div>
+
+</div>
+<div id="toast"></div>
+
+<script>
+// ─── API KEY ───
+const KEY_STORAGE  = 'apodi_v2';
+const KEY_APIKEY   = 'apodi_apikey';
+
+function getApiKey() { return localStorage.getItem(KEY_APIKEY) || ''; }
+
+function salvarChave() {
+  const v = document.getElementById('input-apikey').value.trim();
+  if (!v.startsWith('sk-')) { showToast('Chave inválida! Deve começar com sk-ant-...', 'err'); return; }
+  localStorage.setItem(KEY_APIKEY, v);
+  fecharModal();
+  atualizarBadge();
+  showToast('✅ Chave salva com sucesso!', 'ok');
+}
+
+function atualizarBadge() {
+  const badge = document.getElementById('cfg-badge');
+  if (getApiKey()) {
+    badge.textContent = '✅ API Configurada';
+    badge.className = 'ok';
+  } else {
+    badge.textContent = '⚙ Configurar API';
+    badge.className = 'nok';
+  }
+}
+
+function abrirModal() {
+  document.getElementById('input-apikey').value = getApiKey();
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function fecharModal() {
+  document.getElementById('modal-overlay').classList.remove('open');
+}
+
+document.getElementById('modal-overlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('modal-overlay')) fecharModal();
+});
+
+// ─── STORAGE ───
+const load = () => { try { return JSON.parse(localStorage.getItem(KEY_STORAGE)||'[]'); } catch { return []; } };
+const save = d => localStorage.setItem(KEY_STORAGE, JSON.stringify(d));
+
+// ─── TABS ───
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  btn.classList.add('active');
+  if (name==='registros') renderTabela();
+}
+
+// ─── UPLOAD ───
+const dropZone  = document.getElementById('drop-zone');
+const fileInput = document.getElementById('file-input');
+
+dropZone.addEventListener('dragover', e=>{ e.preventDefault(); dropZone.classList.add('drag-over'); });
+dropZone.addEventListener('dragleave', ()=>dropZone.classList.remove('drag-over'));
+dropZone.addEventListener('drop', e=>{ e.preventDefault(); dropZone.classList.remove('drag-over'); if(e.dataTransfer.files[0]) processFile(e.dataTransfer.files[0]); });
+fileInput.addEventListener('change', ()=>{ if(fileInput.files[0]) processFile(fileInput.files[0]); });
+
+function processFile(file) {
+  if (!file.type.startsWith('image/')) { showToast('Envie uma imagem!','err'); return; }
+  if (!getApiKey()) { abrirModal(); showToast('Configure sua chave da API primeiro!','err'); return; }
+
+  const reader = new FileReader();
+  reader.onload = e => {
+    document.getElementById('preview-img').src = e.target.result;
+    document.getElementById('preview-wrap').style.display = 'block';
+    const base64 = e.target.result.split(',')[1];
+    const mime   = file.type;
+    runClaude(base64, mime);
+  };
+  reader.readAsDataURL(file);
+}
+
+// ─── CLAUDE API ───
+async function runClaude(base64, mime) {
+  setOcrStatus('running', '<span class="spin">🤖</span>  Claude está lendo o documento (texto + caligrafia)…');
+  setProgress(20);
+
+  const prompt = `Você é um sistema especializado em extrair dados de Autorizações de Carregamento da empresa Apodi.
+
+Analise esta imagem com MÁXIMA atenção, lendo tanto o texto impresso quanto qualquer texto escrito à mão/caneta.
+
+Retorne APENAS um objeto JSON válido, sem markdown, sem explicações, sem blocos de código. Apenas o JSON puro:
+
+{
+  "autorizacao": "número da autorização de carregamento",
+  "emissao": "data e hora de emissão",
+  "emissor": "nome do emissor",
+  "motorista_cod": "código numérico do motorista",
+  "motorista_nome": "nome completo do motorista",
+  "placa": "placa do veículo",
+  "transp_cod": "código do transportador",
+  "transp_nome": "nome do transportador",
+  "item": "descrição completa da mercadoria",
+  "qtd": "quantidade",
+  "un": "unidade",
+  "peso": "peso",
+  "pedido": "número do pedido",
+  "cliente": "código ou nome do cliente",
+  "frt": "tipo de frete (FOB, CIF etc)",
+  "plt": "valor PLT se houver",
+  "cidade": "cidade e UF de destino",
+  "lacres": "todos os números de lacres separados por vírgula",
+  "hora_ini": "hora inicial TMCI escrita à caneta",
+  "hora_fin": "hora final TMCI escrita à caneta",
+  "matricula": "matrícula TMCI escrita à caneta",
+  "obs": "observações"
+}
+
+Campos vazios devem ser string vazia "". NÃO invente dados — se não conseguir ler, deixe vazio.`;
+
+  try {
+    setProgress(40);
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': getApiKey(),
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1024,
+        messages: [{
+          role: 'user',
+          content: [
+            { type: 'image', source: { type: 'base64', media_type: mime, data: base64 } },
+            { type: 'text', text: prompt }
+          ]
+        }]
+      })
+    });
+
+    setProgress(80);
+
+    if (res.status === 401) throw new Error('Chave da API inválida. Clique em "✅ API Configurada" e verifique.');
+    if (res.status === 529) throw new Error('API sobrecarregada. Tente novamente em alguns segundos.');
+    if (!res.ok) throw new Error(`Erro na API: ${res.status}`);
+
+    const data = await res.json();
+    const raw  = data.content[0].text.trim();
+
+    // Remove possíveis blocos markdown
+    const clean = raw.replace(/```json\s*/gi,'').replace(/```\s*/g,'').trim();
+    const obj   = JSON.parse(clean);
+
+    setProgress(100);
+    preencherCampos(obj);
+    setOcrStatus('done', '✅ Leitura concluída com IA! Revise e salve.');
+    setTimeout(()=>{ document.getElementById('prog-wrap').style.display='none'; }, 800);
+
+  } catch(err) {
+    setOcrStatus('error', '❌ ' + err.message);
+    setProgress(0);
+    console.error(err);
+  }
+}
+
+// ─── PREENCHER ───
+function preencherCampos(obj) {
+  const campos = ['autorizacao','emissao','emissor','motorista_cod','motorista_nome',
+    'placa','transp_cod','transp_nome','item','qtd','un','peso','pedido','cliente',
+    'frt','plt','cidade','lacres','hora_ini','hora_fin','matricula','obs'];
+
+  campos.forEach(f => {
+    const el = document.getElementById('f_'+f);
+    if (!el) return;
+    const val = (obj[f]||'').trim();
+    el.value = val;
+    el.classList.toggle('filled', val.length > 0);
+  });
+
+  const preenchidos = campos.filter(f => (obj[f]||'').trim()).length;
+  showToast(`📋 ${preenchidos} campos preenchidos! Revise antes de salvar.`, 'ok');
+}
+
+// ─── FORM ───
+const FIELDS = ['autorizacao','emissao','emissor','motorista_cod','motorista_nome',
+  'placa','transp_cod','transp_nome','item','qtd','un','peso','pedido','cliente',
+  'frt','plt','cidade','lacres','hora_ini','hora_fin','matricula','obs'];
+
+function getForm() {
+  const o = {};
+  FIELDS.forEach(f => { o[f] = (document.getElementById('f_'+f)?.value||'').trim(); });
+  return o;
+}
+
+function limparFormulario() {
+  FIELDS.forEach(f => {
+    const el = document.getElementById('f_'+f);
+    if(el){ el.value=''; el.classList.remove('filled'); }
+  });
+  document.getElementById('preview-wrap').style.display='none';
+  document.getElementById('preview-img').src='';
+  document.getElementById('ocr-status').className='';
+  document.getElementById('ocr-status').innerHTML='';
+  document.getElementById('prog-wrap').style.display='none';
+  fileInput.value='';
+}
+
+function adicionarRegistro() {
+  const data = getForm();
+  if (!data.autorizacao && !data.motorista_nome && !data.placa) {
+    showToast('Preencha pelo menos Autorização, Motorista ou Placa!','err');
+    return;
+  }
+  data.salvo_em = new Date().toLocaleString('pt-BR');
+  data.salvo_ts = Date.now();
+  const reg = load();
+  reg.unshift(data);
+  save(reg);
+  atualizarContador();
+  showToast('✅ Registro salvo!','ok');
+  limparFormulario();
+  if(document.getElementById('tab-registros').classList.contains('active')) renderTabela();
+}
+
+// ─── TABELA ───
+function renderTabela() {
+  const todos = load();
+  const tbody = document.getElementById('table-body');
+  const empty = document.getElementById('empty-state');
+  const q = document.getElementById('search-input').value.toLowerCase();
+  const d = document.getElementById('filter-date').value;
+
+  const filtered = todos.filter(r => {
+    const ok_q = !q || JSON.stringify(r).toLowerCase().includes(q);
+    const ok_d = !d || (r.salvo_ts && new Date(r.salvo_ts).toISOString().split('T')[0]===d);
+    return ok_q && ok_d;
+  });
+
+  tbody.innerHTML = '';
+  if (!filtered.length) { empty.style.display='block'; atualizarStats(todos); return; }
+  empty.style.display='none';
+
+  filtered.forEach((r,i) => {
+    const idx = todos.findIndex(x=>x.salvo_ts===r.salvo_ts);
+    tbody.innerHTML += `<tr>
+      <td>${i+1}</td>
+      <td><span class="tag">${r.autorizacao||'—'}</span></td>
+      <td>${r.emissao||'—'}</td>
+      <td>${r.motorista_nome||'—'}</td>
+      <td>${r.placa||'—'}</td>
+      <td>${r.item||'—'}</td>
+      <td>${r.qtd||'—'}</td>
+      <td>${r.peso||'—'}</td>
+      <td>${r.pedido||'—'}</td>
+      <td>${r.cliente||'—'}</td>
+      <td>${r.cidade||'—'}</td>
+      <td>${r.lacres||'—'}</td>
+      <td>${r.hora_ini||'—'}</td>
+      <td>${r.hora_fin||'—'}</td>
+      <td>${r.matricula||'—'}</td>
+      <td>${r.obs||'—'}</td>
+      <td>${r.salvo_em||'—'}</td>
+      <td><button class="del-btn" onclick="deletar(${idx})">🗑</button></td>
+    </tr>`;
+  });
+  atualizarStats(todos);
+}
+
+function atualizarStats(todos) {
+  const reg = todos || load();
+  document.getElementById('stat-total').textContent = reg.length;
+  const tp = reg.reduce((a,r)=>{ const p=parseFloat((r.peso||'').replace(/[^\d.]/g,''))||0; return a+p; },0);
+  document.getElementById('stat-peso').textContent = tp>0 ? (tp/1000).toLocaleString('pt-BR',{maximumFractionDigits:1})+' T' : '—';
+  const hoje = new Date().toLocaleDateString('pt-BR');
+  document.getElementById('stat-hoje').textContent = reg.filter(r=>r.salvo_em&&r.salvo_em.startsWith(hoje)).length;
+}
+
+function atualizarContador() {
+  document.getElementById('tab-count').textContent = load().length;
+  atualizarStats();
+}
+
+function filtrar() { renderTabela(); }
+
+function deletar(idx) {
+  if(!confirm('Excluir este registro?')) return;
+  const reg = load(); reg.splice(idx,1); save(reg);
+  renderTabela(); atualizarContador();
+  showToast('Registro excluído.','ok');
+}
+
+function limparTudo() {
+  if(!confirm('Apagar TODOS os registros? Não é possível desfazer.')) return;
+  localStorage.removeItem(KEY_STORAGE);
+  renderTabela(); atualizarContador();
+  showToast('Todos os registros apagados.','err');
+}
+
+// ─── EXPORT ───
+function exportarExcel() {
+  const reg = load();
+  if (!reg.length) { showToast('Sem registros para exportar!','err'); return; }
+  const headers = ['Autorização','Emissão','Emissor','Cód Motorista','Motorista','Placa',
+    'Cód Transportador','Transportador','Item','QTD','UN','Peso','Pedido','Cliente',
+    'FRT','PLT','Cidade/UF','Lacres','Hora Inicial','Hora Final','Matrícula','Observação','Salvo em'];
+  const rows = reg.map(r=>[r.autorizacao,r.emissao,r.emissor,r.motorista_cod,r.motorista_nome,
+    r.placa,r.transp_cod,r.transp_nome,r.item,r.qtd,r.un,r.peso,r.pedido,r.cliente,
+    r.frt,r.plt,r.cidade,r.lacres,r.hora_ini,r.hora_fin,r.matricula,r.obs,r.salvo_em
+  ].map(v=>'"'+(v||'').replace(/"/g,'""')+'"'));
+  const csv = '\uFEFF'+[headers.map(h=>'"'+h+'"'),...rows].map(r=>r.join(',')).join('\n');
+  const a = Object.assign(document.createElement('a'),{
+    href: URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8;'})),
+    download: `apodi_${new Date().toISOString().split('T')[0]}.csv`
+  });
+  a.click();
+  showToast('📥 Excel exportado!','ok');
+}
+
+// ─── HELPERS ───
+function setOcrStatus(type, html) {
+  const el = document.getElementById('ocr-status');
+  el.className = type; el.innerHTML = html;
+}
+function setProgress(pct) {
+  document.getElementById('prog-wrap').style.display='block';
+  document.getElementById('prog-bar').style.width = pct+'%';
+}
+let tt;
+function showToast(msg, type='ok') {
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.className='show '+type;
+  clearTimeout(tt); tt=setTimeout(()=>t.className='',3200);
+}
+
+// ─── INIT ───
+atualizarBadge();
+atualizarContador();
+if (!getApiKey()) setTimeout(abrirModal, 600);
+</script>
+</body>
+</html>
