@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Rastreio de Carga</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700;800&family=Inter:wght@400;500;600&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#060d18;--bg2:#0b1524;--bg3:#102030;--bg4:#152840;
+  --bd:#162840;--b2:#1e3a58;
+  --tx:#e2eeff;--t2:#7a9fd4;--t3:#3a5880;
+  --bl:#00d4ff;--gr:#00e896;--ye:#ffd000;
+  --rd:#ff4466;--pu:#a78bfa;--or:#fb923c;
+  --r:12px;--rs:8px
+}
+body{background:var(--bg);color:var(--tx);font-family:'Inter',sans-serif;min-height:100vh}
+.top{background:var(--bg2);border-bottom:2px solid var(--bd);height:52px;display:flex;align-items:center;padding:0 16px;position:sticky;top:0;z-index:200}
+.top-logo{font-family:'Rajdhani',sans-serif;font-size:18px;font-weight:800;color:var(--bl);letter-spacing:1px;flex:1}
+.live{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:600;color:var(--gr)}
+.ldot{width:7px;height:7px;background:var(--gr);border-radius:50%;animation:pu 1.5s ease-in-out infinite}
+@keyframes pu{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.3;transform:scale(1.5)}}
+.navt{background:var(--bg2);border-bottom:1px solid var(--bd);display:flex;overflow-x:auto;padding:0 6px;scrollbar-width:none}
+.navt::-webkit-scrollbar{display:none}
+.nt{display:flex;flex-direction:column;align-items:center;padding:9px 13px;border:none;background:transparent;color:var(--t2);font-family:'Inter',sans-serif;font-size:10px;font-weight:600;cursor:pointer;border-bottom:3px solid transparent;transition:all .15s;white-space:nowrap;gap:2px;min-width:65px}
+.nt .ni{font-size:17px}
+.nt.on{color:var(--tx);border-bottom-color:var(--bl)}
+.sc{display:none;max-width:680px;margin:0 auto;padding:18px 13px}
+.sc.on{display:block}
+.scm{display:none;max-width:1200px;margin:0 auto;padding:18px 13px}
+.scm.on{display:block}
+.card{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:18px;margin-bottom:14px}
+.ct{font-family:'Rajdhani',sans-serif;font-size:16px;font-weight:700;margin-bottom:14px}
+.fg{display:flex;flex-direction:column;gap:4px;margin-bottom:11px}
+.fg label{font-size:10px;font-weight:600;color:var(--t2);text-transform:uppercase;letter-spacing:.5px}
+.fg input{background:var(--bg3);border:1px solid var(--b2);border-radius:var(--rs);color:var(--tx);padding:10px 12px;font-size:14px;font-family:'Inter',sans-serif;outline:none;transition:border-color .2s;width:100%}
+.fg input:focus{border-color:var(--bl)}
+.pa{background:var(--bg3);border:2px dashed var(--b2);border-radius:var(--rs);min-height:110px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;cursor:pointer;transition:border-color .2s;position:relative;overflow:hidden}
+.pa:hover{border-color:var(--bl)}
+.pa.ok{border-color:var(--gr);border-style:solid}
+.pa input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.pai{font-size:30px;pointer-events:none}
+.pat{font-size:12px;color:var(--t2);pointer-events:none}
+.pah{font-size:10px;color:var(--t3);pointer-events:none}
+.pap{width:100%;max-height:170px;object-fit:cover;display:none}
+.pats{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.75);padding:5px 9px;font-size:11px;font-weight:600;color:var(--gr);display:none}
+.pa.ok .pai,.pa.ok .pat,.pa.ok .pah{display:none}
+.pa.ok .pap{display:block}
+.pa.ok .pats{display:block}
+.btn{width:100%;padding:12px;border:none;border-radius:var(--rs);font-size:13px;font-weight:700;cursor:pointer;font-family:'Rajdhani',sans-serif;letter-spacing:1px;transition:all .2s;text-transform:uppercase;margin-top:4px}
+.btn:disabled{opacity:.3;cursor:not-allowed}
+.btn:not(:disabled):hover{transform:translateY(-1px);opacity:.88}
+.b-bl{background:linear-gradient(135deg,var(--bl),#0099bb);color:#000}
+.b-gr{background:linear-gradient(135deg,var(--gr),#00a060);color:#000}
+.b-ye{background:linear-gradient(135deg,var(--ye),#cc9900);color:#000}
+.b-rd{background:linear-gradient(135deg,var(--rd),#cc2244);color:#fff}
+.b-pu{background:linear-gradient(135deg,var(--pu),#6d28d9);color:#fff}
+.b2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px}
+.al{padding:10px 13px;border-radius:var(--rs);font-size:13px;margin-bottom:12px;display:none}
+.al.on{display:block}
+.a-ok{background:rgba(0,232,150,.1);border:1px solid rgba(0,232,150,.3);color:var(--gr)}
+.a-er{background:rgba(255,68,102,.1);border:1px solid rgba(255,68,102,.3);color:var(--rd)}
+.ifo{background:rgba(0,212,255,.06);border:1px solid rgba(0,212,255,.2);border-radius:var(--rs);padding:12px;margin-bottom:12px;display:none}
+.ifo .ip{font-family:'Rajdhani',sans-serif;font-size:24px;font-weight:800;color:var(--bl);letter-spacing:2px}
+.ifo .ia{font-size:11px;color:var(--t2);margin-top:2px}
+.ifo .is{font-size:11px;color:var(--tx);margin-top:3px}
+.rl{display:flex;flex-direction:column;gap:7px}
+.ri{background:var(--bg3);border:1px solid var(--bd);border-radius:var(--rs);padding:10px 12px;display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.rip{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:14px;color:var(--bl);letter-spacing:1px}
+.rii{font-size:11px;color:var(--t2);margin-top:2px;line-height:1.7}
+.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:9px;font-weight:700;text-transform:uppercase}
+.bb{background:rgba(0,212,255,.12);color:var(--bl)} .by{background:rgba(255,208,0,.12);color:var(--ye)}
+.br{background:rgba(255,68,102,.12);color:var(--rd)} .bp{background:rgba(167,139,250,.12);color:var(--pu)}
+.bg{background:rgba(0,232,150,.12);color:var(--gr)}
+.em{text-align:center;padding:24px;color:var(--t3);font-size:13px}
+.sgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:9px;margin-bottom:18px}
+.sc2{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:13px;text-align:center;position:relative}
+.sc2::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:var(--r) var(--r) 0 0}
+.sb::after{background:var(--bl)}.sy::after{background:var(--ye)}.sr::after{background:var(--rd)}
+.sp::after{background:var(--pu)}.so::after{background:var(--or)}.sg::after{background:var(--gr)}
+.sv{font-family:'Rajdhani',sans-serif;font-size:26px;font-weight:800}
+.sb .sv{color:var(--bl)}.sy .sv{color:var(--ye)}.sr .sv{color:var(--rd)}
+.sp .sv{color:var(--pu)}.so .sv{color:var(--or)}.sg .sv{color:var(--gr)}
+.sl{font-size:9px;color:var(--t2);text-transform:uppercase;letter-spacing:.4px;margin-top:1px}
+.fbar{display:flex;gap:7px;margin-bottom:13px;flex-wrap:wrap}
+.fbar input{background:var(--bg3);border:1px solid var(--b2);border-radius:var(--rs);color:var(--tx);padding:8px 12px;font-size:12px;font-family:'Inter',sans-serif;outline:none;flex:1;min-width:150px}
+.fbar input:focus{border-color:var(--bl)}
+.fb{padding:7px 12px;border:1px solid var(--bd);border-radius:20px;background:transparent;color:var(--t2);font-size:10px;font-weight:600;cursor:pointer;transition:all .2s;text-transform:uppercase}
+.fb.on,.fb:hover{border-color:var(--bl);color:var(--bl);background:rgba(0,212,255,.07)}
+.tc{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);overflow:hidden}
+.th{padding:13px 16px;font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;border-bottom:1px solid var(--bd);display:flex;justify-content:space-between;align-items:center}
+.th small{font-size:11px;color:var(--t2);font-weight:400;font-family:'Inter',sans-serif}
+.ts{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:11px}
+th{text-align:left;font-size:9px;font-weight:600;color:var(--t3);text-transform:uppercase;padding:8px 12px;border-bottom:1px solid var(--bd);white-space:nowrap}
+td{padding:10px 12px;border-bottom:1px solid var(--bd);vertical-align:top}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--bg3)}
+.ptag{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:13px;letter-spacing:1px;background:var(--bg4);border:1px solid var(--b2);border-radius:4px;padding:2px 7px;display:inline-block;color:var(--bl)}
+.pi{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:20px;font-size:9px;font-weight:700;text-transform:uppercase;white-space:nowrap}
+.pb{background:rgba(0,212,255,.12);color:var(--bl);border:1px solid rgba(0,212,255,.2)}
+.py{background:rgba(255,208,0,.12);color:var(--ye);border:1px solid rgba(255,208,0,.2)}
+.pr{background:rgba(255,68,102,.12);color:var(--rd);border:1px solid rgba(255,68,102,.2)}
+.pp{background:rgba(167,139,250,.12);color:var(--pu);border:1px solid rgba(167,139,250,.2)}
+.pg{background:rgba(0,232,150,.12);color:var(--gr);border:1px solid rgba(0,232,150,.2)}
+.ec{font-size:11px;line-height:1.9;color:var(--t2)}
+.ec .dn{color:var(--tx)}.ec .wt{color:var(--t3);font-style:italic}
+.ec .dr{background:rgba(0,212,255,.1);color:var(--bl);border-radius:5px;padding:0 4px;font-size:10px;margin-left:3px}
+.fl{color:var(--bl);font-size:10px;border:1px solid rgba(0,212,255,.3);border-radius:3px;padding:1px 5px;text-decoration:none}
+.fl:hover{background:rgba(0,212,255,.1)}
+.me{text-align:center;padding:40px;color:var(--t3)}
+.me .mi{font-size:36px;display:block;margin-bottom:8px}
+.spin{width:26px;height:26px;border:3px solid var(--bd);border-top-color:var(--bl);border-radius:50%;animation:ro .7s linear infinite;margin:36px auto 8px}
+@keyframes ro{to{transform:rotate(360deg)}}
+@media(max-width:600px){.sgrid{grid-template-columns:repeat(3,1fr)}.b2{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="top">
+  <div class="top-logo">🏭 RASTREIO DE CARGA</div>
+  <div class="live"><div class="ldot"></div>AO VIVO</div>
+</div>
+
+<div class="navt">
+  <button class="nt on" onclick="goTo('master')"><span class="ni">👁️</span>Master</button>
+  <button class="nt" onclick="goTo('posto1')"><span class="ni">🏁</span>Posto 1</button>
+  <button class="nt" onclick="goTo('triagem')"><span class="ni">📦</span>Triagem</button>
+  <button class="nt" onclick="goTo('carregamento')"><span class="ni">🏗️</span>Carga</button>
+  <button class="nt" onclick="goTo('enlonamento')"><span class="ni">🪢</span>Enlone</button>
+  <button class="nt" onclick="goTo('faturamento')"><span class="ni">🧾</span>Saída</button>
+</div>
+
+<!-- MASTER -->
+<div class="scm on" id="s-master">
+  <div class="sgrid">
+    <div class="sc2 sb"><div class="sv" id="st-to">—</div><div class="sl">Total</div></div>
+    <div class="sc2 sy"><div class="sv" id="st-tr">—</div><div class="sl">Triagem</div></div>
+    <div class="sc2 sr"><div class="sv" id="st-ca">—</div><div class="sl">Carga</div></div>
+    <div class="sc2 sp"><div class="sv" id="st-en">—</div><div class="sl">Enlone</div></div>
+    <div class="sc2 so"><div class="sv" id="st-fa">—</div><div class="sl">Ag.Saída</div></div>
+    <div class="sc2 sg"><div class="sv" id="st-ok">—</div><div class="sl">Concluído</div></div>
+  </div>
+  <div class="fbar">
+    <input id="mq" type="text" placeholder="🔍 Placa ou AC..." oninput="renderM()"/>
+    <button class="fb on" onclick="setF('t',this)">Todos</button>
+    <button class="fb" onclick="setF('a',this)">Em processo</button>
+    <button class="fb" onclick="setF('c',this)">Concluídos</button>
+  </div>
+  <div class="tc">
+    <div class="th">📋 Caminhões Hoje <small id="mcnt"></small></div>
+    <div id="mld"><div class="spin"></div></div>
+    <div class="ts" id="mtbl" style="display:none">
+      <table>
+        <thead><tr><th>Placa</th><th>AC</th><th>Entrada</th><th>Setor</th><th>📦 Triagem</th><th>🏗️ Carga</th><th>🪢 Enlone</th><th>Saída</th></tr></thead>
+        <tbody id="mbody"></tbody>
+      </table>
+    </div>
+    <div class="me" id="memp" style="display:none"><span class="mi">🔍</span>Nenhum resultado.</div>
+  </div>
+</div>
+
+<!-- POSTO 1 -->
+<div class="sc" id="s-posto1">
+  <div id="mg-p1"></div>
+  <div class="card">
+    <div class="ct">🏁 Registrar Chegada</div>
+    <div class="fg"><label>Número da AC *</label><input id="p1ac" type="text" placeholder="AC-001" style="text-transform:uppercase" oninput="chkP1()"/></div>
+    <div class="fg"><label>Placa *</label><input id="p1pl" type="text" placeholder="ABC1234" maxlength="8" style="text-transform:uppercase;letter-spacing:2px;font-weight:700;font-family:monospace" oninput="chkP1()"/></div>
+    <div class="fg">
+      <label>📷 Foto da AC — data/hora registrada no momento da foto</label>
+      <div class="pa" id="pa-p1" onclick="document.getElementById('fi-p1').click()">
+        <input type="file" id="fi-p1" accept="image/*" capture="environment" onchange="capF('p1',event)"/>
+        <div class="pai">📷</div><p class="pat">Fotografar AC</p><small class="pah">Timestamp automático</small>
+        <img class="pap" id="pv-p1"/><div class="pats" id="pts-p1"></div>
+      </div>
+    </div>
+    <button class="btn b-bl" id="bn-p1" onclick="doP1()" disabled>✅ REGISTRAR ENTRADA</button>
+  </div>
+  <div class="card"><div class="ct">🕐 Entradas Hoje</div><div id="ls-p1"><div class="em">Aguardando...</div></div></div>
+</div>
+
+<!-- TRIAGEM -->
+<div class="sc" id="s-triagem">
+  <div id="mg-tri"></div>
+  <div class="card">
+    <div class="ct">📦 Triagem de Palete</div>
+    <div class="fg"><label>Placa</label><input id="pl-tri" type="text" placeholder="ABC1234" maxlength="8" style="text-transform:uppercase;letter-spacing:2px;font-weight:700;font-family:monospace" oninput="bsc('tri')"/></div>
+    <div class="ifo" id="if-tri"><div class="ip" id="ip-tri"></div><div class="ia" id="ia-tri"></div><div class="is" id="is-tri"></div></div>
+    <div class="fg">
+      <label>📷 Foto INÍCIO — timestamp no momento da foto</label>
+      <div class="pa" id="pa-tri-i" onclick="document.getElementById('fi-tri-i').click()">
+        <input type="file" id="fi-tri-i" accept="image/*" capture="environment" onchange="capF('tri-i',event)"/>
+        <div class="pai">📷</div><p class="pat">Foto de início</p><small class="pah">Timestamp automático</small>
+        <img class="pap" id="pv-tri-i"/><div class="pats" id="pts-tri-i"></div>
+      </div>
+    </div>
+    <div class="fg">
+      <label>📷 Foto FIM — timestamp no momento da foto</label>
+      <div class="pa" id="pa-tri-f" onclick="document.getElementById('fi-tri-f').click()">
+        <input type="file" id="fi-tri-f" accept="image/*" capture="environment" onchange="capF('tri-f',event)"/>
+        <div class="pai">📷</div><p class="pat">Foto de fim</p><small class="pah">Timestamp automático</small>
+        <img class="pap" id="pv-tri-f"/><div class="pats" id="pts-tri-f"></div>
+      </div>
+    </div>
+    <div class="b2">
+      <button class="btn b-ye" id="bn-tri-i" onclick="doS('tri','i')" disabled>▶ INICIAR</button>
+      <button class="btn b-gr" id="bn-tri-f" onclick="doS('tri','f')" disabled>⏹ FINALIZAR</button>
+    </div>
+  </div>
+  <div class="card"><div class="ct">📋 Triagens Hoje</div><div id="ls-tri"><div class="em">Aguardando...</div></div></div>
+</div>
+
+<!-- CARREGAMENTO -->
+<div class="sc" id="s-carregamento">
+  <div id="mg-car"></div>
+  <div class="card">
+    <div class="ct">🏗️ Carregamento</div>
+    <div class="fg"><label>Placa</label><input id="pl-car" type="text" placeholder="ABC1234" maxlength="8" style="text-transform:uppercase;letter-spacing:2px;font-weight:700;font-family:monospace" oninput="bsc('car')"/></div>
+    <div class="ifo" id="if-car"><div class="ip" id="ip-car"></div><div class="ia" id="ia-car"></div><div class="is" id="is-car"></div></div>
+    <div class="fg">
+      <label>📷 Foto INÍCIO — timestamp no momento da foto</label>
+      <div class="pa" id="pa-car-i" onclick="document.getElementById('fi-car-i').click()">
+        <input type="file" id="fi-car-i" accept="image/*" capture="environment" onchange="capF('car-i',event)"/>
+        <div class="pai">📷</div><p class="pat">Foto de início</p><small class="pah">Timestamp automático</small>
+        <img class="pap" id="pv-car-i"/><div class="pats" id="pts-car-i"></div>
+      </div>
+    </div>
+    <div class="fg">
+      <label>📷 Foto FIM — timestamp no momento da foto</label>
+      <div class="pa" id="pa-car-f" onclick="document.getElementById('fi-car-f').click()">
+        <input type="file" id="fi-car-f" accept="image/*" capture="environment" onchange="capF('car-f',event)"/>
+        <div class="pai">📷</div><p class="pat">Foto de fim</p><small class="pah">Timestamp automático</small>
+        <img class="pap" id="pv-car-f"/><div class="pats" id="pts-car-f"></div>
+      </div>
+    </div>
+    <div class="b2">
+      <button class="btn b-rd" id="bn-car-i" onclick="doS('car','i')" disabled>▶ INICIAR</button>
+      <button class="btn b-gr" id="bn-car-f" onclick="doS('car','f')" disabled>⏹ FINALIZAR</button>
+    </div>
+  </div>
+  <div class="card"><div class="ct">📋 Carregamentos Hoje</div><div id="ls-car"><div class="em">Aguardando...</div></div></div>
+</div>
+
+<!-- ENLONAMENTO -->
+<div class="sc" id="s-enlonamento">
+  <div id="mg-enl"></div>
+  <div class="card">
+    <div class="ct">🪢 Enlonamento</div>
+    <div class="fg"><label>Placa</label><input id="pl-enl" type="text" placeholder="ABC1234" maxlength="8" style="text-transform:uppercase;letter-spacing:2px;font-weight:700;font-family:monospace" oninput="bsc('enl')"/></div>
+    <div class="ifo" id="if-enl"><div class="ip" id="ip-enl"></div><div class="ia" id="ia-enl"></div><div class="is" id="is-enl"></div></div>
+    <div class="fg">
+      <label>📷 Foto INÍCIO — timestamp no momento da foto</label>
+      <div class="pa" id="pa-enl-i" onclick="document.getElementById('fi-enl-i').click()">
+        <input type="file" id="fi-enl-i" accept="image/*" capture="environment" onchange="capF('enl-i',event)"/>
+        <div class="pai">📷</div><p class="pat">Foto de início</p><small class="pah">Timestamp automático</small>
+        <img class="pap" id="pv-enl-i"/><div class="pats" id="pts-enl-i"></div>
+      </div>
+    </div>
+    <div class="fg">
+      <label>📷 Foto FIM — timestamp no momento da foto</label>
+      <div class="pa" id="pa-enl-f" onclick="document.getElementById('fi-enl-f').click()">
+        <input type="file" id="fi-enl-f" accept="image/*" capture="environment" onchange="capF('enl-f',event)"/>
+        <div class="pai">📷</div><p class="pat">Foto de fim</p><small class="pah">Timestamp automático</small>
+        <img class="pap" id="pv-enl-f"/><div class="pats" id="pts-enl-f"></div>
+      </div>
+    </div>
+    <div class="b2">
+      <button class="btn b-pu" id="bn-enl-i" onclick="doS('enl','i')" disabled>▶ INICIAR</button>
+      <button class="btn b-gr" id="bn-enl-f" onclick="doS('enl','f')" disabled>⏹ FINALIZAR</button>
+    </div>
+  </div>
+  <div class="card"><div class="ct">📋 Enlonamentos Hoje</div><div id="ls-enl"><div class="em">Aguardando...</div></div></div>
+</div>
+
+<!-- FATURAMENTO -->
+<div class="sc" id="s-faturamento">
+  <div id="mg-fat"></div>
+  <div class="card">
+    <div class="ct">🧾 Faturamento — Saída</div>
+    <div class="fg"><label>Placa</label><input id="pl-fat" type="text" placeholder="ABC1234" maxlength="8" style="text-transform:uppercase;letter-spacing:2px;font-weight:700;font-family:monospace" oninput="bsc('fat')"/></div>
+    <div class="ifo" id="if-fat"><div class="ip" id="ip-fat"></div><div class="ia" id="ia-fat"></div><div class="is" id="is-fat"></div></div>
+    <div class="fg">
+      <label>📷 Foto da AC de saída — timestamp registrado no momento da foto</label>
+      <div class="pa" id="pa-fat" onclick="document.getElementById('fi-fat').click()">
+        <input type="file" id="fi-fat" accept="image/*" capture="environment" onchange="capF('fat',event)"/>
+        <div class="pai">📷</div><p class="pat">Fotografar AC de saída</p><small class="pah">Timestamp automático</small>
+        <img class="pap" id="pv-fat"/><div class="pats" id="pts-fat"></div>
+      </div>
+    </div>
+    <button class="btn b-gr" id="bn-fat" onclick="doFat()" disabled>🚀 CONFIRMAR SAÍDA</button>
+  </div>
+  <div class="card"><div class="ct">📋 Saídas Hoje</div><div id="ls-fat"><div class="em">Aguardando...</div></div></div>
+</div>
+
+<script type="module">
+import{initializeApp}from"https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
+import{getFirestore,collection,addDoc,onSnapshot,query,orderBy,updateDoc,doc,Timestamp}from"https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+import{getStorage,ref,uploadString,getDownloadURL}from"https://www.gstatic.com/firebasejs/10.11.0/firebase-storage.js";
+
+const app=initializeApp({  apiKey:"AIzaSyCzd3mlF0qlPvw1AwVv3PAt9RXnZQ06sdY",
+  authDomain:"cimento-d887e.firebaseapp.com",
+  projectId:"cimento-d887e",
+  storageBucket:"cimento-d887e.firebasestorage.app",
+  messagingSenderId:"1098178518193",
+  appId:"1:1098178518193:web:8712992a0eda7730ce9690"});
+const db=getFirestore(app),st=getStorage(app);
+const F={},D={};
+let HD=[],MF="t";
+const hoje=()=>new Date().toISOString().split("T")[0];
+const fmt=d=>d?d.toLocaleString("pt-BR",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit",second:"2-digit"}):"—";
+const fmtT=d=>d?d.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit",second:"2-digit"}):"—";
+function dur(ms){if(!ms||ms<0)return"";const m=Math.round(ms/60000);return m<60?m+"min":Math.floor(m/60)+"h"+m%60+"m";}
+const SL={posto1:"Entrada",triagem_inicio:"Em Triagem",triagem_fim:"Triagem OK",carregamento_inicio:"Carregando",carregamento_fim:"Carregado",enlonamento_inicio:"Enlonando",enlonamento_fim:"Enlonado",concluido:"Concluído"};
+const sl=s=>SL[s]||s||"—";
+function pill(s){
+  if(!s||s==="posto1")return`<span class="pi pb">🔵 Entrada</span>`;
+  if(s.startsWith("triagem"))return`<span class="pi py">🟡 ${SL[s]||s}</span>`;
+  if(s.startsWith("carregamento"))return`<span class="pi pr">🔴 ${SL[s]||s}</span>`;
+  if(s.startsWith("enlonamento"))return`<span class="pi pp">🟣 ${SL[s]||s}</span>`;
+  if(s==="concluido")return`<span class="pi pg">🟢 Concluído</span>`;
+  return`<span class="pi pb">${s}</span>`;
+}
+async function up(k,pl){
+  if(!F[k])return null;
+  try{const r=ref(st,`f/${pl}/${k}_${Date.now()}.jpg`);await uploadString(r,F[k].b64,"data_url");return await getDownloadURL(r);}
+  catch(e){return F[k].b64;}
+}
+function showMsg(id,t,txt){
+  const el=document.getElementById("mg-"+id);
+  if(!el)return;
+  el.innerHTML=`<div class="al ${t==="ok"?"a-ok":"a-er"} on">${txt}</div>`;
+  if(t==="ok")setTimeout(()=>el.innerHTML="",6000);
+}
+window.capF=(k,e)=>{
+  const f=e.target.files[0];if(!f)return;
+  const ts=new Date(); // timestamp exato da foto
+  new FileReader().onload=ev=>{
+    F[k]={b64:ev.target.result,ts};
+    const pa=document.getElementById("pa-"+k);
+    if(pa){pa.classList.add("ok");const img=document.getElementById("pv-"+k);if(img)img.src=ev.target.result;}
+    const te=document.getElementById("pts-"+k);
+    if(te)te.textContent="📅 "+fmt(ts);
+    chk(k);
+  };
+  (new FileReader()).onload=ev=>{
+    F[k]={b64:ev.target.result,ts};
+    const pa=document.getElementById("pa-"+k);
+    if(pa){pa.classList.add("ok");const img=document.getElementById("pv-"+k);if(img)img.src=ev.target.result;}
+    const te=document.getElementById("pts-"+k);
+    if(te)te.textContent="📅 "+fmt(ts);
+    chk(k);
+  };
+};
+// fix double reader bug
+window.capF=(k,e)=>{
+  const f=e.target.files[0];if(!f)return;
+  const ts=new Date();
+  const rd=new FileReader();
+  rd.onload=ev=>{
+    F[k]={b64:ev.target.result,ts};
+    const pa=document.getElementById("pa-"+k);
+    if(pa){pa.classList.add("ok");const img=document.getElementById("pv-"+k);if(img)img.src=ev.target.result;}
+    const te=document.getElementById("pts-"+k);
+    if(te)te.textContent="📅 "+fmt(ts);
+    chk(k);
+  };
+  rd.readAsDataURL(f);
+};
+function chk(k){
+  if(k==="p1")chkP1();
+  else if(k.startsWith("tri"))chkS("tri");
+  else if(k.startsWith("car"))chkS("car");
+  else if(k.startsWith("enl"))chkS("enl");
+  else if(k==="fat"){document.getElementById("bn-fat").disabled=!(F.fat&&D.fat);}
+}
+window.chkP1=()=>{
+  const ac=document.getElementById("p1ac").value.trim();
+  const pl=document.getElementById("p1pl").value.replace(/[^A-Z0-9]/gi,"");
+  document.getElementById("bn-p1").disabled=!(ac&&pl.length>=7&&F.p1);
+};
+function chkS(s){
+  const c=D[s];
+  if(!c){document.getElementById(`bn-${s}-i`).disabled=true;document.getElementById(`bn-${s}-f`).disabled=true;return;}
+  const sn={tri:"triagem",car:"carregamento",enl:"enlonamento"}[s];
+  const hi=!!(c[sn]?.inicio),hf=!!(c[sn]?.fim);
+  document.getElementById(`bn-${s}-i`).disabled=hi||!F[`${s}-i`];
+  document.getElementById(`bn-${s}-f`).disabled=!hi||hf||!F[`${s}-f`];
+}
+onSnapshot(query(collection(db,"caminhoes_rastreio"),orderBy("criadoEm","desc")),snap=>{
+  HD=snap.docs.map(d=>({id:d.id,...d.data()})).filter(c=>c.data===hoje());
+  rListas(); renderM();
+  ["tri","car","enl","fat"].forEach(s=>{
+    const el=document.getElementById("pl-"+s);
+    if(!el)return;
+    const p=el.value.toUpperCase().replace(/[^A-Z0-9]/g,"");
+    if(p.length>=7)doSearch(s,p);
+  });
+  document.getElementById("mld").style.display="none";
+  document.getElementById("mtbl").style.display="block";
+});
+window.doP1=async()=>{
+  const ac=document.getElementById("p1ac").value.trim().toUpperCase();
+  const pl=document.getElementById("p1pl").value.toUpperCase().replace(/[^A-Z0-9]/g,"");
+  if(!ac||pl.length<7||!F.p1){showMsg("p1","er","Preencha AC, placa e tire a foto.");return;}
+  if(HD.find(c=>c.placa===pl&&c.setorAtual!=="concluido")){showMsg("p1","er","Placa já está em processo hoje!");return;}
+  document.getElementById("bn-p1").disabled=true;
+  try{
+    const url=await up("p1",pl),ts=F.p1.ts;
+    await addDoc(collection(db,"caminhoes_rastreio"),{
+      ac,placa:pl,setorAtual:"posto1",
+      entrada:{ts:Timestamp.fromDate(ts),fotoUrl:url},
+      triagem:null,carregamento:null,enlonamento:null,faturamento:null,
+      data:hoje(),criadoEm:Timestamp.fromDate(new Date())
+    });
+    showMsg("p1","ok",`✅ ${pl} registrado! AC: ${ac} · Entrada: ${fmtT(ts)}`);
+    document.getElementById("p1ac").value="";document.getElementById("p1pl").value="";
+    rPA("p1");delete F.p1;
+  }catch(e){showMsg("p1","er","Erro: "+e.message);}
+  document.getElementById("bn-p1").disabled=false;
+};
+window.bsc=s=>{
+  const p=document.getElementById("pl-"+s).value.toUpperCase().replace(/[^A-Z0-9]/g,"");
+  if(p.length>=7)doSearch(s,p);else clrIF(s);
+};
+function doSearch(s,p){
+  const c=HD.find(d=>d.placa===p&&d.setorAtual!=="concluido");
+  if(!c){clrIF(s);return;}
+  D[s]=c;
+  document.getElementById("ip-"+s).textContent=c.placa;
+  document.getElementById("ia-"+s).textContent="AC: "+c.ac;
+  document.getElementById("is-"+s).textContent="Setor: "+sl(c.setorAtual);
+  document.getElementById("if-"+s).style.display="block";
+  if(s==="fat")document.getElementById("bn-fat").disabled=!F.fat;
+  else chkS(s);
+}
+function clrIF(s){
+  D[s]=null;document.getElementById("if-"+s).style.display="none";
+  const bi=document.getElementById(`bn-${s}-i`),bf=document.getElementById(`bn-${s}-f`);
+  if(bi)bi.disabled=true;if(bf)bf.disabled=true;
+  if(s==="fat")document.getElementById("bn-fat").disabled=true;
+}
+window.doS=async(s,t)=>{
+  const c=D[s];if(!c){showMsg(s,"er","Busque uma placa.");return;}
+  const fk=`${s}-${t}`;if(!F[fk]){showMsg(s,"er","Tire a foto primeiro.");return;}
+  const bi=`bn-${s}-${t}`;document.getElementById(bi).disabled=true;
+  try{
+    const ts=F[fk].ts,url=await up(fk,c.placa);
+    const sn={tri:"triagem",car:"carregamento",enl:"enlonamento"}[s];
+    const u={};
+    u[`${sn}.${t==="i"?"inicio":"fim"}`]=Timestamp.fromDate(ts);
+    u[`${sn}.foto${t==="i"?"Ini":"Fim"}`]=url;
+    u.ac=c.ac;
+    const SM={tri:{i:"triagem_inicio",f:"triagem_fim"},car:{i:"carregamento_inicio",f:"carregamento_fim"},enl:{i:"enlonamento_inicio",f:"enlonamento_fim"}};
+    u.setorAtual=SM[s][t];
+    await updateDoc(doc(db,"caminhoes_rastreio",c.id),u);
+    showMsg(s,"ok",`✅ ${c.placa} · AC: ${c.ac} · ${t==="i"?"Início":"Fim"}: ${fmtT(ts)}`);
+    rPA(fk);delete F[fk];
+  }catch(e){showMsg(s,"er","Erro: "+e.message);document.getElementById(bi).disabled=false;}
+};
+window.doFat=async()=>{
+  const c=D.fat;if(!c){showMsg("fat","er","Busque uma placa.");return;}
+  if(!F.fat){showMsg("fat","er","Tire a foto da AC.");return;}
+  document.getElementById("bn-fat").disabled=true;
+  try{
+    const ts=F.fat.ts,url=await up("fat",c.placa);
+    await updateDoc(doc(db,"caminhoes_rastreio",c.id),{"faturamento.ts":Timestamp.fromDate(ts),"faturamento.fotoUrl":url,ac:c.ac,setorAtual:"concluido"});
+    showMsg("fat","ok",`🚀 ${c.placa} · AC: ${c.ac} · Saída: ${fmtT(ts)}`);
+    document.getElementById("pl-fat").value="";clrIF("fat");rPA("fat");delete F.fat;
+  }catch(e){showMsg("fat","er","Erro: "+e.message);document.getElementById("bn-fat").disabled=false;}
+};
+function rPA(k){
+  const pa=document.getElementById("pa-"+k);if(!pa)return;
+  pa.classList.remove("ok");
+  const img=document.getElementById("pv-"+k);if(img)img.src="";
+  const ts=document.getElementById("pts-"+k);if(ts)ts.textContent="";
+}
+function rListas(){
+  // posto1
+  const lp=document.getElementById("ls-p1");
+  lp.innerHTML=HD.length?`<div class="rl">`+HD.map(c=>{
+    const ts=c.entrada?.ts?.toDate?c.entrada.ts.toDate():null;
+    return`<div class="ri"><div><div class="rip">${c.placa}</div><div class="rii">AC: ${c.ac}<br>Entrada: ${fmt(ts)}</div></div>${pill(c.setorAtual)}</div>`;
+  }).join("")+`</div>`:`<div class="em">Nenhum registro.</div>`;
+  // setores
+  [["tri","triagem"],["car","carregamento"],["enl","enlonamento"]].forEach(([s,sn])=>{
+    const el=document.getElementById("ls-"+s);if(!el)return;
+    const it=HD.filter(c=>c[sn]);
+    if(!it.length){el.innerHTML=`<div class="em">Nenhum registro.</div>`;return;}
+    el.innerHTML=`<div class="rl">`+it.map(c=>{
+      const ini=c[sn]?.inicio?.toDate?c[sn].inicio.toDate():null;
+      const fim=c[sn]?.fim?.toDate?c[sn].fim.toDate():null;
+      const d=ini&&fim?` · ${dur(fim-ini)}`:"";
+      return`<div class="ri"><div><div class="rip">${c.placa}</div><div class="rii">AC: ${c.ac}<br>▶ ${fmt(ini)}<br>⏹ ${fim?fmt(fim):"aguardando"}${d}</div></div>${pill(c.setorAtual)}</div>`;
+    }).join("")+`</div>`;
+  });
+  // faturamento
+  const lf=document.getElementById("ls-fat");if(!lf)return;
+  const it2=HD.filter(c=>c.setorAtual==="concluido");
+  lf.innerHTML=it2.length?`<div class="rl">`+it2.map(c=>{
+    const ts=c.faturamento?.ts?.toDate?c.faturamento.ts.toDate():null;
+    return`<div class="ri"><div><div class="rip">${c.placa}</div><div class="rii">AC: ${c.ac}<br>Saída: ${fmt(ts)}</div></div><span class="badge bg">Concluído</span></div>`;
+  }).join("")+`</div>`:`<div class="em">Nenhuma saída.</div>`;
+}
+window.setF=(f,el)=>{
+  MF=f;document.querySelectorAll(".fb").forEach(b=>b.classList.remove("on"));el.classList.add("on");renderM();
+};
+window.renderM=()=>{
+  document.getElementById("st-to").textContent=HD.length;
+  document.getElementById("st-tr").textContent=HD.filter(c=>c.setorAtual?.startsWith("triagem")).length;
+  document.getElementById("st-ca").textContent=HD.filter(c=>c.setorAtual?.startsWith("carregamento")).length;
+  document.getElementById("st-en").textContent=HD.filter(c=>c.setorAtual?.startsWith("enlonamento")).length;
+  document.getElementById("st-fa").textContent=HD.filter(c=>c.setorAtual==="enlonamento_fim").length;
+  document.getElementById("st-ok").textContent=HD.filter(c=>c.setorAtual==="concluido").length;
+  const q=(document.getElementById("mq")?.value||"").toUpperCase();
+  let list=[...HD];
+  if(MF==="a")list=list.filter(c=>c.setorAtual!=="concluido");
+  if(MF==="c")list=list.filter(c=>c.setorAtual==="concluido");
+  if(q)list=list.filter(c=>c.placa?.includes(q)||c.ac?.includes(q));
+  document.getElementById("mcnt").textContent=list.length+" registro"+(list.length!==1?"s":"");
+  const tb=document.getElementById("mbody"),em=document.getElementById("memp");
+  if(!list.length){tb.innerHTML="";em.style.display="block";return;}
+  em.style.display="none";
+  tb.innerHTML=list.map(c=>{
+    const en=c.entrada?.ts?.toDate?c.entrada.ts.toDate():null;
+    const sa=c.faturamento?.ts?.toDate?c.faturamento.ts.toDate():null;
+    return`<tr>
+      <td><span class="ptag">${c.placa}</span></td>
+      <td style="color:var(--t2)">${c.ac}</td>
+      <td>${en?`<span style="color:var(--tx)">${fmtT(en)}</span>${c.entrada?.fotoUrl?`<br><a class="fl" href="${c.entrada.fotoUrl}" target="_blank">📷</a>`:""}`:"—"}</td>
+      <td>${pill(c.setorAtual)}</td>
+      <td>${eta(c,"triagem")}</td>
+      <td>${eta(c,"carregamento")}</td>
+      <td>${eta(c,"enlonamento")}</td>
+      <td>${sa?`<span style="color:var(--tx)">${fmtT(sa)}</span>${c.faturamento?.fotoUrl?`<br><a class="fl" href="${c.faturamento.fotoUrl}" target="_blank">📷</a>`:""}`:`<span style="color:var(--t3);font-size:10px">aguardando</span>`}</td>
+    </tr>`;
+  }).join("");
+};
+function eta(c,sn){
+  if(!c[sn])return`<span style="color:var(--t3);font-size:10px">—</span>`;
+  const ini=c[sn].inicio?.toDate?c[sn].inicio.toDate():null;
+  const fim=c[sn].fim?.toDate?c[sn].fim.toDate():null;
+  const d=ini&&fim?`<span class="dr">${dur(fim-ini)}</span>`:"";
+  return`<div class="ec"><span class="${ini?"dn":"wt"}">▶ ${ini?fmt(ini):"aguardando"}</span><br><span class="${fim?"dn":"wt"}">⏹ ${fim?fmt(fim):"aguardando"}</span>${d}</div>`;
+}
+</script>
+
+<script>
+const PG=["master","posto1","triagem","carregamento","enlonamento","faturamento"];
+const NT=document.querySelectorAll(".nt");
+window.goTo=n=>{
+  PG.forEach(p=>{const e=document.getElementById("s-"+p);if(e){e.className=p==="master"?"scm":"sc";}});
+  const e=document.getElementById("s-"+n);if(e)e.classList.add("on");
+  NT.forEach((t,i)=>t.classList.toggle("on",PG[i]===n));
+  window.scrollTo(0,0);
+};
+</script>
+</body>
+</html>
