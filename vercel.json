@@ -1,39 +1,13 @@
 {
   "outputDirectory": ".",
-  "builds": [
-    {
-      "src": "*.html",
-      "use": "@vercel/static"
-    }
-  ],
+  "builds": [{"src": "*.html", "use": "@vercel/static"}],
   "routes": [
-    {
-      "src": "/posto1",
-      "dest": "/posto1.html"
-    },
-    {
-      "src": "/triagem",
-      "dest": "/triagem.html"
-    },
-    {
-      "src": "/carregamento",
-      "dest": "/carregamento.html"
-    },
-    {
-      "src": "/enlonamento",
-      "dest": "/enlonamento.html"
-    },
-    {
-      "src": "/faturamento",
-      "dest": "/faturamento.html"
-    },
-    {
-      "src": "/master",
-      "dest": "/master.html"
-    },
-    {
-      "src": "/",
-      "dest": "/master.html"
-    }
+    {"src": "/posto1", "dest": "/posto1.html"},
+    {"src": "/triagem", "dest": "/triagem.html"},
+    {"src": "/carregamento", "dest": "/carregamento.html"},
+    {"src": "/enlonamento", "dest": "/enlonamento.html"},
+    {"src": "/faturamento", "dest": "/faturamento.html"},
+    {"src": "/master", "dest": "/master.html"},
+    {"src": "/", "dest": "/master.html"}
   ]
 }
