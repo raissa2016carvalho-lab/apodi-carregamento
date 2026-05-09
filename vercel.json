@@ -1,13 +1,10 @@
 {
-  "outputDirectory": ".",
-  "builds": [{"src": "*.html", "use": "@vercel/static"}],
-  "routes": [
-    {"src": "/posto1", "dest": "/posto1.html"},
-    {"src": "/triagem", "dest": "/triagem.html"},
-    {"src": "/carregamento", "dest": "/carregamento.html"},
-    {"src": "/enlonamento", "dest": "/enlonamento.html"},
-    {"src": "/faturamento", "dest": "/faturamento.html"},
-    {"src": "/master", "dest": "/master.html"},
-    {"src": "/", "dest": "/master.html"}
+  "rewrites": [
+    {"source": "/posto1", "destination": "/posto1.html"},
+    {"source": "/triagem", "destination": "/triagem.html"},
+    {"source": "/carregamento", "destination": "/carregamento.html"},
+    {"source": "/enlonamento", "destination": "/enlonamento.html"},
+    {"source": "/faturamento", "destination": "/faturamento.html"},
+    {"source": "/master", "destination": "/master.html"}
   ]
 }
