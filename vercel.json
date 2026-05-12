@@ -5,6 +5,7 @@
     { "source": "/carregamento", "destination": "/carregamento.html" },
     { "source": "/enlonamento", "destination": "/enlonamento.html" },
     { "source": "/faturamento", "destination": "/faturamento.html" },
-    { "source": "/master", "destination": "/master.html" }
+    { "source": "/master", "destination": "/master.html" },
+    { "source": "/", "destination": "/master.html" }
   ]
 }
