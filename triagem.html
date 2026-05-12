@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<title>Triagem de Palete</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--navy:#0a1628;--navy2:#0d1f3c;--teal:#00b4b0;--teal2:#009994;--white:#ffffff;--gray:#e8eaed;--gray2:#c5cad4;--gray3:#8892a0;--text:#1a2332;--text2:#4a5568;--bg:#f0f2f5;--r:8px;--rs:6px}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;display:flex;flex-direction:column}
+.header{background:var(--navy);padding:0 20px;height:58px;display:flex;align-items:center;justify-content:space-between;border-bottom:3px solid var(--teal);flex-shrink:0}
+.h-left{display:flex;align-items:center;gap:12px}
+.h-icon{width:36px;height:36px;background:var(--teal);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.h-title{color:var(--white);font-size:15px;font-weight:700}
+.h-sub{color:var(--gray2);font-size:11px;margin-top:1px}
+.live{display:flex;align-items:center;gap:5px;color:var(--teal);font-size:11px;font-weight:600}
+.ldot{width:6px;height:6px;background:var(--teal);border-radius:50%;animation:pu 1.5s ease-in-out infinite}
+@keyframes pu{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.3;transform:scale(1.5)}}
+.content{flex:1;display:flex;align-items:center;justify-content:center;padding:24px 16px}
+.box{width:100%;max-width:480px}
+.card{background:var(--white);border:1px solid var(--gray);border-radius:var(--r);padding:24px;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.card-title{font-size:16px;font-weight:700;color:var(--navy);margin-bottom:20px;display:flex;align-items:center;gap:8px;padding-bottom:14px;border-bottom:2px solid var(--gray)}
+.fg{display:flex;flex-direction:column;gap:5px;margin-bottom:14px}
+.fg label{font-size:11px;font-weight:600;color:var(--gray3);text-transform:uppercase;letter-spacing:.5px}
+.fg input{background:var(--white);border:1.5px solid var(--gray2);border-radius:var(--rs);color:var(--text);padding:11px 13px;font-size:14px;font-family:'Inter',sans-serif;outline:none;transition:border-color .2s;width:100%}
+.fg input:focus{border-color:var(--teal)}
+.cam{width:100%;background:var(--bg);border:2px dashed var(--gray2);border-radius:var(--r);min-height:160px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;margin-bottom:10px}
+.cam:hover{border-color:var(--teal)}
+.cam.analyzing{border-color:#f59e0b;border-style:solid;animation:bl .9s ease-in-out infinite}
+.cam.success{border-color:#22c55e;border-style:solid}
+.cam.fail{border-color:#ef4444;border-style:solid}
+@keyframes bl{0%,100%{opacity:1}50%{opacity:.6}}
+.cam input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.ci{font-size:36px;pointer-events:none}
+.cl{font-size:13px;color:var(--gray3);pointer-events:none;font-weight:500;text-align:center}
+.cs{font-size:11px;color:var(--gray2);pointer-events:none}
+.prev{width:100%;max-height:180px;object-fit:cover;display:none}
+.cam.analyzing .ci,.cam.analyzing .cl,.cam.analyzing .cs,.cam.success .ci,.cam.success .cl,.cam.success .cs,.cam.fail .ci,.cam.fail .cl,.cam.fail .cs{display:none}
+.cam.analyzing .prev,.cam.success .prev,.cam.fail .prev{display:block}
+.tsbar{position:absolute;bottom:0;left:0;right:0;background:rgba(10,22,40,.9);padding:6px 10px;font-size:11px;font-weight:600;color:#fff;display:none;line-height:1.5}
+.cam.analyzing .tsbar,.cam.success .tsbar,.cam.fail .tsbar{display:block}
+.ov{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;gap:8px;background:rgba(0,0,0,.5)}
+.cam.analyzing .ov{display:flex}
+.sp{width:32px;height:32px;border:3px solid rgba(245,158,11,.3);border-top-color:#f59e0b;border-radius:50%;animation:ro .7s linear infinite}
+@keyframes ro{to{transform:rotate(360deg)}}
+.sptxt{font-size:12px;color:#fbbf24;font-weight:600;text-align:center}
+.confirm-box{background:#f0fdf4;border:1.5px solid #22c55e;border-radius:var(--r);padding:14px;margin-bottom:12px;display:none}
+.cb-label{font-size:10px;font-weight:600;color:var(--gray3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+.cb-placa{font-size:32px;font-weight:900;letter-spacing:4px;font-family:'Courier New',monospace;text-align:center;padding:8px;background:var(--white);border-radius:var(--rs);border:1.5px solid var(--gray2);width:100%;color:var(--navy);outline:none;text-transform:uppercase;margin-bottom:8px;transition:border-color .2s}
+.cb-placa:focus{border-color:var(--teal)}
+.cb-info{font-size:12px;color:var(--text2);text-align:center;line-height:1.7;margin-bottom:3px}
+.cb-hint{font-size:11px;color:var(--gray3);text-align:center}
+.err-box{background:#fef2f2;border:1px solid #fecaca;border-radius:var(--rs);padding:10px 13px;margin-bottom:10px;font-size:12px;color:#991b1b;line-height:1.6;display:none}
+.btn{width:100%;padding:13px;border:none;border-radius:var(--rs);font-size:14px;font-weight:600;cursor:pointer;letter-spacing:.3px;transition:all .2s;margin-bottom:8px;font-family:'Inter',sans-serif}
+.btn:disabled{opacity:.35;cursor:not-allowed}
+.btn:not(:disabled):hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,.15)}
+.btn-teal{background:var(--teal);color:var(--white)}
+.btn-navy{background:var(--navy);color:var(--white)}
+.btn-green{background:#16a34a;color:var(--white)}
+.btn-outline{background:transparent;border:1.5px solid var(--gray2);color:var(--text2)}
+.btn-outline:hover{border-color:var(--teal);color:var(--teal)}
+.msg{padding:11px 14px;border-radius:var(--rs);font-size:13px;margin-bottom:12px;display:none;font-weight:500}
+.msg.on{display:block}
+.ok{background:#f0fdf4;border:1px solid #86efac;color:#166534}
+.er{background:#fef2f2;border:1px solid #fca5a5;color:#991b1b}
+.wn{background:#fffbeb;border:1px solid #fde68a;color:#92400e}
+.section-box{background:var(--white);border:1.5px solid var(--gray);border-radius:var(--r);padding:16px;margin-bottom:12px}
+.section-box.ini-box{border-left:4px solid #f59e0b}
+.section-box.fim-box{border-left:4px solid #22c55e}
+.section-label{font-size:10px;font-weight:700;color:var(--gray3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.btn-navy{background:var(--navy);color:var(--white)}
+.btn-teal{background:var(--teal);color:var(--white)}
+</style>
+</head>
+<body>
+<div id="login-screen" style="position:fixed;inset:0;background:#0a1628;display:flex;align-items:center;justify-content:center;z-index:9999;padding:20px">
+  <div style="background:#0d1f3c;border:1px solid #1e3a58;border-radius:12px;padding:32px 28px;width:100%;max-width:340px;text-align:center">
+    <div style="font-size:44px;margin-bottom:10px">📦</div>
+    <div style="font-family:sans-serif;font-size:18px;font-weight:800;color:#00b4b0;margin-bottom:4px">Triagem de Palete</div>
+    <div style="font-size:12px;color:#c5cad4;margin-bottom:22px">Acesso restrito</div>
+    <div id="login-err" style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:#ef4444;border-radius:8px;padding:10px;font-size:12px;margin-bottom:12px;display:none">Usuário ou senha incorretos</div>
+    <div style="display:flex;flex-direction:column;gap:5px;margin-bottom:12px;text-align:left">
+      <label style="font-size:10px;font-weight:600;color:#8892a0;text-transform:uppercase;letter-spacing:.5px">Usuário</label>
+      <input id="l-user" type="text" autocomplete="off" onkeydown="if(event.key==='Enter')doLogin()" style="background:#1a2332;border:1.5px solid #1e3a58;border-radius:6px;color:#e2eeff;padding:11px 13px;font-size:14px;font-family:inherit;outline:none;width:100%;box-sizing:border-box"/>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:5px;margin-bottom:16px;text-align:left">
+      <label style="font-size:10px;font-weight:600;color:#8892a0;text-transform:uppercase;letter-spacing:.5px">Senha</label>
+      <input id="l-pass" type="password" onkeydown="if(event.key==='Enter')doLogin()" style="background:#1a2332;border:1.5px solid #1e3a58;border-radius:6px;color:#e2eeff;padding:11px 13px;font-size:14px;font-family:inherit;outline:none;width:100%;box-sizing:border-box"/>
+    </div>
+    <button onclick="doLogin()" style="width:100%;padding:13px;border:none;border-radius:8px;background:#00b4b0;color:#000;font-size:14px;font-weight:700;cursor:pointer">Entrar</button>
+  </div>
+</div>
+<div class="header">
+  <div class="h-left">
+    <div class="h-icon">📦</div>
+    <div><div class="h-title">Triagem de Palete</div><div class="h-sub">Registre início e fim fotografando a placa</div></div>
+  </div>
+  <div class="live"><div class="ldot"></div>AO VIVO</div>
+</div>
+<div class="content">
+  <div class="box">
+    <div class="card">
+      <div class="card-title">📦 Triagem de Palete</div>
+      <div id="msg" class="msg"></div>
+      
+  <div class="section-box ini-box">
+    <div class="section-label">▶ Início</div>
+    <div class="cam" id="ini" onclick="document.getElementById('fi-ini').click()">
+    <input type="file" id="fi-ini" accept="image/*" capture="environment"/>
+    <div class="ci">📷</div><div class="cl">Fotografar placa — Início</div><div class="cs">Toque para abrir a câmera</div>
+    <img class="prev" id="pv-ini"/>
+    <div class="tsbar" id="ts-ini"></div>
+    <div class="ov"><div class="sp"></div><div class="sptxt">Identificando placa...<br><small style="font-weight:400">Até 3 tentativas</small></div></div>
+  </div>
+    <div class="err-box" id="err-i"></div>
+    <div class="confirm-box" id="cb-ini">
+    <div class="cb-label">✅ Confirme ou corrija a placa:</div>
+    <input class="cb-placa" id="pl-ini" type="text" maxlength="8" autocomplete="off" oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'');onEditPlaca('ini')"/>
+    <div class="cb-info" id="ci-ini"></div>
+    <div class="cb-hint">Corrija se necessário antes de confirmar</div>
+  </div>
+    <button class="btn btn-navy" id="go-i" onclick="doS('i')" style="display:none">▶ Confirmar Início</button>
+    <button class="btn btn-outline" id="retry-i" onclick="resetCam('i')" style="display:none">📷 Nova foto</button>
+  </div>
+  <div class="section-box fim-box" id="sec-fim" style="display:none">
+    <div class="section-label">⏹ Fim</div>
+    <div class="cam" id="fim" onclick="document.getElementById('fi-fim').click()">
+    <input type="file" id="fi-fim" accept="image/*" capture="environment"/>
+    <div class="ci">📷</div><div class="cl">Fotografar placa — Fim</div><div class="cs">Toque para abrir a câmera</div>
+    <img class="prev" id="pv-fim"/>
+    <div class="tsbar" id="ts-fim"></div>
+    <div class="ov"><div class="sp"></div><div class="sptxt">Identificando placa...<br><small style="font-weight:400">Até 3 tentativas</small></div></div>
+  </div>
+    <div class="err-box" id="err-f"></div>
+    <div class="confirm-box" id="cb-fim">
+    <div class="cb-label">✅ Confirme ou corrija a placa:</div>
+    <input class="cb-placa" id="pl-fim" type="text" maxlength="8" autocomplete="off" oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'');onEditPlaca('fim')"/>
+    <div class="cb-info" id="ci-fim"></div>
+    <div class="cb-hint">Corrija se necessário antes de confirmar</div>
+  </div>
+    <button class="btn btn-green" id="go-f" onclick="doS('f')" style="display:none">⏹ Confirmar Fim</button>
+    <button class="btn btn-outline" id="retry-f" onclick="resetCam('f')" style="display:none">📷 Nova foto</button>
+  </div>
+    </div>
+  </div>
+</div>
+<script type="module">
+
+import{initializeApp}from"https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";import{getFirestore,collection,onSnapshot,updateDoc,doc,Timestamp}from"https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+const app=initializeApp({apiKey:"AIzaSyCMacFP0kGkgOTCqdWzf6Y65LN2q4tw28Y",authDomain:"cimento-6163b.firebaseapp.com",projectId:"cimento-6163b",storageBucket:"cimento-6163b.firebasestorage.app",messagingSenderId:"773785464621",appId:"1:773785464621:web:02dc9de04a7e2af231ada4"});
+const db=getFirestore(app);
+
+const _AU="master",_AP="master2026",_SK="triagem";
+window.doLogin=async()=>{
+  const u=document.getElementById("l-user").value.trim().toLowerCase();
+  const p=document.getElementById("l-pass").value.trim();
+  document.getElementById("login-err").style.display="none";
+  if(u===_AU&&p===_AP){document.getElementById("login-screen").style.display="none";return;}
+  try{
+    const {doc,getDoc}=await import("https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js");
+    const snap=await getDoc(doc(db,"config","senhas"));
+    if(snap.exists()){const d=snap.data();if(d[_SK]&&u===_SK&&p===d[_SK]){document.getElementById("login-screen").style.display="none";return;}}
+  }catch(e){}
+  document.getElementById("login-err").style.display="block";
+};
+
+
+const KEY="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";
+const hoje=()=>new Date().toLocaleDateString("pt-BR",{timeZone:"America/Fortaleza"}).split("/").reverse().join("-");
+const fmt=d=>d?d.toLocaleString("pt-BR",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit",second:"2-digit"}):"—";
+const fmtT=d=>d?d.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit",second:"2-digit"}):"—";
+function resizeImage(b64,maxW=1800,quality=0.95){
+  return new Promise(resolve=>{
+    const img=new Image();
+    img.onload=()=>{
+      let w=img.width,h=img.height;
+      if(w>maxW){h=Math.round(h*(maxW/w));w=maxW;}
+      const c=document.createElement("canvas");c.width=w;c.height=h;
+      c.getContext("2d").drawImage(img,0,0,w,h);
+      resolve(c.toDataURL("image/jpeg",quality));
+    };
+    img.src=b64;
+  });
+}
+async function lerPlacaComRetry(b64){
+  let lastErr=null;
+  for(let i=0;i<3;i++){
+    try{
+      const resized=await resizeImage(b64);
+      const resp=await fetch("/api/placa",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({image:resized.split(",")[1]})
+      });
+      const data=await resp.json();
+      if(!resp.ok){
+        const err={s:data.error||"Erro "+resp.status,d:data.detail||"",noRetry:[401,403].includes(resp.status)};
+        lastErr=err;if(err.noRetry)break;
+        if(i<2)await new Promise(r=>setTimeout(r,800));continue;
+      }
+      if(data.placa)return{ok:true,data};
+      if(data.placa===null)return{ok:false,notFound:true};
+    }catch(e){lastErr={s:"Erro de conexão",d:e.message};}
+    if(i<2)await new Promise(r=>setTimeout(r,800));
+  }
+  if(lastErr)return{ok:false,err:lastErr};
+  return{ok:false,notFound:true};
+}
+function showMsg(type,txt){
+  const el=document.getElementById("msg");if(!el)return;
+  el.className="msg on "+type;el.textContent=txt;
+  if(type==="ok")setTimeout(()=>{el.className="msg";el.textContent="";},7000);
+}
+function showErrBox(id,html){const el=document.getElementById(id);if(el){el.style.display="block";el.innerHTML=html;}}
+function hideErrBox(id){const el=document.getElementById(id);if(el)el.style.display="none";}
+function setCamState(id,state,b64,tsText){
+  const area=document.getElementById(id);
+  area.classList.remove("analyzing","success","fail");
+  if(state)area.classList.add(state);
+  if(b64){const p=area.querySelector(".prev");if(p)p.src=b64;}
+  const te=area.querySelector(".tsbar");if(te&&tsText!==undefined)te.textContent=tsText;
+}
+
+function initCam(camId,callback){
+  const area=document.getElementById(camId);
+  let processing=false;
+  
+  function bindInput(){
+    const old=area.querySelector("input[type=file]");
+    if(!old)return;
+    // Clone to remove all previous event listeners
+    const inp=old.cloneNode(true);
+    old.parentNode.replaceChild(inp,old);
+    
+    inp.addEventListener("change",async e=>{
+      if(processing)return;
+      const f=e.target.files[0];
+      if(!f)return;
+      processing=true;
+      inp.disabled=true; // prevent re-trigger
+      const ts=new Date();
+      const rd=new FileReader();
+      rd.onload=ev=>{
+        callback(ev.target.result,ts);
+        // Re-bind after a delay to allow next photo
+        setTimeout(()=>{processing=false;bindInput();},3000);
+      };
+      rd.readAsDataURL(f);
+    });
+  }
+  bindInput();
+}
+
+const B64={},TS={},DC={};let HD=[];
+onSnapshot(collection(db,"caminhoes_rastreio"),snap=>{
+  HD=snap.docs.map(d=>{return{id:d.id,...d.data()}}).filter(c=>c.data===hoje());
+});
+function find(pl){return HD.find(d=>d.placa===pl&&d.setorAtual!=="concluido")||null;}
+window.onEditPlaca=cid=>{
+  const t=cid==="ini"?"i":"f";
+  const pl=document.getElementById("pl-"+cid).value;DC[t]=find(pl);
+  document.getElementById("ci-"+cid).innerHTML=DC[t]?`✅ AC: ${DC[t].ac} · Setor: ${DC[t].setorAtual.replace(/_/g," ")}`:"⚠️ Não encontrado hoje";
+};
+function setupCam(t){
+  const cid=t==="i"?"ini":"fim";
+  initCam(cid,async(b64,ts)=>{
+    B64[t]=b64;TS[t]=ts;DC[t]=null;
+    setCamState(cid,"analyzing",b64,"Analisando...");
+    document.getElementById("cb-"+cid).style.display="none";
+    document.getElementById("go-"+t).style.display="none";
+    document.getElementById("retry-"+t).style.display="none";
+    hideErrBox("err-"+t);
+    const res=await lerPlacaComRetry(b64);
+    if(!res.ok){
+      setCamState(cid,"fail",b64,"❌ "+(res.err?.s||"Não identificado"));
+      showErrBox("err-"+t,(res.err?.s||"Não identificado")+"<br><small>"+(res.err?.d||"Tente foto mais próxima")+"</small>");
+      document.getElementById("retry-"+t).style.display="block";return;
+    }
+    const pl=res.data.placa;
+    setCamState(cid,"success",b64,"✅ Placa: "+pl+" · "+fmtT(ts));
+    document.getElementById("pl-"+cid).value=pl;
+    DC[t]=find(pl);
+    document.getElementById("ci-"+cid).innerHTML=DC[t]?`✅ AC: ${DC[t].ac} · Setor: ${DC[t].setorAtual.replace(/_/g," ")}`:"⚠️ Não encontrado hoje";
+    document.getElementById("cb-"+cid).style.display="block";
+    document.getElementById("go-"+t).style.display="block";
+    document.getElementById("retry-"+t).style.display="block";
+  });
+}
+setupCam("i");setupCam("f");
+window.doS=async(t)=>{
+  const cid=t==="i"?"ini":"fim";
+  const pl=document.getElementById("pl-"+cid).value.toUpperCase().replace(/[^A-Z0-9]/g,"");
+  if(pl.length<5){showMsg("er","Placa inválida.");return;}
+  const c=find(pl);if(!c){showMsg("er","Caminhão "+pl+" não encontrado hoje.");return;}
+  document.getElementById("go-"+t).disabled=true;
+  try{
+    const ts=TS[t];
+    const u={};
+    u["triagem."+(t==="i"?"inicio":"fim")]=Timestamp.fromDate(ts);
+    u.ac=c.ac;u.setorAtual=t==="i"?"triagem_inicio":"triagem_fim";
+    await updateDoc(doc(db,"caminhoes_rastreio",c.id),u);
+    showMsg("ok","✅ "+pl+" · AC: "+c.ac+" · "+(t==="i"?"Início":"Fim")+": "+fmtT(ts));
+    if(t==="i"){
+      document.getElementById("sec-fim").style.display="block";
+      const iniArea=document.getElementById("ini");
+      if(iniArea){iniArea.style.pointerEvents="none";iniArea.style.opacity="0.45";}
+      document.getElementById("go-i").style.display="none";
+      document.getElementById("retry-i").style.display="none";
+    } else {
+      document.getElementById("sec-fim").style.display="none";
+      const iniArea=document.getElementById("ini");
+      if(iniArea){iniArea.style.pointerEvents="auto";iniArea.style.opacity="1";}
+    }
+    resetCam(t);
+  }catch(e){showMsg("er","Erro: "+e.message);document.getElementById("go-"+t).disabled=false;}
+};
+window.resetCam=t=>{
+  const cid=t==="i"?"ini":"fim";
+  setCamState(cid,null,null,"");
+  const p=document.getElementById(cid).querySelector(".prev");if(p)p.src="";
+  document.getElementById("cb-"+cid).style.display="none";
+  document.getElementById("go-"+t).style.display="none";document.getElementById("go-"+t).disabled=false;
+  document.getElementById("retry-"+t).style.display="none";hideErrBox("err-"+t);
+  delete B64[t];delete TS[t];delete DC[t];
+  document.getElementById("msg").className="msg";
+};
+</script>
+</body></html>
