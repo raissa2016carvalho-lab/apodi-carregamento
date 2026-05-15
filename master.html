@@ -242,7 +242,7 @@ function isAlerta(c){
   if(!c.setorAtual||statusSemAlerta.includes(c.setorAtual))return false;
   const en=getTS(c,"entrada","ts");
   if(!en)return false;
-  return(Date.now()-en.getTime())>30*60*1000;
+  return(Date.now()-en.getTime())>2*60*60*1000;
 }
 
 // ── Sort ───────────────────────────────────────────────────────────────────
@@ -374,7 +374,7 @@ window.render=()=>{
     const tmac=calcTMAC(c);
     const alerta=isAlerta(c);
     return`<tr${alerta?' class="alerta"':''}>
-      <td><span class="ptag">${c.placa}</span>${turnoPill(en)}${alerta?'<span class="alerta-badge">+30min</span>':''}</td>
+      <td><span class="ptag">${c.placa}</span>${turnoPill(en)}${alerta?'<span class="alerta-badge">+2h</span>':''}</td>
       <td style="color:var(--t2)">${c.ac}</td>
       <td style="color:var(--t2);font-size:10px">${c.data||"—"}</td>
       <td class="ec">${en?`<span class="d">${fmtT(en)}</span>`:"—"}</td>
@@ -405,7 +405,7 @@ window.render=()=>{
       </div>`;
     }).join("");
     return`<div class="crd${alerta?" alerta":""}">
-      <div class="crd-top"><span class="crd-pl">${c.placa}${alerta?'<span class="alerta-badge" style="font-size:8px">+30min</span>':''}</span>${pill(c.setorAtual)}</div>
+      <div class="crd-top"><span class="crd-pl">${c.placa}${alerta?'<span class="alerta-badge" style="font-size:8px">+2h</span>':''}</span>${pill(c.setorAtual)}</div>
       <div class="crd-sub">AC: ${c.ac} · ${c.data||""} · Entrada: ${en?fmtT(en):"—"} ${turnoPill(en)}</div>
       <div class="crd-grid">${etapas}</div>
       ${sa?`<div style="font-size:11px;color:var(--gr);margin-top:8px;font-weight:700">🧾 Saída: ${fmtT(sa)}</div>`:""}
