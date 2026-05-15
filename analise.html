@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Análise — Rastreio</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@700;800&family=Inter:wght@400;500;600&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#060d18;--bg2:#0b1524;--bg3:#102030;--bg4:#152840;--bd:#162840;--b2:#1e3a58;--tx:#e2eeff;--t2:#7a9fd4;--t3:#3a5880;--bl:#00d4ff;--gr:#00e896;--ye:#ffd000;--rd:#ff4466;--pu:#a78bfa;--or:#fb923c;--tm:#ff9f43;--r:12px;--rs:8px}
+body{background:var(--bg);color:var(--tx);font-family:'Inter',sans-serif;min-height:100vh}
+.top{background:var(--bg2);border-bottom:2px solid var(--pu);height:56px;display:flex;align-items:center;padding:0 20px;position:sticky;top:0;z-index:200;gap:12px}
+.logo{font-family:'Rajdhani',sans-serif;font-size:18px;font-weight:800;color:var(--pu);flex:1;letter-spacing:1px}
+.back-btn{padding:6px 14px;border:1px solid var(--b2);border-radius:20px;background:transparent;color:var(--t2);font-size:11px;font-weight:700;cursor:pointer;letter-spacing:.4px;text-decoration:none;display:inline-flex;align-items:center;gap:5px;transition:all .2s}
+.back-btn:hover{border-color:var(--bl);color:var(--bl)}
+.export-btn{padding:6px 14px;border:1px solid var(--gr);border-radius:20px;background:rgba(0,232,150,.08);color:var(--gr);font-size:11px;font-weight:700;cursor:pointer;letter-spacing:.4px;display:inline-flex;align-items:center;gap:5px;transition:all .2s}
+.export-btn:hover{background:rgba(0,232,150,.15)}
+.wrap{max-width:1300px;margin:0 auto;padding:20px 16px}
+.filter-row{display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap;align-items:center}
+.row-label{font-size:10px;color:var(--t3);font-weight:600;padding:0 4px;white-space:nowrap;min-width:60px}
+.pb{padding:6px 14px;border:1px solid var(--bd);border-radius:20px;background:transparent;color:var(--t2);font-size:10px;font-weight:700;cursor:pointer;transition:all .2s;text-transform:uppercase;white-space:nowrap;letter-spacing:.4px}
+.pb.on{border-color:var(--ye);color:var(--ye);background:rgba(255,208,0,.08)}
+.pb:hover:not(.on){border-color:var(--t2);color:var(--tx)}
+.tb{padding:6px 14px;border:1px solid var(--bd);border-radius:20px;background:transparent;color:var(--t2);font-size:10px;font-weight:700;cursor:pointer;transition:all .2s;white-space:nowrap;letter-spacing:.3px}
+.tb:hover:not(.on){border-color:var(--t2);color:var(--tx)}
+.tb-todos.on{border-color:var(--bl);color:var(--bl);background:rgba(0,212,255,.07)}
+.tb-a.on{border-color:var(--bl);color:var(--bl);background:rgba(0,212,255,.12)}
+.tb-b.on{border-color:var(--ye);color:var(--ye);background:rgba(255,208,0,.10)}
+.tb-c.on{border-color:var(--pu);color:var(--pu);background:rgba(167,139,250,.10)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:16px}
+.kpi{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:14px;text-align:center;position:relative}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:var(--r) var(--r) 0 0}
+.k0::before{background:var(--bl)}.k1::before{background:var(--gr)}.k2::before{background:var(--tm)}.k3::before{background:var(--pu)}
+.kv{font-family:'Rajdhani',sans-serif;font-size:26px;font-weight:800}
+.k0 .kv{color:var(--bl)}.k1 .kv{color:var(--gr)}.k2 .kv{color:var(--tm)}.k3 .kv{color:var(--pu)}
+.kl{font-size:9px;color:var(--t2);text-transform:uppercase;letter-spacing:.4px;margin-top:3px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px}
+.card{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:14px}
+.card-title{font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.bar-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.bar-label{font-size:11px;color:var(--t2);width:80px;text-align:right;flex-shrink:0}
+.bar-track{flex:1;background:var(--bg3);border-radius:4px;height:18px;position:relative;overflow:hidden}
+.bar-fill{height:100%;border-radius:4px;display:flex;align-items:center;justify-content:flex-end;padding-right:7px;transition:width .6s ease;min-width:36px}
+.bar-val{font-size:10px;font-weight:700;color:#000;white-space:nowrap}
+.hr-wrap{display:flex;align-items:flex-end;gap:3px;height:80px;margin-top:4px}
+.hr-col{flex:1;border-radius:3px 3px 0 0;min-height:3px;transition:height .4s ease;cursor:pointer;position:relative}
+.hr-col:hover{opacity:.8}
+.hr-tooltip{position:absolute;bottom:calc(100% + 4px);left:50%;transform:translateX(-50%);background:var(--bg4);border:1px solid var(--b2);border-radius:4px;padding:3px 7px;font-size:10px;color:var(--tx);white-space:nowrap;display:none;z-index:10}
+.hr-col:hover .hr-tooltip{display:block}
+.hr-labels{display:flex;gap:3px;margin-top:4px}
+.hr-lbl{flex:1;font-size:8px;color:var(--t3);text-align:center}
+.turno-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.tcrd{border-radius:var(--rs);padding:12px;text-align:center;border:1px solid}
+.tcrd-a{background:rgba(0,212,255,.06);border-color:rgba(0,212,255,.2)}
+.tcrd-b{background:rgba(255,208,0,.06);border-color:rgba(255,208,0,.2)}
+.tcrd-c{background:rgba(167,139,250,.06);border-color:rgba(167,139,250,.2)}
+.tcrd .tlb{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.tcrd-a .tlb{color:var(--bl)}.tcrd-b .tlb{color:var(--ye)}.tcrd-c .tlb{color:var(--pu)}
+.tcrd .tv{font-family:'Rajdhani',sans-serif;font-size:28px;font-weight:800}
+.tcrd-a .tv{color:var(--bl)}.tcrd-b .tv{color:var(--ye)}.tcrd-c .tv{color:var(--pu)}
+.tcrd .ts{font-size:10px;color:var(--t2);margin-top:2px}
+.tcrd .ttmac{font-size:12px;font-weight:700;margin-top:6px;padding-top:6px;border-top:1px solid}
+.tcrd-a .ttmac{color:var(--bl);border-color:rgba(0,212,255,.15)}
+.tcrd-b .ttmac{color:var(--ye);border-color:rgba(255,208,0,.15)}
+.tcrd-c .ttmac{color:var(--pu);border-color:rgba(167,139,250,.15)}
+.rank-row{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--bg3)}
+.rank-row:last-child{border-bottom:none}
+.rank-n{font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:800;color:var(--t3);width:16px;flex-shrink:0}
+.rank-pl{font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;color:var(--bl);letter-spacing:1px;flex:1}
+.rank-ct{font-size:10px;color:var(--t3)}
+.rank-v{font-size:11px;font-weight:700;color:var(--tm)}
+.garg-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.garg-icon{font-size:13px;width:18px;text-align:center;flex-shrink:0}
+.garg-label{font-size:11px;color:var(--t2);flex:1}
+.garg-track{width:100px;background:var(--bg3);border-radius:4px;height:10px;flex-shrink:0}
+.garg-fill{height:100%;border-radius:4px;transition:width .6s ease}
+.garg-val{font-size:11px;font-weight:700;color:var(--tx);min-width:32px;text-align:right}
+.worst-box{margin-top:10px;padding-top:10px;border-top:1px solid var(--bg3)}
+.worst-label{font-size:9px;color:var(--t3);font-weight:700;text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px}
+.worst-val{font-size:13px;font-weight:700;color:var(--or)}
+.worst-sub{font-size:10px;color:var(--t3);margin-top:2px}
+.empty-state{text-align:center;padding:40px;color:var(--t3);font-size:13px}
+.spin{width:24px;height:24px;border:3px solid var(--bd);border-top-color:var(--bl);border-radius:50%;animation:ro .7s linear infinite;margin:40px auto 10px}
+@keyframes ro{to{transform:rotate(360deg)}}
+.loading-wrap{text-align:center;padding:60px;color:var(--t3)}
+@media(max-width:700px){.grid2{grid-template-columns:1fr}.grid3{grid-template-columns:1fr}.turno-grid{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<div class="top">
+  <div class="logo">📊 ANÁLISE — RASTREIO</div>
+  <a class="back-btn" href="/master">← Master</a>
+  <button class="export-btn" onclick="exportExcel()">📥 Exportar Excel</button>
+</div>
+<div class="wrap">
+
+  <div class="filter-row">
+    <span class="row-label">📅 Período:</span>
+    <button class="pb on" onclick="setPeriod('hoje',this)">Hoje</button>
+    <button class="pb" onclick="setPeriod('ontem',this)">Ontem</button>
+    <button class="pb" onclick="setPeriod('semana',this)">Essa Semana</button>
+    <button class="pb" onclick="setPeriod('mes',this)">Esse Mês</button>
+    <button class="pb" onclick="setPeriod('ano',this)">Esse Ano</button>
+  </div>
+
+  <div class="filter-row" style="margin-bottom:18px">
+    <span class="row-label">🕐 Turno:</span>
+    <button class="tb tb-todos on" onclick="setTurno('t',this)">Todos</button>
+    <button class="tb tb-a" onclick="setTurno('A',this)">A · 23h–07h</button>
+    <button class="tb tb-b" onclick="setTurno('B',this)">B · 07h–15h</button>
+    <button class="tb tb-c" onclick="setTurno('C',this)">C · 15h–23h</button>
+  </div>
+
+  <div id="loading-wrap" class="loading-wrap"><div class="spin"></div><div>Carregando dados...</div></div>
+  <div id="content" style="display:none">
+    <!-- KPIs -->
+    <div class="kpis">
+      <div class="kpi k0"><div class="kv" id="k-total">—</div><div class="kl">Caminhões</div></div>
+      <div class="kpi k1"><div class="kv" id="k-conc">—</div><div class="kl">Concluídos</div></div>
+      <div class="kpi k2"><div class="kv" id="k-tmac">—</div><div class="kl">TMAC Médio</div></div>
+      <div class="kpi k3"><div class="kv" id="k-taxa">—</div><div class="kl">Taxa Conclusão</div></div>
+    </div>
+
+    <!-- Etapas + Pico hora -->
+    <div class="grid2">
+      <div class="card">
+        <div class="card-title">⏱ Tempo Médio por Etapa</div>
+        <div id="etapas-chart"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">📈 Caminhões por Hora</div>
+        <div class="hr-wrap" id="hora-chart"></div>
+        <div class="hr-labels" id="hora-labels"></div>
+      </div>
+    </div>
+
+    <!-- Turno -->
+    <div class="card" style="margin-bottom:12px">
+      <div class="card-title">🕐 Comparativo por Turno</div>
+      <div class="turno-grid" id="turno-grid"></div>
+    </div>
+
+    <!-- Ranking + Gargalo -->
+    <div class="grid2">
+      <div class="card">
+        <div class="card-title">🏆 Placas Mais Frequentes</div>
+        <div id="ranking-list"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">🔥 Gargalo por Etapa</div>
+        <div id="gargalo-chart"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import{initializeApp}from"https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
+import{getFirestore,collection,onSnapshot,query,orderBy}from"https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+
+const app=initializeApp({apiKey:"AIzaSyCMacFP0kGkgOTCqdWzf6Y65LN2q4tw28Y",authDomain:"cimento-6163b.firebaseapp.com",projectId:"cimento-6163b",storageBucket:"cimento-6163b.firebasestorage.app",messagingSenderId:"773785464621",appId:"1:773785464621:web:02dc9de04a7e2af231ada4"});
+const db=getFirestore(app);
+
+// ── Helpers ──────────────────────────────────────────────────────────────
+function periodDates(p){
+  const now=new Date();
+  const tz=new Date(now.toLocaleString("en-US",{timeZone:"America/Fortaleza"}));
+  const pad=n=>String(n).padStart(2,"0");
+  const fmt=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+  if(p==="hoje")return{s:fmt(tz),e:fmt(tz)};
+  if(p==="ontem"){const y=new Date(tz);y.setDate(tz.getDate()-1);return{s:fmt(y),e:fmt(y)};}
+  if(p==="semana"){const d=new Date(tz);d.setDate(tz.getDate()-tz.getDay());return{s:fmt(d),e:fmt(tz)};}
+  if(p==="mes"){const s=new Date(tz.getFullYear(),tz.getMonth(),1);return{s:fmt(s),e:fmt(tz)};}
+  if(p==="ano"){const s=new Date(tz.getFullYear(),0,1);return{s:fmt(s),e:fmt(tz)};}
+  return{s:fmt(tz),e:fmt(tz)};
+}
+
+function durStr(ms){
+  if(!ms||ms<0)return"—";
+  const m=Math.round(ms/60000);
+  if(m===0)return"<1min";
+  return m<60?m+"min":Math.floor(m/60)+"h"+(m%60>0?m%60+"m":"");
+}
+
+function getTS(c,sn,f){const v=c[sn]?.[f];return v?.toDate?v.toDate():null;}
+
+function getTurno(d){
+  if(!d)return null;
+  const h=d.getHours();
+  if(h>=23||h<7)return"A";
+  if(h>=7&&h<15)return"B";
+  return"C";
+}
+
+function avg(arr){return arr.length?arr.reduce((a,b)=>a+b,0)/arr.length:null;}
+
+function fmtEx(d){return d?d.toLocaleString("pt-BR",{day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit",second:"2-digit"}):""}
+
+// ── State ─────────────────────────────────────────────────────────────────
+let ALL=[],MP="hoje",MT="t";
+
+onSnapshot(query(collection(db,"caminhoes_rastreio"),orderBy("criadoEm","desc")),snap=>{
+  ALL=snap.docs.map(d=>({id:d.id,...d.data()}));
+  document.getElementById("loading-wrap").style.display="none";
+  document.getElementById("content").style.display="block";
+  render();
+});
+
+window.setPeriod=(p,el)=>{MP=p;document.querySelectorAll(".pb").forEach(b=>b.classList.remove("on"));el.classList.add("on");render();};
+window.setTurno=(t,el)=>{MT=t;document.querySelectorAll(".tb").forEach(b=>b.classList.remove("on"));el.classList.add("on");render();};
+
+function getList(){
+  const{s,e}=periodDates(MP);
+  let list=ALL.filter(c=>c.data>=s&&c.data<=e);
+  if(MT!=="t")list=list.filter(c=>getTurno(getTS(c,"entrada","ts"))===MT);
+  return list;
+}
+
+// ── Render ────────────────────────────────────────────────────────────────
+function render(){
+  const list=getList();
+  const conc=list.filter(c=>c.setorAtual==="concluido");
+
+  // TMAC geral
+  const tmacs=conc.map(c=>{
+    const en=getTS(c,"entrada","ts"),sa=getTS(c,"faturamento","ts");
+    return(en&&sa)?sa-en:null;
+  }).filter(v=>v!=null);
+  const tmacMedio=avg(tmacs);
+  const taxa=list.length?Math.round(conc.length/list.length*100):0;
+
+  // KPIs
+  document.getElementById("k-total").textContent=list.length;
+  document.getElementById("k-conc").textContent=conc.length;
+  document.getElementById("k-tmac").textContent=tmacMedio?durStr(tmacMedio):"—";
+  document.getElementById("k-taxa").textContent=taxa+"%";
+
+  // ── Tempo médio por etapa ─────────────────────────────────────────────
+  const etapas=[
+    {lb:"Triagem",sn:"triagem",ini:"inicio",fim:"fim",cor:"#ffd000"},
+    {lb:"Carga",sn:"carregamento",ini:"inicio",fim:"fim",cor:"#ff6644"},
+    {lb:"Enlonamento",sn:"enlonamento",ini:"inicio",fim:"fim",cor:"#a78bfa"},
+  ];
+  // faturamento = tempo entre enlone_fim e faturamento
+  const fatTimes=list.map(c=>{
+    const enF=getTS(c,"enlonamento","fim"),sa=getTS(c,"faturamento","ts");
+    return(enF&&sa)?sa-enF:null;
+  }).filter(v=>v!=null);
+  const fatAvg=avg(fatTimes);
+
+  const etapaData=etapas.map(e=>{
+    const times=list.map(c=>{
+      const i=getTS(c,e.sn,e.ini),f=getTS(c,e.sn,e.fim);
+      return(i&&f)?f-i:null;
+    }).filter(v=>v!=null);
+    return{...e,avg:avg(times),count:times.length};
+  });
+  etapaData.push({lb:"Faturamento",cor:"#00d4ff",avg:fatAvg,count:fatTimes.length});
+
+  const maxEtapa=Math.max(...etapaData.map(e=>e.avg||0),1);
+  document.getElementById("etapas-chart").innerHTML=etapaData.map(e=>{
+    const pct=e.avg?Math.round(e.avg/maxEtapa*100):0;
+    const val=e.avg?durStr(e.avg):"sem dados";
+    return`<div class="bar-row">
+      <span class="bar-label">${e.lb}</span>
+      <div class="bar-track">
+        <div class="bar-fill" style="width:${Math.max(pct,e.avg?15:0)}%;background:${e.cor}">
+          <span class="bar-val">${val}</span>
+        </div>
+      </div>
+    </div>`;
+  }).join("")||`<div class="empty-state">Sem dados suficientes</div>`;
+
+  // ── Caminhões por hora ────────────────────────────────────────────────
+  const hourMap={};
+  list.forEach(c=>{
+    const en=getTS(c,"entrada","ts");
+    if(!en)return;
+    const h=en.getHours();
+    hourMap[h]=(hourMap[h]||0)+1;
+  });
+  const allHours=Object.keys(hourMap).map(Number).sort((a,b)=>a-b);
+  let hoursToShow=[];
+  if(allHours.length>0){
+    const hMin=Math.min(...allHours),hMax=Math.max(...allHours);
+    for(let h=hMin;h<=hMax;h++)hoursToShow.push(h);
+  }
+  if(hoursToShow.length===0){hoursToShow=[...Array(24).keys()];}
+  const maxH=Math.max(...hoursToShow.map(h=>hourMap[h]||0),1);
+  const pico=hoursToShow.reduce((a,h)=>(hourMap[h]||0)>(hourMap[a]||0)?h:a,hoursToShow[0]);
+
+  document.getElementById("hora-chart").innerHTML=hoursToShow.map(h=>{
+    const cnt=hourMap[h]||0;
+    const pct=Math.round(cnt/maxH*100);
+    const isPico=h===pico&&cnt>0;
+    const cor=isPico?"#ffd000":cnt>0?"#00d4ff":"#1e3a58";
+    return`<div class="hr-col" style="height:${Math.max(pct,cnt>0?5:3)}%;background:${cor}">
+      <div class="hr-tooltip">${String(h).padStart(2,"0")}h: ${cnt} caminhão${cnt!==1?"s":""}</div>
+    </div>`;
+  }).join("");
+  document.getElementById("hora-labels").innerHTML=hoursToShow.map(h=>`<div class="hr-lbl">${String(h).padStart(2,"0")}</div>`).join("");
+
+  // ── Comparativo por turno ─────────────────────────────────────────────
+  const turnos=[
+    {id:"A",lb:"Turno A",sub:"23h – 07h",cls:"tcrd-a",cor:"var(--bl)"},
+    {id:"B",lb:"Turno B",sub:"07h – 15h",cls:"tcrd-b",cor:"var(--ye)"},
+    {id:"C",lb:"Turno C",sub:"15h – 23h",cls:"tcrd-c",cor:"var(--pu)"},
+  ];
+  document.getElementById("turno-grid").innerHTML=turnos.map(t=>{
+    const tlist=list.filter(c=>getTurno(getTS(c,"entrada","ts"))===t.id);
+    const tconc=tlist.filter(c=>c.setorAtual==="concluido");
+    const ttmacs=tconc.map(c=>{
+      const en=getTS(c,"entrada","ts"),sa=getTS(c,"faturamento","ts");
+      return(en&&sa)?sa-en:null;
+    }).filter(v=>v!=null);
+    const ttmac=avg(ttmacs);
+    return`<div class="tcrd ${t.cls}">
+      <div class="tlb">${t.lb} · ${t.sub}</div>
+      <div class="tv">${tlist.length}</div>
+      <div class="ts">${tconc.length} concluídos</div>
+      <div class="ttmac">TMAC: ${ttmac?durStr(ttmac):"—"}</div>
+    </div>`;
+  }).join("");
+
+  // ── Ranking placas ────────────────────────────────────────────────────
+  const placaMap={};
+  list.forEach(c=>{
+    if(!c.placa)return;
+    if(!placaMap[c.placa])placaMap[c.placa]={count:0,tmacs:[]};
+    placaMap[c.placa].count++;
+    const en=getTS(c,"entrada","ts"),sa=getTS(c,"faturamento","ts");
+    if(en&&sa&&c.setorAtual==="concluido")placaMap[c.placa].tmacs.push(sa-en);
+  });
+  const ranking=Object.entries(placaMap)
+    .map(([pl,v])=>({pl,count:v.count,tmac:avg(v.tmacs)}))
+    .sort((a,b)=>b.count-a.count)
+    .slice(0,8);
+
+  document.getElementById("ranking-list").innerHTML=ranking.length
+    ?ranking.map((r,i)=>`<div class="rank-row">
+        <span class="rank-n">${i+1}</span>
+        <span class="rank-pl">${r.pl}</span>
+        <span class="rank-ct">${r.count} visit${r.count!==1?"as":"a"}</span>
+        <span class="rank-v">${r.tmac?durStr(r.tmac):"—"}</span>
+      </div>`).join("")
+    :`<div class="empty-state">Sem dados no período</div>`;
+
+  // ── Gargalo ───────────────────────────────────────────────────────────
+  const gargData=[
+    {lb:"Carga",icon:"🏗️",cor:"#ff6644",avg:etapaData.find(e=>e.lb==="Carga")?.avg},
+    {lb:"Enlonamento",icon:"🪢",cor:"#a78bfa",avg:etapaData.find(e=>e.lb==="Enlonamento")?.avg},
+    {lb:"Triagem",icon:"📦",cor:"#ffd000",avg:etapaData.find(e=>e.lb==="Triagem")?.avg},
+    {lb:"Faturamento",icon:"🧾",cor:"#00d4ff",avg:etapaData.find(e=>e.lb==="Faturamento")?.avg},
+  ].filter(g=>g.avg).sort((a,b)=>b.avg-a.avg);
+
+  const maxG=gargData.length?gargData[0].avg:1;
+  const worst=gargData[0];
+
+  // TMAC turno B desvio
+  const tmacB=()=>{
+    const bl=list.filter(c=>getTurno(getTS(c,"entrada","ts"))==="B"&&c.setorAtual==="concluido");
+    const bt=bl.map(c=>{const en=getTS(c,"entrada","ts"),sa=getTS(c,"faturamento","ts");return(en&&sa)?sa-en:null;}).filter(v=>v!=null);
+    return avg(bt);
+  };
+
+  document.getElementById("gargalo-chart").innerHTML=(gargData.length
+    ?gargData.map(g=>`<div class="garg-row">
+        <span class="garg-icon">${g.icon}</span>
+        <span class="garg-label">${g.lb}</span>
+        <div class="garg-track"><div class="garg-fill" style="width:${Math.round(g.avg/maxG*100)}%;background:${g.cor}"></div></div>
+        <span class="garg-val">${durStr(g.avg)}</span>
+      </div>`).join("")
+    :`<div class="empty-state">Sem dados suficientes</div>`)
+    +(worst?`<div class="worst-box">
+      <div class="worst-label">Maior gargalo do período</div>
+      <div class="worst-val">${worst.icon} ${worst.lb} · ${durStr(worst.avg)}</div>
+      ${(()=>{const tb=tmacB();const diff=tb&&tmacMedio?tb-tmacMedio:null;return diff&&diff>0?`<div class="worst-sub">Turno B tem o maior desvio (+${durStr(diff)})</div>`:"";})()}
+    </div>`:"");
+}
+
+// ── Export Excel ──────────────────────────────────────────────────────────
+window.exportExcel=()=>{
+  const list=getList();
+  if(!list.length){alert("Nenhum dado para exportar.");return;}
+
+  // Sumário
+  const conc=list.filter(c=>c.setorAtual==="concluido");
+  const tmacs=conc.map(c=>{const en=getTS(c,"entrada","ts"),sa=getTS(c,"faturamento","ts");return(en&&sa)?sa-en:null;}).filter(v=>v!=null);
+  const tmacMedio=tmacs.length?tmacs.reduce((a,b)=>a+b,0)/tmacs.length:null;
+
+  const etapasEx=[
+    {lb:"Triagem",sn:"triagem",ini:"inicio",fim:"fim"},
+    {lb:"Carga",sn:"carregamento",ini:"inicio",fim:"fim"},
+    {lb:"Enlonamento",sn:"enlonamento",ini:"inicio",fim:"fim"},
+  ];
+
+  // Aba 1: detalhe
+  const rows=list.map(c=>{
+    const en=getTS(c,"entrada","ts");
+    const sa=getTS(c,"faturamento","ts");
+    const tmac=(en&&sa&&c.setorAtual==="concluido")?sa-en:null;
+    const row={"Placa":c.placa,"Turno":getTurno(en)||"","AC":c.ac,"Data":c.data||"","Entrada":fmtEx(en),"Setor":c.setorAtual||""};
+    etapasEx.forEach(e=>{
+      const i=getTS(c,e.sn,e.ini),f=getTS(c,e.sn,e.fim);
+      row[e.lb+" Ini"]=fmtEx(i);
+      row[e.lb+" Fim"]=fmtEx(f);
+      row[e.lb+" Dur"]=i&&f?durStr(f-i):"";
+    });
+    row["Saída"]=fmtEx(sa);
+    row["TMAC"]=tmac?durStr(tmac):"";
+    return row;
+  });
+
+  // Aba 2: sumário
+  const sumRows=[
+    {"Métrica":"Total caminhões","Valor":list.length},
+    {"Métrica":"Concluídos","Valor":conc.length},
+    {"Métrica":"Taxa conclusão","Valor":list.length?Math.round(conc.length/list.length*100)+"%":"—"},
+    {"Métrica":"TMAC médio","Valor":tmacMedio?durStr(tmacMedio):"—"},
+    {},
+  ];
+  const turnos=["A","B","C"];
+  turnos.forEach(t=>{
+    const tl=list.filter(c=>getTurno(getTS(c,"entrada","ts"))===t);
+    const tc=tl.filter(c=>c.setorAtual==="concluido");
+    const tt=tc.map(c=>{const en=getTS(c,"entrada","ts"),sa=getTS(c,"faturamento","ts");return(en&&sa)?sa-en:null;}).filter(v=>v!=null);
+    const ta=tt.length?tt.reduce((a,b)=>a+b,0)/tt.length:null;
+    sumRows.push({"Métrica":`Turno ${t} — caminhões`,"Valor":tl.length});
+    sumRows.push({"Métrica":`Turno ${t} — TMAC`,"Valor":ta?durStr(ta):"—"});
+  });
+
+  const wb=XLSX.utils.book_new();
+  const ws1=XLSX.utils.json_to_sheet(rows);
+  const ws2=XLSX.utils.json_to_sheet(sumRows);
+  ws1["!cols"]=[{wch:10},{wch:7},{wch:10},{wch:12},{wch:20},{wch:16},{wch:18},{wch:18},{wch:12},{wch:18},{wch:18},{wch:12},{wch:18},{wch:18},{wch:12},{wch:20},{wch:14}];
+  ws2["!cols"]=[{wch:30},{wch:20}];
+  XLSX.utils.book_append_sheet(wb,ws1,"Detalhe");
+  XLSX.utils.book_append_sheet(wb,ws2,"Sumário");
+
+  const{s,e}=periodDates(MP);
+  const turnoSuffix=MT!=="t"?`_turno${MT}`:"";
+  const fname=s===e?`analise_${s}${turnoSuffix}.xlsx`:`analise_${s}_a_${e}${turnoSuffix}.xlsx`;
+  XLSX.writeFile(wb,fname);
+};
+</script>
+</body>
+</html>
