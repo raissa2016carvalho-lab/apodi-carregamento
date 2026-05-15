@@ -73,6 +73,14 @@ tr:hover td{background:var(--bg3)}
 .empty{text-align:center;padding:48px;color:var(--t3)}
 .spin{width:28px;height:28px;border:3px solid var(--bd);border-top-color:var(--bl);border-radius:50%;animation:ro .7s linear infinite;margin:40px auto 10px}
 @keyframes ro{to{transform:rotate(360deg)}}
+@keyframes rowAlert{0%,100%{background:rgba(255,68,102,.13)}50%{background:rgba(255,68,102,.28)}}
+tr.alerta td{animation:rowAlert 1.2s ease-in-out infinite;border-bottom-color:rgba(255,68,102,.2) !important}
+tr.alerta td .d,tr.alerta td .w,tr.alerta td{color:#ff8099 !important}
+tr.alerta .ptag{color:#ff4466;border-color:rgba(255,68,102,.4);background:rgba(255,68,102,.1)}
+tr.alerta .turno{opacity:.7}
+.crd.alerta{animation:rowAlert 1.2s ease-in-out infinite;border-color:rgba(255,68,102,.4) !important}
+.crd.alerta .crd-pl{color:#ff4466}
+.alerta-badge{display:inline-block;background:rgba(255,68,102,.2);border:1px solid rgba(255,68,102,.4);color:#ff4466;font-size:9px;font-weight:800;padding:1px 6px;border-radius:4px;margin-left:5px;letter-spacing:.3px;vertical-align:middle;animation:rowAlert 1.2s ease-in-out infinite}
 .cards{display:none;flex-direction:column;gap:10px}
 .crd{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:14px}
 .crd-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
@@ -220,6 +228,27 @@ function calcTMAC(c){
   return sa-en;
 }
 
+// Retorna true se o caminhão está há mais de 30min na etapa atual sem concluí-la
+function isAlerta(c){
+  if(c.setorAtual==="concluido"||!c.setorAtual||c.setorAtual==="posto1")return false;
+  const LIMITE=30*60*1000;
+  const now=Date.now();
+  const map={
+    "triagem_inicio":["triagem","inicio"],
+    "carregamento_inicio":["carregamento","inicio"],
+    "enlonamento_inicio":["enlonamento","inicio"],
+    // fim de etapa sem próxima — também conta
+    "triagem_fim":["triagem","fim"],
+    "carregamento_fim":["carregamento","fim"],
+    "enlonamento_fim":["enlonamento","fim"],
+  };
+  const key=map[c.setorAtual];
+  if(!key)return false;
+  const ts=getTS(c,key[0],key[1]);
+  if(!ts)return false;
+  return(now-ts.getTime())>LIMITE;
+}
+
 // ── Sort ───────────────────────────────────────────────────────────────────
 let SORT_COL=null,SORT_DIR=1;
 
@@ -268,6 +297,9 @@ onSnapshot(query(collection(db,"caminhoes_rastreio"),orderBy("criadoEm","desc"))
 window.setPeriod=(p,el)=>{MP=p;document.querySelectorAll(".pb").forEach(b=>b.classList.remove("on"));el.classList.add("on");render();};
 window.setF=(f,el)=>{MF=f;document.querySelectorAll(".fb").forEach(b=>b.classList.remove("on"));el.classList.add("on");render();};
 window.setTurno=(t,el)=>{MT=t;document.querySelectorAll(".tb").forEach(b=>b.classList.remove("on"));el.classList.add("on");render();};
+
+// Re-renderiza a cada 60s para atualizar alertas de tempo
+setInterval(()=>render(),60000);
 
 function getFiltered(){
   const{s,e}=periodDates(MP);
@@ -323,8 +355,9 @@ window.render=()=>{
     const enI=getTS(c,"enlonamento","inicio"),enF=getTS(c,"enlonamento","fim");
     const sa=getTS(c,"faturamento","ts");
     const tmac=calcTMAC(c);
-    return`<tr>
-      <td><span class="ptag">${c.placa}</span>${turnoPill(en)}</td>
+    const alerta=isAlerta(c);
+    return`<tr${alerta?' class="alerta"':''}>
+      <td><span class="ptag">${c.placa}</span>${turnoPill(en)}${alerta?'<span class="alerta-badge">+30min</span>':''}</td>
       <td style="color:var(--t2)">${c.ac}</td>
       <td style="color:var(--t2);font-size:10px">${c.data||"—"}</td>
       <td class="ec">${en?`<span class="d">${fmtT(en)}</span>`:"—"}</td>
@@ -344,6 +377,7 @@ window.render=()=>{
     const en=getTS(c,"entrada","ts");
     const sa=getTS(c,"faturamento","ts");
     const tmac=calcTMAC(c);
+    const alerta=isAlerta(c);
     const etapas=[["📦 Triagem","triagem"],["🏗️ Carga","carregamento"],["🪢 Enlone","enlonamento"]].map(([lb,sn])=>{
       const ini=getTS(c,sn,"inicio"),fim=getTS(c,sn,"fim");
       const d=ini&&fim?durStr(fim-ini):"";
@@ -353,8 +387,8 @@ window.render=()=>{
         ${d?`<div class="ed">⏱ ${d}</div>`:""}
       </div>`;
     }).join("");
-    return`<div class="crd">
-      <div class="crd-top"><span class="crd-pl">${c.placa}</span>${pill(c.setorAtual)}</div>
+    return`<div class="crd${alerta?" alerta":""}">
+      <div class="crd-top"><span class="crd-pl">${c.placa}${alerta?'<span class="alerta-badge" style="font-size:8px">+30min</span>':''}</span>${pill(c.setorAtual)}</div>
       <div class="crd-sub">AC: ${c.ac} · ${c.data||""} · Entrada: ${en?fmtT(en):"—"} ${turnoPill(en)}</div>
       <div class="crd-grid">${etapas}</div>
       ${sa?`<div style="font-size:11px;color:var(--gr);margin-top:8px;font-weight:700">🧾 Saída: ${fmtT(sa)}</div>`:""}
