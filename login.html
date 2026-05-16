@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<title>Login — Sistema de Rastreio</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#060d18;--bg2:#0b1524;--bd:#1e3558;--tx:#e2eeff;--t2:#7aafcc;--t3:#3a6880;--ac:#00d4ff;--r:14px;--rs:10px}
+body{background:var(--bg);color:var(--tx);font-family:system-ui,-apple-system,sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px}
+.box{width:100%;max-width:380px}
+.hdr{text-align:center;margin-bottom:32px}
+.hdr .ic{font-size:52px;display:block;margin-bottom:12px}
+.hdr h1{font-size:22px;font-weight:800;color:var(--ac);letter-spacing:1px;text-transform:uppercase}
+.hdr p{font-size:12px;color:var(--t2);margin-top:6px}
+.dest-badge{display:inline-block;margin-top:8px;padding:4px 12px;border:1px solid var(--bd);border-radius:20px;font-size:11px;color:var(--t3);font-family:monospace}
+.fg{display:flex;flex-direction:column;gap:6px;margin-bottom:16px}
+.fg label{font-size:10px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.6px}
+.fg input{background:var(--bg2);border:2px solid var(--bd);border-radius:var(--rs);color:var(--tx);padding:14px 16px;font-size:18px;font-family:system-ui,sans-serif;outline:none;transition:border-color .2s;width:100%;letter-spacing:2px;font-weight:700}
+.fg input:focus{border-color:var(--ac)}
+.go{width:100%;padding:16px;border:none;border-radius:var(--rs);font-size:16px;font-weight:800;cursor:pointer;text-transform:uppercase;letter-spacing:1px;background:linear-gradient(135deg,var(--ac),#0099bb);color:#000;transition:all .2s;margin-top:4px}
+.go:active{transform:scale(.97)}
+.go:disabled{opacity:.3;cursor:not-allowed}
+.msg{padding:12px 16px;border-radius:var(--rs);font-size:13px;margin-bottom:14px;text-align:center;font-weight:600;line-height:1.5;display:none}
+.msg.on{display:block}
+.er{background:rgba(255,68,102,.1);border:1px solid rgba(255,68,102,.3);color:#ff4466}
+</style>
+</head>
+<body>
+<div class="box">
+  <div class="hdr">
+    <span class="ic">🚛</span>
+    <h1>Sistema de Rastreio</h1>
+    <p>Digite sua matrícula e senha para entrar</p>
+    <div class="dest-badge" id="dest-badge" style="display:none"></div>
+  </div>
+  <div id="msg" class="msg er"></div>
+  <div class="fg">
+    <label>Matrícula</label>
+    <input id="mat" type="text" placeholder="Ex: 1001" autocomplete="off" oninput="chk()" inputmode="numeric"/>
+  </div>
+  <div class="fg">
+    <label>Senha</label>
+    <input id="pwd" type="password" placeholder="••••••" autocomplete="current-password" oninput="chk()" onkeydown="if(event.key==='Enter')entrar()"/>
+  </div>
+  <button class="go" id="go" onclick="entrar()" disabled>Entrar</button>
+</div>
+<script type="module">
+import{initializeApp}from"https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
+import{getAuth,signInWithEmailAndPassword,onAuthStateChanged}from"https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
+import{getFirestore,doc,getDoc}from"https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+
+const app=initializeApp({apiKey:"AIzaSyCMacFP0kGkgOTCqdWzf6Y65LN2q4tw28Y",authDomain:"cimento-6163b.firebaseapp.com",projectId:"cimento-6163b",storageBucket:"cimento-6163b.firebasestorage.app",messagingSenderId:"773785464621",appId:"1:773785464621:web:02dc9de04a7e2af231ada4"});
+const auth=getAuth(app);
+const db=getFirestore(app);
+
+// Pega a URL de destino do parâmetro ?next=/pagina
+const params=new URLSearchParams(window.location.search);
+const next=params.get("next")||null;
+if(next){
+  const badge=document.getElementById("dest-badge");
+  badge.style.display="inline-block";
+  badge.textContent="→ "+next;
+}
+
+// Se já estiver logado, redireciona direto
+onAuthStateChanged(auth,async user=>{
+  if(!user)return;
+  const snap=await getDoc(doc(db,"usuarios",user.uid));
+  if(!snap.exists())return;
+  redirecionar(snap.data().role,snap.data());
+});
+
+async function getPerfil(uid){
+  try{const snap=await getDoc(doc(db,"usuarios",uid));return snap.exists()?snap.data():null;}
+  catch(e){return null;}
+}
+
+function redirecionar(role,perfil){
+  // Se tem destino específico, verifica se o role tem acesso
+  if(next){
+    const acessos={
+      "/master":["admin"],
+      "/analise":["admin"],
+      "/justificativas":["supervisor","admin"],
+      "/posto1":["operador","supervisor","admin"],
+      "/triagem":["operador","supervisor","admin"],
+      "/carregamento":["operador","supervisor","admin"],
+      "/enlonamento":["operador","supervisor","admin"],
+      "/faturamento":["operador","supervisor","admin"],
+    };
+    const permitido=acessos[next];
+    if(permitido&&permitido.includes(role)){
+      window.location.href=next;return;
+    }
+  }
+  // Sem destino ou sem permissão — vai para página padrão do role
+  if(role==="admin")window.location.href="/master";
+  else if(role==="supervisor")window.location.href="/justificativas";
+  else window.location.href="/posto1";
+}
+
+window.chk=()=>{
+  const m=document.getElementById("mat").value.trim();
+  const p=document.getElementById("pwd").value;
+  document.getElementById("go").disabled=!(m.length>=1&&p.length>=4);
+};
+
+window.entrar=async()=>{
+  const mat=document.getElementById("mat").value.trim();
+  const pwd=document.getElementById("pwd").value;
+  const btn=document.getElementById("go");
+  const msg=document.getElementById("msg");
+  btn.disabled=true;btn.textContent="Entrando...";
+  msg.className="msg";
+  try{
+    const cred=await signInWithEmailAndPassword(auth,mat+"@cimento.com",pwd);
+    const perfil=await getPerfil(cred.user.uid);
+    if(!perfil){
+      await auth.signOut();
+      throw new Error("Usuário sem perfil cadastrado. Contate o administrador.");
+    }
+    redirecionar(perfil.role,perfil);
+  }catch(e){
+    let txt="Matrícula ou senha incorretos.";
+    if(e.message.includes("perfil"))txt=e.message;
+    msg.className="msg on er";msg.textContent=txt;
+    btn.disabled=false;btn.textContent="Entrar";
+  }
+};
+</script>
+</body></html>
