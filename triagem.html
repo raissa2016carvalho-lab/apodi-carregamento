@@ -132,7 +132,6 @@ body{background:var(--bg);color:var(--tx);font-family:system-ui,-apple-system,sa
 <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
 import{getAuth,onAuthStateChanged,signOut as fbSignOut}from"https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
-import{getDoc}from"https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
 import{getFirestore,collection,onSnapshot,updateDoc,doc,getDoc,Timestamp}from"https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
 const app=initializeApp({apiKey:"AIzaSyCMacFP0kGkgOTCqdWzf6Y65LN2q4tw28Y",authDomain:"cimento-6163b.firebaseapp.com",projectId:"cimento-6163b",storageBucket:"cimento-6163b.firebasestorage.app",messagingSenderId:"773785464621",appId:"1:773785464621:web:02dc9de04a7e2af231ada4"});
 const db=getFirestore(app);
