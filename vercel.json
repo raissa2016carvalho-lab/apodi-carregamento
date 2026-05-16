@@ -11,6 +11,7 @@
     { "source": "/analise",        "destination": "/analise.html"        },
     { "source": "/justificativas", "destination": "/justificativas.html" },
     { "source": "/patio",          "destination": "/patio.html"          },
-    { "source": "/admin",          "destination": "/admin.html"          }
+    { "source": "/admin",          "destination": "/admin.html"          },
+    { "source": "/placas",         "destination": "/placas.html"         }
   ]
 }
