@@ -131,9 +131,24 @@ body{background:var(--bg);color:var(--tx);font-family:system-ui,-apple-system,sa
 </div>
 <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
-import{getFirestore,collection,onSnapshot,updateDoc,doc,Timestamp}from"https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+import{getAuth,onAuthStateChanged,signOut as fbSignOut}from"https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
+import{getDoc}from"https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+import{getFirestore,collection,onSnapshot,updateDoc,doc,getDoc,Timestamp}from"https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
 const app=initializeApp({apiKey:"AIzaSyCMacFP0kGkgOTCqdWzf6Y65LN2q4tw28Y",authDomain:"cimento-6163b.firebaseapp.com",projectId:"cimento-6163b",storageBucket:"cimento-6163b.firebasestorage.app",messagingSenderId:"773785464621",appId:"1:773785464621:web:02dc9de04a7e2af231ada4"});
 const db=getFirestore(app);
+const auth=getAuth(app);
+let USUARIO_ATUAL=null;
+onAuthStateChanged(auth,async user=>{
+  if(!user){window.location.href="/login?next=/triagem";return;}
+  const snap=await getDoc(doc(db,"usuarios",user.uid));
+  if(!snap.exists()){await fbSignOut(auth);window.location.href="/login?next=/triagem";return;}
+  const p=snap.data();
+  if(!["operador","supervisor","admin"].includes(p.role)){window.location.href="/login?next=/triagem";return;}
+  USUARIO_ATUAL={uid:user.uid,...p};
+  const hdr=document.querySelector(".hdr h1");
+  if(hdr)hdr.insertAdjacentHTML("afterend",`<p style="font-size:11px;color:var(--t3);margin-top:4px">Mat. ${p.matricula} · ${p.nome}</p>`);
+});
+window.sair=async()=>{await fbSignOut(auth);window.location.href="/login";};
 const hoje=()=>new Date().toLocaleDateString("pt-BR",{timeZone:"America/Fortaleza"}).split("/").reverse().join("-");
 const fmtT=d=>d?d.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit",second:"2-digit"}):"—";
 function resizeImage(b64,maxW=1800,quality=0.95){return new Promise(resolve=>{const img=new Image();img.onload=()=>{let w=img.width,h=img.height;if(w>maxW){h=Math.round(h*(maxW/w));w=maxW;}const c=document.createElement("canvas");c.width=w;c.height=h;c.getContext("2d").drawImage(img,0,0,w,h);resolve(c.toDataURL("image/jpeg",quality));};img.src=b64;});}
