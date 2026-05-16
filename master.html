@@ -2,25 +2,39 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Análise — Rastreio</title>
+<title>Master — Rastreio em Tempo Real</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@700;800&family=Inter:wght@400;500;600&display=swap');
 *{box-sizing:border-box;margin:0;padding:0}
 :root{--bg:#060d18;--bg2:#0b1524;--bg3:#102030;--bg4:#152840;--bd:#162840;--b2:#1e3a58;--tx:#e2eeff;--t2:#7a9fd4;--t3:#3a5880;--bl:#00d4ff;--gr:#00e896;--ye:#ffd000;--rd:#ff4466;--pu:#a78bfa;--or:#fb923c;--tm:#ff9f43;--r:12px;--rs:8px}
 body{background:var(--bg);color:var(--tx);font-family:'Inter',sans-serif;min-height:100vh}
-.top{background:var(--bg2);border-bottom:2px solid var(--pu);height:56px;display:flex;align-items:center;padding:0 20px;position:sticky;top:0;z-index:200;gap:12px}
-.logo{font-family:'Rajdhani',sans-serif;font-size:18px;font-weight:800;color:var(--pu);flex:1;letter-spacing:1px}
-.back-btn{padding:6px 14px;border:1px solid var(--b2);border-radius:20px;background:transparent;color:var(--t2);font-size:11px;font-weight:700;cursor:pointer;letter-spacing:.4px;text-decoration:none;display:inline-flex;align-items:center;gap:5px;transition:all .2s}
-.back-btn:hover{border-color:var(--bl);color:var(--bl)}
-.export-btn{padding:6px 14px;border:1px solid var(--gr);border-radius:20px;background:rgba(0,232,150,.08);color:var(--gr);font-size:11px;font-weight:700;cursor:pointer;letter-spacing:.4px;display:inline-flex;align-items:center;gap:5px;transition:all .2s}
-.export-btn:hover{background:rgba(0,232,150,.15)}
-.wrap{max-width:1300px;margin:0 auto;padding:20px 16px}
+.top{background:var(--bg2);border-bottom:2px solid var(--bl);height:56px;display:flex;align-items:center;padding:0 20px;position:sticky;top:0;z-index:200;gap:12px}
+.logo{font-family:'Rajdhani',sans-serif;font-size:18px;font-weight:800;color:var(--bl);flex:1;letter-spacing:1px}
+.live{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--gr)}
+.dot{width:8px;height:8px;background:var(--gr);border-radius:50%;animation:pu 1.4s ease-in-out infinite}
+@keyframes pu{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.3;transform:scale(1.5)}}
+.wrap{max-width:1400px;margin:0 auto;padding:20px 16px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:10px;margin-bottom:20px}
+.st{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:14px;text-align:center;position:relative}
+.st::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:var(--r) var(--r) 0 0}
+.s0::before{background:var(--bl)}.s1::before{background:var(--ye)}.s2::before{background:var(--rd)}
+.s3::before{background:var(--pu)}.s4::before{background:var(--or)}.s5::before{background:var(--gr)}.s6::before{background:var(--tm)}
+.s7::before{background:#38bdf8}.s8::before{background:#34d399}.s9::before{background:#f472b6}
+.sv{font-family:'Rajdhani',sans-serif;font-size:28px;font-weight:800}
+.s0 .sv{color:var(--bl)}.s1 .sv{color:var(--ye)}.s2 .sv{color:var(--rd)}
+.s3 .sv{color:var(--pu)}.s4 .sv{color:var(--or)}.s5 .sv{color:var(--gr)}.s6 .sv{color:var(--tm)}
+.s7 .sv{color:#38bdf8}.s8 .sv{color:#34d399}.s9 .sv{color:#f472b6}
+.sl{font-size:9px;color:var(--t2);text-transform:uppercase;letter-spacing:.4px;margin-top:2px}
 .filter-row{display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap;align-items:center}
 .row-label{font-size:10px;color:var(--t3);font-weight:600;padding:0 4px;white-space:nowrap;min-width:60px}
+.fi{background:var(--bg3);border:1px solid var(--b2);border-radius:var(--rs);color:var(--tx);padding:8px 13px;font-size:12px;font-family:'Inter',sans-serif;outline:none;flex:1;min-width:160px}
+.fi:focus{border-color:var(--bl)}
 .pb{padding:6px 14px;border:1px solid var(--bd);border-radius:20px;background:transparent;color:var(--t2);font-size:10px;font-weight:700;cursor:pointer;transition:all .2s;text-transform:uppercase;white-space:nowrap;letter-spacing:.4px}
 .pb.on{border-color:var(--ye);color:var(--ye);background:rgba(255,208,0,.08)}
 .pb:hover:not(.on){border-color:var(--t2);color:var(--tx)}
+.fb{padding:6px 14px;border:1px solid var(--bd);border-radius:20px;background:transparent;color:var(--t2);font-size:10px;font-weight:600;cursor:pointer;transition:all .2s;text-transform:uppercase;white-space:nowrap}
+.fb.on,.fb:hover{border-color:var(--bl);color:var(--bl);background:rgba(0,212,255,.07)}
 .tb{padding:6px 14px;border:1px solid var(--bd);border-radius:20px;background:transparent;color:var(--t2);font-size:10px;font-weight:700;cursor:pointer;transition:all .2s;white-space:nowrap;letter-spacing:.3px}
 .tb:hover:not(.on){border-color:var(--t2);color:var(--tx)}
 .tb-todos.on{border-color:var(--bl);color:var(--bl);background:rgba(0,212,255,.07)}
@@ -33,94 +47,96 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',sans-serif;min-hei
 .ttb-ensacado.on{border-color:#00d4ff;color:#00d4ff;background:rgba(0,212,255,.10)}
 .ttb-granel.on{border-color:#fb923c;color:#fb923c;background:rgba(251,146,60,.10)}
 .ttb-bigbag.on{border-color:#00e896;color:#00e896;background:rgba(0,232,150,.10)}
-.tipo-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:0}
-.tipo-crd{border-radius:var(--rs);padding:12px;text-align:center;border:1px solid}
-.tipo-ens{background:rgba(0,212,255,.06);border-color:rgba(0,212,255,.2)}
-.tipo-gr{background:rgba(251,146,60,.06);border-color:rgba(251,146,60,.2)}
-.tipo-bb{background:rgba(0,232,150,.06);border-color:rgba(0,232,150,.2)}
-.tipo-crd .tlb{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
-.tipo-ens .tlb{color:#00d4ff}.tipo-gr .tlb{color:#fb923c}.tipo-bb .tlb{color:#00e896}
-.tipo-crd .tv{font-family:'Rajdhani',sans-serif;font-size:28px;font-weight:800}
-.tipo-ens .tv{color:#00d4ff}.tipo-gr .tv{color:#fb923c}.tipo-bb .tv{color:#00e896}
-.tipo-crd .ts{font-size:10px;color:var(--t2);margin-top:2px}
-.tipo-crd .ttmac{font-size:12px;font-weight:700;margin-top:6px;padding-top:6px;border-top:1px solid}
-.tipo-ens .ttmac{color:#00d4ff;border-color:rgba(0,212,255,.15)}
-.tipo-gr .ttmac{color:#fb923c;border-color:rgba(251,146,60,.15)}
-.tipo-bb .ttmac{color:#00e896;border-color:rgba(0,232,150,.15)}
-.cross-table{width:100%;border-collapse:collapse;font-size:11px;margin-top:4px}
-.cross-table th{text-align:center;font-size:9px;font-weight:600;color:var(--t3);text-transform:uppercase;padding:7px 10px;border-bottom:1px solid var(--bd)}
-.cross-table td{padding:8px 10px;border-bottom:1px solid var(--bg3);text-align:center;font-size:11px;color:var(--t2)}
-.cross-table tr:last-child td{border-bottom:none}
-.cross-table .row-hdr{text-align:left;font-weight:700;color:var(--tx);font-size:10px}
-.cross-val{font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700}
-.cv-ens{color:#00d4ff}.cv-gr{color:#fb923c}.cv-bb{color:#00e896}
-.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:16px}
-.kpi{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:14px;text-align:center;position:relative}
-.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:var(--r) var(--r) 0 0}
-.k0::before{background:var(--bl)}.k1::before{background:var(--gr)}.k2::before{background:var(--tm)}.k3::before{background:var(--pu)}
-.kv{font-family:'Rajdhani',sans-serif;font-size:26px;font-weight:800}
-.k0 .kv{color:var(--bl)}.k1 .kv{color:var(--gr)}.k2 .kv{color:var(--tm)}.k3 .kv{color:var(--pu)}
-.kl{font-size:9px;color:var(--t2);text-transform:uppercase;letter-spacing:.4px;margin-top:3px}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
-.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px}
-.card{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:14px}
-.card-title{font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px;display:flex;align-items:center;gap:6px}
-.bar-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
-.bar-label{font-size:11px;color:var(--t2);width:80px;text-align:right;flex-shrink:0}
-.bar-track{flex:1;background:var(--bg3);border-radius:4px;height:18px;position:relative;overflow:hidden}
-.bar-fill{height:100%;border-radius:4px;display:flex;align-items:center;justify-content:flex-end;padding-right:7px;transition:width .6s ease;min-width:36px}
-.bar-val{font-size:10px;font-weight:700;color:#000;white-space:nowrap}
-.hr-wrap{display:flex;align-items:flex-end;gap:3px;height:80px;margin-top:4px}
-.hr-col{flex:1;border-radius:3px 3px 0 0;min-height:3px;transition:height .4s ease;cursor:pointer;position:relative}
-.hr-col:hover{opacity:.8}
-.hr-tooltip{position:absolute;bottom:calc(100% + 4px);left:50%;transform:translateX(-50%);background:var(--bg4);border:1px solid var(--b2);border-radius:4px;padding:3px 7px;font-size:10px;color:var(--tx);white-space:nowrap;display:none;z-index:10}
-.hr-col:hover .hr-tooltip{display:block}
-.hr-labels{display:flex;gap:3px;margin-top:4px}
-.hr-lbl{flex:1;font-size:8px;color:var(--t3);text-align:center}
-.turno-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
-.tcrd{border-radius:var(--rs);padding:12px;text-align:center;border:1px solid}
-.tcrd-a{background:rgba(0,212,255,.06);border-color:rgba(0,212,255,.2)}
-.tcrd-b{background:rgba(255,208,0,.06);border-color:rgba(255,208,0,.2)}
-.tcrd-c{background:rgba(167,139,250,.06);border-color:rgba(167,139,250,.2)}
-.tcrd .tlb{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
-.tcrd-a .tlb{color:var(--bl)}.tcrd-b .tlb{color:var(--ye)}.tcrd-c .tlb{color:var(--pu)}
-.tcrd .tv{font-family:'Rajdhani',sans-serif;font-size:28px;font-weight:800}
-.tcrd-a .tv{color:var(--bl)}.tcrd-b .tv{color:var(--ye)}.tcrd-c .tv{color:var(--pu)}
-.tcrd .ts{font-size:10px;color:var(--t2);margin-top:2px}
-.tcrd .ttmac{font-size:12px;font-weight:700;margin-top:6px;padding-top:6px;border-top:1px solid}
-.tcrd-a .ttmac{color:var(--bl);border-color:rgba(0,212,255,.15)}
-.tcrd-b .ttmac{color:var(--ye);border-color:rgba(255,208,0,.15)}
-.tcrd-c .ttmac{color:var(--pu);border-color:rgba(167,139,250,.15)}
-.rank-row{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--bg3)}
-.rank-row:last-child{border-bottom:none}
-.rank-n{font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:800;color:var(--t3);width:16px;flex-shrink:0}
-.rank-pl{font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;color:var(--bl);letter-spacing:1px;flex:1}
-.rank-ct{font-size:10px;color:var(--t3)}
-.rank-v{font-size:11px;font-weight:700;color:var(--tm)}
-.garg-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
-.garg-icon{font-size:13px;width:18px;text-align:center;flex-shrink:0}
-.garg-label{font-size:11px;color:var(--t2);flex:1}
-.garg-track{width:100px;background:var(--bg3);border-radius:4px;height:10px;flex-shrink:0}
-.garg-fill{height:100%;border-radius:4px;transition:width .6s ease}
-.garg-val{font-size:11px;font-weight:700;color:var(--tx);min-width:32px;text-align:right}
-.worst-box{margin-top:10px;padding-top:10px;border-top:1px solid var(--bg3)}
-.worst-label{font-size:9px;color:var(--t3);font-weight:700;text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px}
-.worst-val{font-size:13px;font-weight:700;color:var(--or)}
-.worst-sub{font-size:10px;color:var(--t3);margin-top:2px}
-.empty-state{text-align:center;padding:40px;color:var(--t3);font-size:13px}
-.spin{width:24px;height:24px;border:3px solid var(--bd);border-top-color:var(--bl);border-radius:50%;animation:ro .7s linear infinite;margin:40px auto 10px}
+.export-btn{margin-left:auto;padding:7px 16px;border:1px solid var(--gr);border-radius:20px;background:rgba(0,232,150,.08);color:var(--gr);font-size:10px;font-weight:700;cursor:pointer;transition:all .2s;text-transform:uppercase;letter-spacing:.4px;display:flex;align-items:center;gap:5px;white-space:nowrap}
+.export-btn:hover{background:rgba(0,232,150,.15)}
+.tcard{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);overflow:hidden;margin-bottom:16px}
+.thead{padding:14px 18px;font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;border-bottom:1px solid var(--bd);display:flex;justify-content:space-between;align-items:center}
+.thead small{font-size:11px;color:var(--t2);font-weight:400;font-family:'Inter',sans-serif}
+.tscroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:11px}
+th{text-align:left;font-size:9px;font-weight:600;color:var(--t3);text-transform:uppercase;padding:9px 14px;border-bottom:1px solid var(--bd);white-space:nowrap;cursor:pointer;user-select:none;transition:color .15s}
+th:hover{color:var(--t2)}
+th.sort-asc,th.sort-desc{color:var(--bl)}
+th.sort-asc::after{content:" ▲";font-size:8px}
+th.sort-desc::after{content:" ▼";font-size:8px}
+td{padding:11px 14px;border-bottom:1px solid var(--bd);vertical-align:top}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--bg3)}
+tr.incompleto td{opacity:.45}
+tr.incompleto .ptag{color:var(--t2);border-color:var(--bd)}
+.status-icon{font-size:15px;display:inline-block;line-height:1}
+.status-concluido{color:var(--gr)}
+.status-processo{color:var(--ye)}
+.status-incompleto{color:var(--rd)}
+.ptag{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:14px;letter-spacing:1px;background:var(--bg4);border:1px solid var(--b2);border-radius:5px;padding:2px 9px;display:inline-block;color:var(--bl)}
+.turno{display:inline-block;font-size:9px;font-weight:800;padding:1px 6px;border-radius:4px;margin-left:5px;vertical-align:middle;font-family:'Rajdhani',sans-serif;letter-spacing:.5px}
+.t-a{background:rgba(0,212,255,.15);color:var(--bl);border:1px solid rgba(0,212,255,.3)}
+.t-b{background:rgba(255,208,0,.15);color:var(--ye);border:1px solid rgba(255,208,0,.3)}
+.t-c{background:rgba(167,139,250,.15);color:var(--pu);border:1px solid rgba(167,139,250,.3)}
+.tipo-pill{display:inline-block;font-size:8px;font-weight:800;padding:1px 6px;border-radius:4px;margin-left:4px;vertical-align:middle;letter-spacing:.3px}
+.tp-ensacado{background:rgba(0,212,255,.12);color:#00d4ff;border:1px solid rgba(0,212,255,.25)}
+.tp-granel{background:rgba(251,146,60,.12);color:#fb923c;border:1px solid rgba(251,146,60,.25)}
+.tp-bigbag{background:rgba(0,232,150,.12);color:#00e896;border:1px solid rgba(0,232,150,.25)}
+.pill{display:inline-flex;align-items:center;gap:3px;padding:3px 9px;border-radius:20px;font-size:9px;font-weight:700;text-transform:uppercase;white-space:nowrap;border:1px solid}
+.p-bl{background:rgba(0,212,255,.1);color:var(--bl);border-color:rgba(0,212,255,.2)}
+.p-ye{background:rgba(255,208,0,.1);color:var(--ye);border-color:rgba(255,208,0,.2)}
+.p-rd{background:rgba(255,68,102,.1);color:var(--rd);border-color:rgba(255,68,102,.2)}
+.p-pu{background:rgba(167,139,250,.1);color:var(--pu);border-color:rgba(167,139,250,.2)}
+.p-gr{background:rgba(0,232,150,.1);color:var(--gr);border-color:rgba(0,232,150,.2)}
+.p-or{background:rgba(251,146,60,.1);color:var(--or);border-color:rgba(251,146,60,.2)}
+.ec{font-size:11px;color:var(--t2);line-height:1.9}
+.ec .d{color:var(--tx)}.ec .w{color:var(--t3);font-style:italic}
+.dr{background:rgba(0,212,255,.1);color:var(--bl);border-radius:4px;padding:0 4px;font-size:10px;margin-left:3px}
+.tmac-cell{font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;color:var(--tm)}
+.tmac-cell.w{color:var(--t3);font-style:italic;font-size:11px;font-family:'Inter',sans-serif;font-weight:400}
+.empty{text-align:center;padding:48px;color:var(--t3)}
+.spin{width:28px;height:28px;border:3px solid var(--bd);border-top-color:var(--bl);border-radius:50%;animation:ro .7s linear infinite;margin:40px auto 10px}
 @keyframes ro{to{transform:rotate(360deg)}}
-.loading-wrap{text-align:center;padding:60px;color:var(--t3)}
-@media(max-width:700px){.grid2{grid-template-columns:1fr}.grid3{grid-template-columns:1fr}.turno-grid{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(2,1fr)}}
+@keyframes rowAlert{0%,100%{background:rgba(255,68,102,.13)}50%{background:rgba(255,68,102,.28)}}
+tr.alerta td{animation:rowAlert 1.2s ease-in-out infinite;border-bottom-color:rgba(255,68,102,.2) !important}
+tr.alerta td .d,tr.alerta td .w,tr.alerta td{color:#ff8099 !important}
+tr.alerta .ptag{color:#ff4466;border-color:rgba(255,68,102,.4);background:rgba(255,68,102,.1)}
+tr.alerta .turno{opacity:.7}
+.crd.alerta{animation:rowAlert 1.2s ease-in-out infinite;border-color:rgba(255,68,102,.4) !important}
+.crd.alerta .crd-pl{color:#ff4466}
+.alerta-badge{display:inline-block;background:rgba(255,68,102,.2);border:1px solid rgba(255,68,102,.4);color:#ff4466;font-size:9px;font-weight:800;padding:1px 6px;border-radius:4px;margin-left:5px;letter-spacing:.3px;vertical-align:middle;animation:rowAlert 1.2s ease-in-out infinite}
+.cards{display:none;flex-direction:column;gap:10px}
+.crd{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:14px}
+.crd-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.crd-pl{font-family:'Rajdhani',sans-serif;font-size:20px;font-weight:800;color:var(--bl);letter-spacing:1px}
+.crd-sub{font-size:11px;color:var(--t2);margin-bottom:8px}
+.crd-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.crd-et{background:var(--bg3);border:1px solid var(--bd);border-radius:var(--rs);padding:7px 10px}
+.crd-et .el{color:var(--t3);font-size:9px;text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px}
+.crd-et .ei{font-size:11px;font-weight:600;color:var(--tx)}
+.crd-et .ei.w{color:var(--t3);font-style:italic;font-weight:400}
+.crd-et .ed{font-size:10px;color:var(--bl);margin-top:1px}
+.crd-tmac{background:rgba(255,159,67,.08);border:1px solid rgba(255,159,67,.25);border-radius:var(--rs);padding:7px 10px;margin-top:6px;display:flex;align-items:center;justify-content:space-between}
+.crd-tmac .el{color:var(--t3);font-size:9px;text-transform:uppercase;letter-spacing:.4px}
+.crd-tmac .ei{font-family:'Rajdhani',sans-serif;font-size:15px;font-weight:800;color:var(--tm)}
+.crd-tmac .ei.w{color:var(--t3);font-style:italic;font-size:11px;font-family:'Inter',sans-serif;font-weight:400}
+@media(max-width:768px){.tcard{display:none}.cards{display:flex}.stats{grid-template-columns:repeat(4,1fr)}.export-btn span{display:none}}
 </style>
 </head>
 <body>
 <div class="top">
-  <div class="logo">📊 ANÁLISE — RASTREIO</div>
-  <a class="back-btn" href="/master">← Master</a>
-  <button class="export-btn" onclick="exportExcel()">📥 Exportar Excel</button>
+  <div class="logo">👁️ MASTER — PROCESSOS EM TEMPO REAL</div>
+  <a href="/analise" style="padding:6px 14px;border:1px solid var(--pu);border-radius:20px;background:rgba(167,139,250,.08);color:var(--pu);font-size:11px;font-weight:700;text-decoration:none;letter-spacing:.4px;white-space:nowrap;transition:all .2s" onmouseover="this.style.background='rgba(167,139,250,.15)'" onmouseout="this.style.background='rgba(167,139,250,.08)'">📊 Análise</a>
+  <div class="live"><div class="dot"></div>AO VIVO</div>
 </div>
 <div class="wrap">
+  <div class="stats">
+    <div class="st s0"><div class="sv" id="s0">—</div><div class="sl">Total</div></div>
+    <div class="st s1"><div class="sv" id="s1">—</div><div class="sl">Triagem</div></div>
+    <div class="st s2"><div class="sv" id="s2">—</div><div class="sl">Carga</div></div>
+    <div class="st s3"><div class="sv" id="s3">—</div><div class="sl">Enlone</div></div>
+    <div class="st s4"><div class="sv" id="s4">—</div><div class="sl">Ag.Saída</div></div>
+    <div class="st s5"><div class="sv" id="s5">—</div><div class="sl">Concluído</div></div>
+    <div class="st s6"><div class="sv" id="s6">—</div><div class="sl">TMAC Geral</div></div>
+    <div class="st s7"><div class="sv" id="s7">—</div><div class="sl">TME · Espera</div></div>
+    <div class="st s8"><div class="sv" id="s8">—</div><div class="sl">TMC · Carga</div></div>
+    <div class="st s9"><div class="sv" id="s9">—</div><div class="sl">TMF · Fila</div></div>
+  </div>
 
   <div class="filter-row">
     <span class="row-label">📅 Período:</span>
@@ -129,9 +145,10 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',sans-serif;min-hei
     <button class="pb" onclick="setPeriod('semana',this)">Essa Semana</button>
     <button class="pb" onclick="setPeriod('mes',this)">Esse Mês</button>
     <button class="pb" onclick="setPeriod('ano',this)">Esse Ano</button>
+    <button class="export-btn" onclick="exportExcel()">📊 <span>Exportar Excel</span></button>
   </div>
 
-  <div class="filter-row" style="margin-bottom:18px">
+  <div class="filter-row">
     <span class="row-label">🕐 Turno:</span>
     <button class="tb tb-todos on" onclick="setTurno('t',this)">Todos</button>
     <button class="tb tb-a" onclick="setTurno('A',this)">A · 23h–07h</button>
@@ -139,7 +156,7 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',sans-serif;min-hei
     <button class="tb tb-c" onclick="setTurno('C',this)">C · 15h–23h</button>
   </div>
 
-  <div class="filter-row" style="margin-bottom:18px">
+  <div class="filter-row">
     <span class="row-label">📦 Carga:</span>
     <button class="ttb ttb-todos on" onclick="setTipoCarga('t',this)">Todos</button>
     <button class="ttb ttb-ensacado" onclick="setTipoCarga('ensacado',this)">🛍️ Ensacado</button>
@@ -147,64 +164,41 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',sans-serif;min-hei
     <button class="ttb ttb-bigbag" onclick="setTipoCarga('bigbag',this)">📦 Big Bag</button>
   </div>
 
-  <div id="loading-wrap" class="loading-wrap"><div class="spin"></div><div>Carregando dados...</div></div>
-  <div id="content" style="display:none">
-    <!-- KPIs -->
-    <div class="kpis">
-      <div class="kpi k0"><div class="kv" id="k-total">—</div><div class="kl">Caminhões</div></div>
-      <div class="kpi k1"><div class="kv" id="k-conc">—</div><div class="kl">Concluídos</div></div>
-      <div class="kpi k2"><div class="kv" id="k-tmac">—</div><div class="kl">TMAC Médio</div></div>
-      <div class="kpi k3"><div class="kv" id="k-taxa">—</div><div class="kl">Taxa Conclusão</div></div>
-    </div>
-
-    <!-- Etapas + Pico hora -->
-    <div class="grid2">
-      <div class="card">
-        <div class="card-title">⏱ Tempo Médio por Etapa</div>
-        <div id="etapas-chart"></div>
-      </div>
-      <div class="card">
-        <div class="card-title">📈 Caminhões por Hora</div>
-        <div class="hr-wrap" id="hora-chart"></div>
-        <div class="hr-labels" id="hora-labels"></div>
-      </div>
-    </div>
-
-    <!-- Turno -->
-    <div class="card" style="margin-bottom:12px">
-      <div class="card-title">🕐 Comparativo por Turno</div>
-      <div class="turno-grid" id="turno-grid"></div>
-    </div>
-
-    <!-- Ranking + Gargalo -->
-    <div class="grid2">
-      <div class="card">
-        <div class="card-title">🏆 Placas Mais Frequentes</div>
-        <div id="ranking-list"></div>
-      </div>
-      <div class="card">
-        <div class="card-title">🔥 Gargalo por Etapa</div>
-        <div id="gargalo-chart"></div>
-      </div>
-    </div>
-    <!-- Tipo de Carga -->
-    <div class="grid2" style="margin-bottom:12px">
-      <div class="card">
-        <div class="card-title">📦 Volume por Tipo de Carga</div>
-        <div class="tipo-grid" id="tipo-volume"></div>
-      </div>
-      <div class="card">
-        <div class="card-title">⏱ TMAC Médio por Tipo</div>
-        <div id="tipo-tmac-chart"></div>
-      </div>
-    </div>
-    <div class="card" style="margin-bottom:12px">
-      <div class="card-title">🔀 Tipo de Carga × Turno — TMAC médio</div>
-      <div style="overflow-x:auto"><table class="cross-table" id="cross-table"></table></div>
-    </div>
+  <div class="filter-row" style="margin-bottom:16px">
+    <input class="fi" id="q" type="text" placeholder="🔍 Placa ou AC..." oninput="render()"/>
+    <button class="fb on" onclick="setF('t',this)">Todos</button>
+    <button class="fb" onclick="setF('a',this)">Em processo</button>
+    <button class="fb" onclick="setF('c',this)">Concluídos</button>
   </div>
-</div>
 
+  <div class="tcard">
+    <div class="thead">📋 Caminhões <small id="cnt"></small></div>
+    <div id="ld"><div class="spin"></div></div>
+    <div class="tscroll" id="tbl" style="display:none">
+      <table>
+        <thead><tr id="thead-row">
+          <th data-col="placa">Placa</th>
+          <th data-col="ac">AC</th>
+          <th data-col="data">Data</th>
+          <th data-col="entrada">Entrada</th>
+          <th data-col="setor">Setor Atual</th>
+          <th data-col="trI">📦 Triagem Ini</th>
+          <th data-col="trF">📦 Triagem Fim</th>
+          <th data-col="caI">🏗️ Carga Ini</th>
+          <th data-col="caF">🏗️ Carga Fim</th>
+          <th data-col="enI">🪢 Enlone Ini</th>
+          <th data-col="enF">🪢 Enlone Fim</th>
+          <th data-col="saida">🧾 Saída</th>
+          <th data-col="tmac">⏱️ TMAC</th>
+          <th data-col="status">Status</th>
+        </tr></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+    <div class="empty" id="emp" style="display:none">🔍 Nenhum resultado.</div>
+  </div>
+  <div class="cards" id="cards"></div>
+</div>
 <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
 import{getFirestore,collection,onSnapshot,query,orderBy}from"https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
@@ -212,7 +206,7 @@ import{getFirestore,collection,onSnapshot,query,orderBy}from"https://www.gstatic
 const app=initializeApp({apiKey:"AIzaSyCMacFP0kGkgOTCqdWzf6Y65LN2q4tw28Y",authDomain:"cimento-6163b.firebaseapp.com",projectId:"cimento-6163b",storageBucket:"cimento-6163b.firebasestorage.app",messagingSenderId:"773785464621",appId:"1:773785464621:web:02dc9de04a7e2af231ada4"});
 const db=getFirestore(app);
 
-// ── Helpers ──────────────────────────────────────────────────────────────
+// ── Helpers ────────────────────────────────────────────────────────────────
 function periodDates(p){
   const now=new Date();
   const tz=new Date(now.toLocaleString("en-US",{timeZone:"America/Fortaleza"}));
@@ -226,14 +220,14 @@ function periodDates(p){
   return{s:fmt(tz),e:fmt(tz)};
 }
 
+const fmtT=d=>d?d.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit",second:"2-digit"}):"—";
+const fmtEx=d=>d?d.toLocaleString("pt-BR",{day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit",second:"2-digit"}):"";
+
 function durStr(ms){
-  if(!ms||ms<0)return"—";
+  if(!ms||ms<0)return"";
   const m=Math.round(ms/60000);
-  if(m===0)return"<1min";
   return m<60?m+"min":Math.floor(m/60)+"h"+(m%60>0?m%60+"m":"");
 }
-
-function getTS(c,sn,f){const v=c[sn]?.[f];return v?.toDate?v.toDate():null;}
 
 function getTurno(d){
   if(!d)return null;
@@ -242,327 +236,258 @@ function getTurno(d){
   if(h>=7&&h<15)return"B";
   return"C";
 }
+function turnoPill(d){
+  const t=getTurno(d);if(!t)return"";
+  return`<span class="turno t-${t.toLowerCase()}">${t}</span>`;
+}
+function tipoPill(c){
+  const map={ensacado:["tp-ensacado","🛍️ Ensacado"],granel:["tp-granel","⛏️ Granel"],bigbag:["tp-bigbag","📦 Big Bag"]};
+  const v=map[c.tipoCarga];
+  if(!v)return"";
+  return`<span class="tipo-pill ${v[0]}">${v[1]}</span>`;
+}
+function pill(s){
+  if(!s||s==="posto1")return`<span class="pill p-bl">🔵 Entrada</span>`;
+  if(s==="triagem_inicio")return`<span class="pill p-ye">🟡 Em Triagem</span>`;
+  if(s==="triagem_fim")return`<span class="pill p-ye">🟡 Triagem OK</span>`;
+  if(s==="carregamento_inicio")return`<span class="pill p-rd">🔴 Carregando</span>`;
+  if(s==="carregamento_fim")return`<span class="pill p-rd">🔴 Carregado</span>`;
+  if(s==="enlonamento_inicio")return`<span class="pill p-pu">🟣 Enlonando</span>`;
+  if(s==="enlonamento_fim")return`<span class="pill p-pu">🟣 Enlonado</span>`;
+  if(s==="faturamento_aguardando")return`<span class="pill p-or">🧾 Ag. Faturamento</span>`;
+  if(s==="concluido")return`<span class="pill p-gr">🟢 Concluído</span>`;
+  return`<span class="pill p-bl">${s}</span>`;
+}
+function getTS(c,sn,f){const v=c[sn]?.[f];return v?.toDate?v.toDate():null;}
+function calcTMAC(c){
+  if(c.setorAtual!=="concluido")return null;
+  const en=getTS(c,"entrada","ts"),sa=getTS(c,"faturamento","ts");
+  if(!en||!sa)return null;
+  return sa-en;
+}
 
-function avg(arr){return arr.length?arr.reduce((a,b)=>a+b,0)/arr.length:null;}
+// Pulsa se o caminhão está em processo há mais de 30min (desde entrada)
+// Não pulsa se concluído, enlonado aguardando faturamento ou já fora de processo ativo
+function isAlerta(c){
+  const statusSemAlerta=["concluido","faturamento_aguardando","enlonamento_fim","posto1"];
+  if(!c.setorAtual||statusSemAlerta.includes(c.setorAtual))return false;
+  const en=getTS(c,"entrada","ts");
+  if(!en)return false;
+  return(Date.now()-en.getTime())>90*60*1000;
+}
 
-function fmtEx(d){return d?d.toLocaleString("pt-BR",{day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit",second:"2-digit"}):""}
+function statusFinal(c){
+  if(c.setorAtual==="concluido")return`<span class="status-icon status-concluido" title="Concluído">✔</span>`;
+  const hoje=new Date().toLocaleDateString("pt-BR",{timeZone:"America/Fortaleza"}).split("/").reverse().join("-");
+  if(c.data&&c.data<hoje)return`<span class="status-icon status-incompleto" title="Processo não concluído">❌</span>`;
+  return`<span class="status-icon status-processo" title="Em processo">⏳</span>`;
+}
 
-// ── State ─────────────────────────────────────────────────────────────────
-let ALL=[],MP="hoje",MT="t",MTC="t";
+// ── Sort ───────────────────────────────────────────────────────────────────
+let SORT_COL=null,SORT_DIR=1;
+
+function tsVal(c,sn,f){const d=getTS(c,sn,f);return d?d.getTime():0;}
+function getSortVal(c,col){
+  switch(col){
+    case"placa":return c.placa||"";
+    case"ac":return c.ac||"";
+    case"data":return c.data||"";
+    case"entrada":return tsVal(c,"entrada","ts");
+    case"setor":return c.setorAtual||"";
+    case"trI":return tsVal(c,"triagem","inicio");
+    case"trF":return tsVal(c,"triagem","fim");
+    case"caI":return tsVal(c,"carregamento","inicio");
+    case"caF":return tsVal(c,"carregamento","fim");
+    case"enI":return tsVal(c,"enlonamento","inicio");
+    case"enF":return tsVal(c,"enlonamento","fim");
+    case"saida":return tsVal(c,"faturamento","ts");
+    case"tmac":return calcTMAC(c)??-1;
+    default:return 0;
+  }
+}
+function updateSortHeaders(){
+  document.querySelectorAll("#thead-row th").forEach(th=>{
+    th.classList.remove("sort-asc","sort-desc");
+    if(th.dataset.col===SORT_COL)th.classList.add(SORT_DIR===1?"sort-asc":"sort-desc");
+  });
+}
+document.addEventListener("click",e=>{
+  const th=e.target.closest("th[data-col]");if(!th)return;
+  const col=th.dataset.col;
+  if(SORT_COL===col){SORT_DIR*=-1;}else{SORT_COL=col;SORT_DIR=1;}
+  updateSortHeaders();render();
+});
+
+// ── State ──────────────────────────────────────────────────────────────────
+let ALL=[],MF="t",MP="hoje",MT="t",MTC="t";
 
 onSnapshot(query(collection(db,"caminhoes_rastreio"),orderBy("criadoEm","desc")),snap=>{
   ALL=snap.docs.map(d=>({id:d.id,...d.data()}));
-  document.getElementById("loading-wrap").style.display="none";
-  document.getElementById("content").style.display="block";
   render();
-},(err)=>{
-  console.error("Firestore error:",err);
-  document.getElementById("loading-wrap").innerHTML="<div style='color:#ff4466;text-align:center;padding:20px'>Erro ao carregar dados. Verifique o console.</div>";
+  document.getElementById("ld").style.display="none";
+  document.getElementById("tbl").style.display="block";
 });
 
 window.setPeriod=(p,el)=>{MP=p;document.querySelectorAll(".pb").forEach(b=>b.classList.remove("on"));el.classList.add("on");render();};
+window.setF=(f,el)=>{MF=f;document.querySelectorAll(".fb").forEach(b=>b.classList.remove("on"));el.classList.add("on");render();};
 window.setTurno=(t,el)=>{MT=t;document.querySelectorAll(".tb").forEach(b=>b.classList.remove("on"));el.classList.add("on");render();};
 window.setTipoCarga=(t,el)=>{MTC=t;document.querySelectorAll(".ttb").forEach(b=>b.classList.remove("on"));el.classList.add("on");render();};
 
-function getList(){
+// Re-renderiza a cada 60s para atualizar alertas de tempo
+setInterval(()=>render(),60000);
+
+function getFiltered(){
   const{s,e}=periodDates(MP);
   let list=ALL.filter(c=>c.data>=s&&c.data<=e);
   if(MT!=="t")list=list.filter(c=>getTurno(getTS(c,"entrada","ts"))===MT);
   if(MTC!=="t")list=list.filter(c=>c.tipoCarga===MTC);
+  if(MF==="a")list=list.filter(c=>c.setorAtual!=="concluido");
+  if(MF==="c")list=list.filter(c=>c.setorAtual==="concluido");
+  const q=(document.getElementById("q")?.value||"").toUpperCase();
+  if(q)list=list.filter(c=>c.placa?.includes(q)||c.ac?.includes(q));
+  if(SORT_COL){
+    list=[...list].sort((a,b)=>{
+      const av=getSortVal(a,SORT_COL),bv=getSortVal(b,SORT_COL);
+      return av<bv?-SORT_DIR:av>bv?SORT_DIR:0;
+    });
+  }
   return list;
 }
 
-// ── Render ────────────────────────────────────────────────────────────────
-function render(){
-  const list=getList();
-  const conc=list.filter(c=>c.setorAtual==="concluido");
+window.render=()=>{
+  const{s,e}=periodDates(MP);
+  let period=ALL.filter(c=>c.data>=s&&c.data<=e);
+  if(MT!=="t")period=period.filter(c=>getTurno(getTS(c,"entrada","ts"))===MT);
+  if(MTC!=="t")period=period.filter(c=>c.tipoCarga===MTC);
 
-  // TMAC geral
-  const tmacs=conc.map(c=>{
-    const en=getTS(c,"entrada","ts"),sa=getTS(c,"faturamento","ts");
-    return(en&&sa)?sa-en:null;
+  document.getElementById("s0").textContent=period.length;
+  document.getElementById("s1").textContent=period.filter(c=>c.setorAtual?.startsWith("triagem")).length;
+  document.getElementById("s2").textContent=period.filter(c=>c.setorAtual?.startsWith("carregamento")).length;
+  document.getElementById("s3").textContent=period.filter(c=>c.setorAtual?.startsWith("enlonamento")).length;
+  document.getElementById("s4").textContent=period.filter(c=>c.setorAtual==="faturamento_aguardando").length;
+  document.getElementById("s5").textContent=period.filter(c=>c.setorAtual==="concluido").length;
+
+  const concluidos=period.filter(c=>c.setorAtual==="concluido");
+  const tmacs=concluidos.map(c=>calcTMAC(c)).filter(v=>v!=null);
+  document.getElementById("s6").textContent=tmacs.length?durStr(tmacs.reduce((a,b)=>a+b,0)/tmacs.length):"—";
+
+  // TME — entrada → triagem.inicio (todos que têm triagem iniciada)
+  const tmeVals=period.map(c=>{
+    const en=getTS(c,"entrada","ts"),trI=getTS(c,"triagem","inicio");
+    return(en&&trI)?trI-en:null;
   }).filter(v=>v!=null);
-  const tmacMedio=avg(tmacs);
-  const taxa=list.length?Math.round(conc.length/list.length*100):0;
+  document.getElementById("s7").textContent=tmeVals.length?durStr(tmeVals.reduce((a,b)=>a+b,0)/tmeVals.length):"—";
 
-  // KPIs
-  document.getElementById("k-total").textContent=list.length;
-  document.getElementById("k-conc").textContent=conc.length;
-  document.getElementById("k-tmac").textContent=tmacMedio?durStr(tmacMedio):"—";
-  document.getElementById("k-taxa").textContent=taxa+"%";
+  // TMC — triagem.inicio → enlonamento.fim (todos que têm enlonamento fim)
+  const tmcVals=period.map(c=>{
+    const trI=getTS(c,"triagem","inicio"),enF=getTS(c,"enlonamento","fim");
+    return(trI&&enF)?enF-trI:null;
+  }).filter(v=>v!=null);
+  document.getElementById("s8").textContent=tmcVals.length?durStr(tmcVals.reduce((a,b)=>a+b,0)/tmcVals.length):"—";
 
-  // ── Tempo médio por etapa ─────────────────────────────────────────────
-  const etapas=[
-    {lb:"Triagem",sn:"triagem",ini:"inicio",fim:"fim",cor:"#ffd000"},
-    {lb:"Carga",sn:"carregamento",ini:"inicio",fim:"fim",cor:"#ff6644"},
-    {lb:"Enlonamento",sn:"enlonamento",ini:"inicio",fim:"fim",cor:"#a78bfa"},
-  ];
-  // faturamento = tempo entre enlone_fim e faturamento
-  const fatTimes=list.map(c=>{
+  // TMF — enlonamento.fim → faturamento.ts (só concluídos)
+  const tmfVals=concluidos.map(c=>{
     const enF=getTS(c,"enlonamento","fim"),sa=getTS(c,"faturamento","ts");
     return(enF&&sa)?sa-enF:null;
   }).filter(v=>v!=null);
-  const fatAvg=avg(fatTimes);
+  document.getElementById("s9").textContent=tmfVals.length?durStr(tmfVals.reduce((a,b)=>a+b,0)/tmfVals.length):"—";
 
-  const etapaData=etapas.map(e=>{
-    const times=list.map(c=>{
-      const i=getTS(c,e.sn,e.ini),f=getTS(c,e.sn,e.fim);
-      return(i&&f)?f-i:null;
-    }).filter(v=>v!=null);
-    return{...e,avg:avg(times),count:times.length};
-  });
-  etapaData.push({lb:"Faturamento",cor:"#00d4ff",avg:fatAvg,count:fatTimes.length});
+  const list=getFiltered();
+  document.getElementById("cnt").textContent=list.length+" caminhão"+(list.length!==1?"s":"");
 
-  const maxEtapa=Math.max(...etapaData.map(e=>e.avg||0),1);
-  document.getElementById("etapas-chart").innerHTML=etapaData.map(e=>{
-    const pct=e.avg?Math.round(e.avg/maxEtapa*100):0;
-    const val=e.avg?durStr(e.avg):"sem dados";
-    return`<div class="bar-row">
-      <span class="bar-label">${e.lb}</span>
-      <div class="bar-track">
-        <div class="bar-fill" style="width:${Math.max(pct,e.avg?15:0)}%;background:${e.cor}">
-          <span class="bar-val">${val}</span>
-        </div>
-      </div>
-    </div>`;
-  }).join("")||`<div class="empty-state">Sem dados suficientes</div>`;
+  const tb=document.getElementById("tbody"),em=document.getElementById("emp"),cards=document.getElementById("cards");
+  if(!list.length){tb.innerHTML="";em.style.display="block";cards.innerHTML="<div class='empty'>🔍 Nenhum resultado.</div>";return;}
+  em.style.display="none";
 
-  // ── Caminhões por hora ────────────────────────────────────────────────
-  const hourMap={};
-  list.forEach(c=>{
-    const en=getTS(c,"entrada","ts");
-    if(!en)return;
-    const h=en.getHours();
-    hourMap[h]=(hourMap[h]||0)+1;
-  });
-  const allHours=Object.keys(hourMap).map(Number).sort((a,b)=>a-b);
-  let hoursToShow=[];
-  if(allHours.length>0){
-    const hMin=Math.min(...allHours),hMax=Math.max(...allHours);
-    for(let h=hMin;h<=hMax;h++)hoursToShow.push(h);
+  function cell(d,d2){
+    if(!d)return`<span class="w">aguardando</span>`;
+    let str=`<span class="d">${fmtT(d)}</span>`;
+    if(d2)str+=`<span class="dr">${durStr(d-d2)}</span>`;
+    return str;
   }
-  if(hoursToShow.length===0){hoursToShow=[...Array(24).keys()];}
-  const maxH=Math.max(...hoursToShow.map(h=>hourMap[h]||0),1);
-  const pico=hoursToShow.reduce((a,h)=>(hourMap[h]||0)>(hourMap[a]||0)?h:a,hoursToShow[0]);
 
-  document.getElementById("hora-chart").innerHTML=hoursToShow.map(h=>{
-    const cnt=hourMap[h]||0;
-    const pct=Math.round(cnt/maxH*100);
-    const isPico=h===pico&&cnt>0;
-    const cor=isPico?"#ffd000":cnt>0?"#00d4ff":"#1e3a58";
-    return`<div class="hr-col" style="height:${Math.max(pct,cnt>0?5:3)}%;background:${cor}">
-      <div class="hr-tooltip">${String(h).padStart(2,"0")}h: ${cnt} caminhão${cnt!==1?"s":""}</div>
-    </div>`;
-  }).join("");
-  document.getElementById("hora-labels").innerHTML=hoursToShow.map(h=>`<div class="hr-lbl">${String(h).padStart(2,"0")}</div>`).join("");
-
-  // ── Comparativo por turno ─────────────────────────────────────────────
-  const turnos=[
-    {id:"A",lb:"Turno A",sub:"23h – 07h",cls:"tcrd-a",cor:"var(--bl)"},
-    {id:"B",lb:"Turno B",sub:"07h – 15h",cls:"tcrd-b",cor:"var(--ye)"},
-    {id:"C",lb:"Turno C",sub:"15h – 23h",cls:"tcrd-c",cor:"var(--pu)"},
-  ];
-  document.getElementById("turno-grid").innerHTML=turnos.map(t=>{
-    const tlist=list.filter(c=>getTurno(getTS(c,"entrada","ts"))===t.id);
-    const tconc=tlist.filter(c=>c.setorAtual==="concluido");
-    const ttmacs=tconc.map(c=>{
-      const en=getTS(c,"entrada","ts"),sa=getTS(c,"faturamento","ts");
-      return(en&&sa)?sa-en:null;
-    }).filter(v=>v!=null);
-    const ttmac=avg(ttmacs);
-    return`<div class="tcrd ${t.cls}">
-      <div class="tlb">${t.lb} · ${t.sub}</div>
-      <div class="tv">${tlist.length}</div>
-      <div class="ts">${tconc.length} concluídos</div>
-      <div class="ttmac">TMAC: ${ttmac?durStr(ttmac):"—"}</div>
-    </div>`;
+  tb.innerHTML=list.map(c=>{
+    const en=getTS(c,"entrada","ts");
+    const trI=getTS(c,"triagem","inicio"),trF=getTS(c,"triagem","fim");
+    const caI=getTS(c,"carregamento","inicio"),caF=getTS(c,"carregamento","fim");
+    const enI=getTS(c,"enlonamento","inicio"),enF=getTS(c,"enlonamento","fim");
+    const sa=getTS(c,"faturamento","ts");
+    const tmac=calcTMAC(c);
+    const alerta=isAlerta(c);
+    const hoje2=new Date().toLocaleDateString("pt-BR",{timeZone:"America/Fortaleza"}).split("/").reverse().join("-");
+    const incompleto=c.data&&c.data<hoje2&&c.setorAtual!=="concluido";
+    return`<tr${alerta?' class="alerta"':incompleto?' class="incompleto"':''}>
+      <td><span class="ptag">${c.placa}</span>${turnoPill(en)}${tipoPill(c)}${alerta?'<span class="alerta-badge">+1h30</span>':''}</td>
+      <td style="color:var(--t2)">${c.ac}</td>
+      <td style="color:var(--t2);font-size:10px">${c.data||"—"}</td>
+      <td class="ec">${en?`<span class="d">${fmtT(en)}</span>`:"—"}</td>
+      <td>${pill(c.setorAtual)}</td>
+      <td class="ec">${cell(trI,null)}</td>
+      <td class="ec">${cell(trF,trI)}</td>
+      <td class="ec">${cell(caI,null)}</td>
+      <td class="ec">${cell(caF,caI)}</td>
+      <td class="ec">${cell(enI,null)}</td>
+      <td class="ec">${cell(enF,enI)}</td>
+      <td class="ec">${sa?`<span class="d">${fmtT(sa)}</span>`:`<span class="w">aguardando</span>`}</td>
+      <td>${tmac!=null?`<span class="tmac-cell" style="color:${tmac>130*60*1000?'var(--rd)':'var(--gr)'}">${durStr(tmac)}</span>`:`<span class="tmac-cell w">${incompleto?"não concluído":"em processo"}</span>`}</td>
+      <td style="text-align:center;font-size:16px">${statusFinal(c)}</td>
+    </tr>`;
   }).join("");
 
-  // ── Ranking placas ────────────────────────────────────────────────────
-  const placaMap={};
-  list.forEach(c=>{
-    if(!c.placa)return;
-    if(!placaMap[c.placa])placaMap[c.placa]={count:0,tmacs:[]};
-    placaMap[c.placa].count++;
-    const en=getTS(c,"entrada","ts"),sa=getTS(c,"faturamento","ts");
-    if(en&&sa&&c.setorAtual==="concluido")placaMap[c.placa].tmacs.push(sa-en);
-  });
-  const ranking=Object.entries(placaMap)
-    .map(([pl,v])=>({pl,count:v.count,tmac:avg(v.tmacs)}))
-    .sort((a,b)=>b.count-a.count)
-    .slice(0,8);
-
-  document.getElementById("ranking-list").innerHTML=ranking.length
-    ?ranking.map((r,i)=>`<div class="rank-row">
-        <span class="rank-n">${i+1}</span>
-        <span class="rank-pl">${r.pl}</span>
-        <span class="rank-ct">${r.count} visit${r.count!==1?"as":"a"}</span>
-        <span class="rank-v">${r.tmac?durStr(r.tmac):"—"}</span>
-      </div>`).join("")
-    :`<div class="empty-state">Sem dados no período</div>`;
-
-  // ── Gargalo ───────────────────────────────────────────────────────────
-  const gargData=[
-    {lb:"Carga",icon:"🏗️",cor:"#ff6644",avg:etapaData.find(e=>e.lb==="Carga")?.avg},
-    {lb:"Enlonamento",icon:"🪢",cor:"#a78bfa",avg:etapaData.find(e=>e.lb==="Enlonamento")?.avg},
-    {lb:"Triagem",icon:"📦",cor:"#ffd000",avg:etapaData.find(e=>e.lb==="Triagem")?.avg},
-    {lb:"Faturamento",icon:"🧾",cor:"#00d4ff",avg:etapaData.find(e=>e.lb==="Faturamento")?.avg},
-  ].filter(g=>g.avg).sort((a,b)=>b.avg-a.avg);
-
-  const maxG=gargData.length?gargData[0].avg:1;
-  const worst=gargData[0];
-
-  // TMAC turno B desvio
-  const tmacB=()=>{
-    const bl=list.filter(c=>getTurno(getTS(c,"entrada","ts"))==="B"&&c.setorAtual==="concluido");
-    const bt=bl.map(c=>{const en=getTS(c,"entrada","ts"),sa=getTS(c,"faturamento","ts");return(en&&sa)?sa-en:null;}).filter(v=>v!=null);
-    return avg(bt);
-  };
-
-  document.getElementById("gargalo-chart").innerHTML=(gargData.length
-    ?gargData.map(g=>`<div class="garg-row">
-        <span class="garg-icon">${g.icon}</span>
-        <span class="garg-label">${g.lb}</span>
-        <div class="garg-track"><div class="garg-fill" style="width:${Math.round(g.avg/maxG*100)}%;background:${g.cor}"></div></div>
-        <span class="garg-val">${durStr(g.avg)}</span>
-      </div>`).join("")
-    :`<div class="empty-state">Sem dados suficientes</div>`)
-    +(worst?`<div class="worst-box">
-      <div class="worst-label">Maior gargalo do período</div>
-      <div class="worst-val">${worst.icon} ${worst.lb} · ${durStr(worst.avg)}</div>
-      ${(()=>{const tb=tmacB();const diff=tb&&tmacMedio?tb-tmacMedio:null;return diff&&diff>0?`<div class="worst-sub">Turno B tem o maior desvio (+${durStr(diff)})</div>`:"";})()}
-    </div>`:"");
-
-  // ── Tipo de Carga ─────────────────────────────────────────────────────
-  const tipos=[
-    {id:"ensacado",lb:"🛍️ Ensacado",cls:"tipo-ens tipo-crd",cor:"#00d4ff"},
-    {id:"granel",  lb:"⛏️ Granel",  cls:"tipo-gr tipo-crd", cor:"#fb923c"},
-    {id:"bigbag",  lb:"📦 Big Bag", cls:"tipo-bb tipo-crd", cor:"#00e896"},
-  ];
-
-  const allPeriod=ALL.filter(c=>{const{s,e}=periodDates(MP);return c.data>=s&&c.data<=e;});
-
-  const elVol=document.getElementById("tipo-volume");
-  if(elVol) elVol.innerHTML=tipos.map(t=>{
-    const tl=allPeriod.filter(c=>c.tipoCarga===t.id);
-    const tc=tl.filter(c=>c.setorAtual==="concluido");
-    return`<div class="${t.cls}">
-      <div class="tlb">${t.lb}</div>
-      <div class="tv">${tl.length}</div>
-      <div class="ts">${tc.length} concluídos</div>
-    </div>`;
-  }).join("");
-
-  const tipoTmacs=tipos.map(t=>{
-    const tl=list.filter(c=>c.tipoCarga===t.id&&c.setorAtual==="concluido");
-    const vals=tl.map(c=>{const en=getTS(c,"entrada","ts"),sa=getTS(c,"faturamento","ts");return(en&&sa)?sa-en:null;}).filter(v=>v!=null);
-    return{...t,avg:avg(vals),count:vals.length};
-  }).filter(t=>t.avg);
-  const maxTipo=tipoTmacs.length?Math.max(...tipoTmacs.map(t=>t.avg)):1;
-
-  const elTmac=document.getElementById("tipo-tmac-chart");
-  if(elTmac) elTmac.innerHTML=tipoTmacs.length
-    ?tipoTmacs.map(t=>`<div class="bar-row">
-        <span class="bar-label">${t.lb}</span>
-        <div class="bar-track">
-          <div class="bar-fill" style="width:${Math.max(Math.round(t.avg/maxTipo*100),15)}%;background:${t.cor}">
-            <span class="bar-val">${durStr(t.avg)}</span>
-          </div>
-        </div>
-      </div>`).join("")
-    :`<div class="empty-state">Sem dados suficientes</div>`;
-
-  const crossTurnos=[{id:"A",lb:"Turno A"},{id:"B",lb:"Turno B"},{id:"C",lb:"Turno C"}];
-  const crossList=ALL.filter(c=>{const{s,e}=periodDates(MP);return c.data>=s&&c.data<=e&&c.setorAtual==="concluido";});
-  const crossCls={ensacado:"cv-ens",granel:"cv-gr",bigbag:"cv-bb"};
-  let tbl=`<thead><tr><th class="row-hdr">Turno</th>${tipos.map(t=>`<th>${t.lb}</th>`).join("")}<th>Todos</th></tr></thead><tbody>`;
-  crossTurnos.forEach(tr=>{
-    const trl=crossList.filter(c=>getTurno(getTS(c,"entrada","ts"))===tr.id);
-    tbl+=`<tr><td class="row-hdr">${tr.lb}</td>`;
-    tipos.forEach(ti=>{
-      const vals=trl.filter(c=>c.tipoCarga===ti.id).map(c=>{const en=getTS(c,"entrada","ts"),sa=getTS(c,"faturamento","ts");return(en&&sa)?sa-en:null;}).filter(v=>v!=null);
-      const a=avg(vals);
-      tbl+=`<td><span class="cross-val ${crossCls[ti.id]}">${a?durStr(a):"—"}</span><div style="font-size:9px;color:var(--t3);margin-top:2px">${vals.length} veíc.</div></td>`;
-    });
-    const allVals=trl.map(c=>{const en=getTS(c,"entrada","ts"),sa=getTS(c,"faturamento","ts");return(en&&sa)?sa-en:null;}).filter(v=>v!=null);
-    tbl+=`<td><span class="cross-val" style="color:var(--tm)">${avg(allVals)?durStr(avg(allVals)):"—"}</span><div style="font-size:9px;color:var(--t3);margin-top:2px">${allVals.length} veíc.</div></td></tr>`;
-  });
-  tbl+=`<tr style="border-top:1px solid var(--bd)"><td class="row-hdr" style="color:var(--t3)">Todos</td>`;
-  tipos.forEach(ti=>{
-    const vals=crossList.filter(c=>c.tipoCarga===ti.id).map(c=>{const en=getTS(c,"entrada","ts"),sa=getTS(c,"faturamento","ts");return(en&&sa)?sa-en:null;}).filter(v=>v!=null);
-    const a=avg(vals);
-    tbl+=`<td><span class="cross-val ${crossCls[ti.id]}">${a?durStr(a):"—"}</span><div style="font-size:9px;color:var(--t3);margin-top:2px">${vals.length} veíc.</div></td>`;
-  });
-  const allV=crossList.map(c=>{const en=getTS(c,"entrada","ts"),sa=getTS(c,"faturamento","ts");return(en&&sa)?sa-en:null;}).filter(v=>v!=null);
-  tbl+=`<td><span class="cross-val" style="color:var(--tm)">${avg(allV)?durStr(avg(allV)):"—"}</span></td></tr></tbody>`;
-  const elCross=document.getElementById("cross-table");
-  if(elCross) elCross.innerHTML=tbl;
-}
-
-// ── Export Excel ──────────────────────────────────────────────────────────
-window.exportExcel=()=>{
-  const list=getList();
-  if(!list.length){alert("Nenhum dado para exportar.");return;}
-
-  // Sumário
-  const conc=list.filter(c=>c.setorAtual==="concluido");
-  const tmacs=conc.map(c=>{const en=getTS(c,"entrada","ts"),sa=getTS(c,"faturamento","ts");return(en&&sa)?sa-en:null;}).filter(v=>v!=null);
-  const tmacMedio=tmacs.length?tmacs.reduce((a,b)=>a+b,0)/tmacs.length:null;
-
-  const etapasEx=[
-    {lb:"Triagem",sn:"triagem",ini:"inicio",fim:"fim"},
-    {lb:"Carga",sn:"carregamento",ini:"inicio",fim:"fim"},
-    {lb:"Enlonamento",sn:"enlonamento",ini:"inicio",fim:"fim"},
-  ];
-
-  // Aba 1: detalhe
-  const rows=list.map(c=>{
+  cards.innerHTML=list.map(c=>{
     const en=getTS(c,"entrada","ts");
     const sa=getTS(c,"faturamento","ts");
-    const tmac=(en&&sa&&c.setorAtual==="concluido")?sa-en:null;
-    const row={"Placa":c.placa,"Turno":getTurno(en)||"","AC":c.ac,"Data":c.data||"","Entrada":fmtEx(en),"Setor":c.setorAtual||""};
-    etapasEx.forEach(e=>{
-      const i=getTS(c,e.sn,e.ini),f=getTS(c,e.sn,e.fim);
-      row[e.lb+" Ini"]=fmtEx(i);
-      row[e.lb+" Fim"]=fmtEx(f);
-      row[e.lb+" Dur"]=i&&f?durStr(f-i):"";
-    });
-    row["Saída"]=fmtEx(sa);
-    row["TMAC"]=tmac?durStr(tmac):"";
-    return row;
-  });
+    const tmac=calcTMAC(c);
+    const alerta=isAlerta(c);
+    const etapas=[["📦 Triagem","triagem"],["🏗️ Carga","carregamento"],["🪢 Enlone","enlonamento"]].map(([lb,sn])=>{
+      const ini=getTS(c,sn,"inicio"),fim=getTS(c,sn,"fim");
+      const d=ini&&fim?durStr(fim-ini):"";
+      return`<div class="crd-et"><div class="el">${lb}</div>
+        <div class="ei ${ini?"":"w"}">▶ ${ini?fmtT(ini):"aguardando"}</div>
+        <div class="ei ${fim?"":"w"}">⏹ ${fim?fmtT(fim):"aguardando"}</div>
+        ${d?`<div class="ed">⏱ ${d}</div>`:""}
+      </div>`;
+    }).join("");
+    return`<div class="crd${alerta?" alerta":""}">
+      <div class="crd-top"><span class="crd-pl">${c.placa}${alerta?'<span class="alerta-badge" style="font-size:8px">+1h30</span>':''}</span>${pill(c.setorAtual)}</div>
+      <div class="crd-sub">AC: ${c.ac} · ${c.data||""} · Entrada: ${en?fmtT(en):"—"} ${turnoPill(en)} ${tipoPill(c)}</div>
+      <div class="crd-grid">${etapas}</div>
+      ${sa?`<div style="font-size:11px;color:var(--gr);margin-top:8px;font-weight:700">🧾 Saída: ${fmtT(sa)}</div>`:""}
+      <div class="crd-tmac">
+        <div><div class="el">⏱️ TMAC</div><div class="ei ${tmac!=null?"":"w"}" style="${tmac!=null?`color:${tmac>130*60*1000?'var(--rd)':'var(--gr)'}`:''}"> ${tmac!=null?durStr(tmac):"em processo"}</div></div>
+      </div>
+    </div>`;
+  }).join("");
+};
 
-  // Aba 2: sumário
-  const sumRows=[
-    {"Métrica":"Total caminhões","Valor":list.length},
-    {"Métrica":"Concluídos","Valor":conc.length},
-    {"Métrica":"Taxa conclusão","Valor":list.length?Math.round(conc.length/list.length*100)+"%":"—"},
-    {"Métrica":"TMAC médio","Valor":tmacMedio?durStr(tmacMedio):"—"},
-    {},
-  ];
-  const exportTurnos=["A","B","C"];
-  exportTurnos.forEach(t=>{
-    const tl=list.filter(c=>getTurno(getTS(c,"entrada","ts"))===t);
-    const tc=tl.filter(c=>c.setorAtual==="concluido");
-    const tt=tc.map(c=>{const en=getTS(c,"entrada","ts"),sa=getTS(c,"faturamento","ts");return(en&&sa)?sa-en:null;}).filter(v=>v!=null);
-    const ta=tt.length?tt.reduce((a,b)=>a+b,0)/tt.length:null;
-    sumRows.push({"Métrica":`Turno ${t} — caminhões`,"Valor":tl.length});
-    sumRows.push({"Métrica":`Turno ${t} — TMAC`,"Valor":ta?durStr(ta):"—"});
+window.exportExcel=()=>{
+  const list=getFiltered();
+  if(!list.length){alert("Nenhum dado para exportar no filtro selecionado.");return;}
+  const rows=list.map(c=>{
+    const en=getTS(c,"entrada","ts");
+    const trI=getTS(c,"triagem","inicio"),trF=getTS(c,"triagem","fim");
+    const caI=getTS(c,"carregamento","inicio"),caF=getTS(c,"carregamento","fim");
+    const enI=getTS(c,"enlonamento","inicio"),enF=getTS(c,"enlonamento","fim");
+    const sa=getTS(c,"faturamento","ts");
+    const tmac=calcTMAC(c);
+    return{
+      "Placa":c.placa,"Turno":getTurno(en)||"","AC":c.ac,"Data":c.data||"",
+      "Entrada":fmtEx(en),"Setor Atual":c.setorAtual||"",
+      "Triagem Início":fmtEx(trI),"Triagem Fim":fmtEx(trF),"Duração Triagem":trI&&trF?durStr(trF-trI):"",
+      "Carga Início":fmtEx(caI),"Carga Fim":fmtEx(caF),"Duração Carga":caI&&caF?durStr(caF-caI):"",
+      "Enlone Início":fmtEx(enI),"Enlone Fim":fmtEx(enF),"Duração Enlone":enI&&enF?durStr(enF-enI):"",
+      "Saída (Faturamento)":fmtEx(sa),"TMAC (Entrada→Saída)":tmac!=null?durStr(tmac):"",
+    };
   });
-
+  const ws=XLSX.utils.json_to_sheet(rows);
   const wb=XLSX.utils.book_new();
-  const ws1=XLSX.utils.json_to_sheet(rows);
-  const ws2=XLSX.utils.json_to_sheet(sumRows);
-  ws1["!cols"]=[{wch:10},{wch:7},{wch:10},{wch:12},{wch:20},{wch:16},{wch:18},{wch:18},{wch:12},{wch:18},{wch:18},{wch:12},{wch:18},{wch:18},{wch:12},{wch:20},{wch:14}];
-  ws2["!cols"]=[{wch:30},{wch:20}];
-  XLSX.utils.book_append_sheet(wb,ws1,"Detalhe");
-  XLSX.utils.book_append_sheet(wb,ws2,"Sumário");
-
+  XLSX.utils.book_append_sheet(wb,ws,"Rastreio");
+  ws["!cols"]=[{wch:10},{wch:7},{wch:10},{wch:12},{wch:20},{wch:18},{wch:20},{wch:20},{wch:14},{wch:20},{wch:20},{wch:14},{wch:20},{wch:20},{wch:14},{wch:20},{wch:18}];
   const{s,e}=periodDates(MP);
   const turnoSuffix=MT!=="t"?`_turno${MT}`:"";
-  const fname=s===e?`analise_${s}${turnoSuffix}.xlsx`:`analise_${s}_a_${e}${turnoSuffix}.xlsx`;
+  const tipoSuffix=MTC!=="t"?`_${MTC}`:"";
+  const fname=s===e?`rastreio_${s}${turnoSuffix}${tipoSuffix}.xlsx`:`rastreio_${s}_a_${e}${turnoSuffix}${tipoSuffix}.xlsx`;
   XLSX.writeFile(wb,fname);
 };
 </script>
-</body>
-</html>
+</body></html>
