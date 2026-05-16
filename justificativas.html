@@ -165,6 +165,7 @@ let ALL=[],MP="hoje",MF="pend";
 onSnapshot(query(collection(db,"caminhoes_rastreio"),orderBy("criadoEm","desc")),snap=>{
   ALL=snap.docs.map(d=>({id:d.id,...d.data()}));
   document.getElementById("loading-wrap").style.display="none";
+  document.getElementById("lista").style.display="block";
   render();
 },(err)=>{
   document.getElementById("loading-wrap").innerHTML=`<div style="color:var(--rd);text-align:center;padding:20px">Erro: ${err.message}</div>`;
@@ -175,22 +176,23 @@ window.setStatus=(f,el)=>{MF=f;document.querySelectorAll(".fbtn").forEach(b=>b.c
 
 function getAtrasados(){
   const{s,e}=periodDates(MP);
-  return ALL.filter(c=>
-    c.data>=s&&c.data<=e&&
-    c.setorAtual==="concluido"&&
-    calcTMAC(c)>LIMITE_MS
-  );
+  return ALL.filter(c=>{
+    if(c.data<s||c.data>e)return false;
+    if(c.setorAtual!=="concluido")return false;
+    const tmac=calcTMAC(c);
+    return tmac!==null&&tmac>LIMITE_MS;
+  });
 }
 
 function render(){
-  const list=getAtrasados();
-  const pend=list.filter(c=>!c.justificativa?.motivo);
-  const ok=list.filter(c=>!!c.justificativa?.motivo);
+  const atList=getAtrasados();
+  const pend=atList.filter(c=>!c.justificativa?.motivo);
+  const ok=atList.filter(c=>!!c.justificativa?.motivo);
   document.getElementById("cnt-pend").textContent=pend.length;
   document.getElementById("cnt-ok").textContent=ok.length;
-  document.getElementById("cnt-all").textContent=list.length;
+  document.getElementById("cnt-all").textContent=atList.length;
 
-  let filtered=list;
+  let filtered=atList;
   if(MF==="pend")filtered=pend;
   if(MF==="ok")filtered=ok;
 
