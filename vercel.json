@@ -10,6 +10,7 @@
     { "source": "/master",         "destination": "/master.html"         },
     { "source": "/analise",        "destination": "/analise.html"        },
     { "source": "/justificativas", "destination": "/justificativas.html" },
-    { "source": "/patio",          "destination": "/patio.html"          }
+    { "source": "/patio",          "destination": "/patio.html"          },
+    { "source": "/admin",          "destination": "/admin.html"          }
   ]
 }
