@@ -35,6 +35,7 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',sans-serif;min-hei
 .ptag{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:16px;letter-spacing:1px;background:var(--bg4);border:1px solid var(--b2);border-radius:5px;padding:2px 9px;color:var(--bl)}
 .tmac-badge{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;font-family:'Rajdhani',sans-serif}
 .tmac-rd{background:rgba(255,68,102,.12);color:var(--rd);border:1px solid rgba(255,68,102,.25)}
+.proc-badge{font-size:9px;font-weight:800;padding:2px 7px;border-radius:4px;background:rgba(255,208,0,.15);color:var(--ye);border:1px solid rgba(255,208,0,.3)}
 .info-txt{font-size:11px;color:var(--t2)}
 .status-pend{margin-left:auto;font-size:11px;color:var(--rd);font-weight:700;display:flex;align-items:center;gap:4px}
 .status-ok{margin-left:auto;font-size:11px;color:var(--gr);font-weight:700;display:flex;align-items:center;gap:4px}
@@ -70,7 +71,7 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',sans-serif;min-hei
 .saved-by{font-size:10px;color:var(--t3)}
 .edit-btn{margin-top:8px;padding:6px 14px;border:1px solid var(--bd);border-radius:var(--rs);background:transparent;color:var(--t2);font-size:11px;cursor:pointer}
 .edit-btn:hover{border-color:var(--bl);color:var(--bl)}
-@media(max-width:600px){.kpis-sm{grid-template-columns:repeat(2,1fr)}.motivos-grid{grid-template-columns:1fr}}
+@media(max-width:600px){.kpis-sm{grid-template-columns:repeat(2,1fr)}}
 </style>
 </head>
 <body>
@@ -105,14 +106,12 @@ import{getFirestore,collection,onSnapshot,query,orderBy,updateDoc,doc,Timestamp}
 const app=initializeApp({apiKey:"AIzaSyCMacFP0kGkgOTCqdWzf6Y65LN2q4tw28Y",authDomain:"cimento-6163b.firebaseapp.com",projectId:"cimento-6163b",storageBucket:"cimento-6163b.firebasestorage.app",messagingSenderId:"773785464621",appId:"1:773785464621:web:02dc9de04a7e2af231ada4"});
 const db=getFirestore(app);
 
-// ── Motivos macro — EDITE AQUI ─────────────────────────────────────────────
 const MOTIVOS=[
   "DataSul","Falta de cimento","Concentração de veículos","Dificuldade de extração",
   "Falha do equipamento","Falha de processo","Falta de mão obra","TMAC online teste"
 ];
 const LIMITE_MS=130*60*1000; // 2h10
 
-// ── Helpers ────────────────────────────────────────────────────────────────
 function periodDates(p){
   const now=new Date();
   const tz=new Date(now.toLocaleString("en-US",{timeZone:"America/Fortaleza"}));
@@ -134,10 +133,6 @@ function fmtT(d){return d?d.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2
 function fmtDT(d){return d?d.toLocaleString("pt-BR",{day:"2-digit",month:"2-digit",year:"2-digit",hour:"2-digit",minute:"2-digit"}):"—";}
 function getTS(c,sn,f){const v=c[sn]?.[f];return v?.toDate?v.toDate():null;}
 function getTurno(d){if(!d)return"—";const h=d.getHours();return h>=23||h<7?"A":h<15?"B":"C";}
-function calcTMAC(c){
-  const en=getTS(c,"entrada","ts"),sa=getTS(c,"faturamento","ts");
-  return(en&&sa)?sa-en:null;
-}
 function gargalo(c){
   const steps=[
     {lb:"Triagem",sn:"triagem",ini:"inicio",fim:"fim"},
@@ -158,7 +153,6 @@ function barColor(ms,avg){
   return"#00d4ff";
 }
 
-// ── State ──────────────────────────────────────────────────────────────────
 let ALL=[],MP="hoje",MF="pend";
 
 onSnapshot(query(collection(db,"caminhoes_rastreio"),orderBy("criadoEm","desc")),snap=>{
@@ -173,18 +167,22 @@ onSnapshot(query(collection(db,"caminhoes_rastreio"),orderBy("criadoEm","desc"))
 window.setPeriod=(p,el)=>{MP=p;document.querySelectorAll(".pb").forEach(b=>b.classList.remove("on"));el.classList.add("on");render();};
 window.setStatus=(f,el)=>{MF=f;document.querySelectorAll(".fbtn").forEach(b=>b.classList.remove("on"));el.classList.add("on");render();};
 
+// ── CORREÇÃO: inclui em processo (>2h10 desde entrada) além de concluídos
 function getAtrasados(){
   const{s,e}=periodDates(MP);
-  const result=ALL.filter(c=>{
+  return ALL.filter(c=>{
     if(!c.data||c.data<s||c.data>e)return false;
-    if(c.setorAtual!=="concluido")return false;
+    if(c.setorAtual==="posto1")return false;
     const en=getTS(c,"entrada","ts");
-    const sa=getTS(c,"faturamento","ts");
-    if(!en||!sa)return false;
-    const tmac=sa.getTime()-en.getTime();
-    return tmac>LIMITE_MS;
+    if(!en)return false;
+    if(c.setorAtual==="concluido"){
+      const sa=getTS(c,"faturamento","ts");
+      if(!sa)return false;
+      return(sa.getTime()-en.getTime())>LIMITE_MS;
+    }else{
+      return(Date.now()-en.getTime())>LIMITE_MS;
+    }
   });
-  return result;
 }
 
 function render(){
@@ -202,7 +200,6 @@ function render(){
   const el=document.getElementById("lista");
   if(!filtered.length){el.innerHTML=`<div class="empty">Nenhum registro no período.</div>`;return;}
 
-  // Calcular médias do período para as barras
   const avgMap={};
   const allConc=ALL.filter(c=>{const{s,e}=periodDates(MP);return c.data>=s&&c.data<=e&&c.setorAtual==="concluido";});
   ["triagem","carregamento","enlonamento"].forEach(sn=>{
@@ -210,9 +207,12 @@ function render(){
     avgMap[sn]=vals.length?vals.reduce((a,b)=>a+b,0)/vals.length:0;
   });
 
-  el.innerHTML=filtered.map((c,idx)=>{
-    const en=getTS(c,"entrada","ts"),sa=getTS(c,"faturamento","ts");
-    const tmac=calcTMAC(c);
+  el.innerHTML=filtered.map(c=>{
+    const en=getTS(c,"entrada","ts");
+    const sa=getTS(c,"faturamento","ts");
+    const concluido=c.setorAtual==="concluido";
+    // Concluídos: TMAC real. Em processo: tempo desde entrada até agora
+    const tempoMs=concluido&&sa&&en?(sa.getTime()-en.getTime()):en?(Date.now()-en.getTime()):null;
     const turno=getTurno(en);
     const tipoLabel=c.tipoCargaLabel||c.tipoCarga||"—";
     const g=gargalo(c);
@@ -223,7 +223,7 @@ function render(){
       {lb:"Triagem",ms:(()=>{const i=getTS(c,"triagem","inicio"),f=getTS(c,"triagem","fim");return(i&&f)?f-i:null;})(),avg:avgMap.triagem,cor:"#ffd000"},
       {lb:"Carga",ms:(()=>{const i=getTS(c,"carregamento","inicio"),f=getTS(c,"carregamento","fim");return(i&&f)?f-i:null;})(),avg:avgMap.carregamento,cor:"#ff6644"},
       {lb:"Enlone",ms:(()=>{const i=getTS(c,"enlonamento","inicio"),f=getTS(c,"enlonamento","fim");return(i&&f)?f-i:null;})(),avg:avgMap.enlonamento,cor:"#a78bfa"},
-      {lb:"Faturamento",ms:(()=>{const f=getTS(c,"enlonamento","fim"),s=getTS(c,"faturamento","ts");return(f&&s)?s-f:null;})(),avg:avgMap.carregamento*0.3,cor:"#00e896"},
+      {lb:"Faturamento",ms:(()=>{const ef=getTS(c,"enlonamento","fim"),sf=getTS(c,"faturamento","ts");return(ef&&sf)?sf-ef:null;})(),avg:avgMap.carregamento*0.3,cor:"#00e896"},
     ].filter(s=>s.ms);
     const maxMs=steps.length?Math.max(...steps.map(s=>s.ms)):1;
 
@@ -242,16 +242,14 @@ function render(){
       <select class="motivo-select" id="mot-${c.id}" onchange="selMotivo('${c.id}')">
         <option value="">— Selecione o motivo —</option>
         ${MOTIVOS.map(m=>`<option value="${m}">${m}</option>`).join("")}
-      </select>
-    `;
+      </select>`;
 
     const formHtml=`
       <div class="motivos-label">Motivo do atraso:</div>
       ${motivosHtml}
       <div class="just-label" style="margin-top:10px">Complemento (opcional):</div>
       <textarea class="just-input" id="desc-${c.id}" placeholder="Descreva mais detalhes se necessário..."></textarea>
-      <button class="save-btn" id="savebtn-${c.id}" onclick="salvar('${c.id}')" disabled>💾 Salvar Justificativa</button>
-    `;
+      <button class="save-btn" id="savebtn-${c.id}" onclick="salvar('${c.id}')" disabled>💾 Salvar Justificativa</button>`;
 
     const savedHtml=`
       <div class="saved-box">
@@ -259,13 +257,13 @@ function render(){
         ${c.justificativa?.descricao?`<div class="saved-desc">"${c.justificativa.descricao}"</div>`:""}
         <div class="saved-by">Registrado em ${fmtDT(c.justificativa?.dataRegistro?.toDate?.())}</div>
       </div>
-      <button class="edit-btn" onclick="editJust('${c.id}')">✏️ Editar</button>
-    `;
+      <button class="edit-btn" onclick="editJust('${c.id}')">✏️ Editar</button>`;
 
     return`<div class="card ${temJust?"done":"pend"}" id="card-${c.id}">
       <div class="card-head" onclick="toggleCard('${c.id}')">
         <span class="ptag">${c.placa}</span>
-        <span class="tmac-badge tmac-rd">⏱ ${durStr(tmac)}</span>
+        <span class="tmac-badge tmac-rd">⏱ ${durStr(tempoMs)}</span>
+        ${!concluido?'<span class="proc-badge">EM PROCESSO</span>':""}
         <span class="info-txt">AC: ${c.ac} · Turno ${turno} · ${tipoLabel}</span>
         <span class="info-txt">${c.data||""}</span>
         <div class="${temJust?"status-ok":"status-pend"}">
@@ -276,8 +274,8 @@ function render(){
       <div class="card-body" id="body-${c.id}">
         <div class="kpis-sm">
           <div class="kpi-sm"><div class="kv">${fmtT(en)}</div><div class="kl">Entrada</div></div>
-          <div class="kpi-sm"><div class="kv">${fmtT(sa)}</div><div class="kl">Saída</div></div>
-          <div class="kpi-sm"><div class="kv danger">${durStr(tmac)}</div><div class="kl">TMAC</div></div>
+          <div class="kpi-sm"><div class="kv">${concluido?fmtT(sa):"em proc."}</div><div class="kl">Saída</div></div>
+          <div class="kpi-sm"><div class="kv danger">${durStr(tempoMs)}</div><div class="kl">${concluido?"TMAC":"Tempo"}</div></div>
           <div class="kpi-sm"><div class="kv">${tipoLabel}</div><div class="kl">Tipo</div></div>
         </div>
         <div class="bars">${barsHtml}</div>
@@ -306,16 +304,12 @@ window.salvar=async(id)=>{
   const btn=document.getElementById("savebtn-"+id);
   const sel=document.getElementById("mot-"+id);
   const desc=document.getElementById("desc-"+id)?.value.trim()||"";
-  if(!sel||!sel.value){return;}
+  if(!sel||!sel.value)return;
   const motivo=sel.value;
   btn.disabled=true;btn.textContent="Salvando...";
   try{
     await updateDoc(doc(db,"caminhoes_rastreio",id),{
-      justificativa:{
-        motivo,
-        descricao:desc,
-        dataRegistro:Timestamp.fromDate(new Date())
-      }
+      justificativa:{motivo,descricao:desc,dataRegistro:Timestamp.fromDate(new Date())}
     });
   }catch(e){btn.disabled=false;btn.textContent="💾 Salvar Justificativa";alert("Erro: "+e.message);}
 };
@@ -330,8 +324,7 @@ window.editJust=id=>{
     <select class="motivo-select" id="mot-${id}" onchange="selMotivo('${id}')">${optsHtml}</select>
     <div class="just-label" style="margin-top:10px">Complemento (opcional):</div>
     <textarea class="just-input" id="desc-${id}" placeholder="Descreva mais detalhes...">${c.justificativa?.descricao||""}</textarea>
-    <button class="save-btn" id="savebtn-${id}" onclick="salvar('${id}')"${motivoAtual?"":"disabled"}>💾 Salvar Justificativa</button>
-  `;
+    <button class="save-btn" id="savebtn-${id}" onclick="salvar('${id}')"${motivoAtual?"":"disabled"}>💾 Salvar Justificativa</button>`;
 };
 </script>
 </body></html>
