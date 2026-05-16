@@ -54,11 +54,10 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',sans-serif;min-hei
 .bar-val{font-size:9px;font-weight:700;color:#000;white-space:nowrap}
 .garg-box{background:rgba(255,68,102,.07);border:1px solid rgba(255,68,102,.2);border-radius:var(--rs);padding:9px 12px;margin-bottom:12px;font-size:12px;color:var(--rd);font-weight:700}
 .divider{border:none;border-top:1px solid var(--bd);margin:12px 0}
-.motivos-label{font-size:10px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px}
-.motivos-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px}
-.motivo-btn{padding:9px 12px;border:1px solid var(--bd);border-radius:var(--rs);background:var(--bg3);color:var(--t2);font-size:11px;font-weight:600;cursor:pointer;text-align:left;transition:all .2s}
-.motivo-btn:hover{border-color:var(--rd);color:var(--rd)}
-.motivo-btn.sel{border-color:var(--rd);color:var(--rd);background:rgba(255,68,102,.08);font-weight:700}
+.motivos-label{font-size:10px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px}
+.motivo-select{width:100%;background:var(--bg3);border:1px solid var(--bd);border-radius:var(--rs);color:var(--tx);padding:11px 12px;font-size:13px;font-family:'Inter',sans-serif;outline:none;cursor:pointer;transition:border-color .2s;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%237a9fd4' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px}
+.motivo-select:focus{border-color:var(--rd)}
+.motivo-select option{background:var(--bg2);color:var(--tx)}
 .just-label{font-size:10px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px}
 .just-input{width:100%;background:var(--bg3);border:1px solid var(--bd);border-radius:var(--rs);color:var(--tx);padding:10px 12px;font-size:12px;font-family:'Inter',sans-serif;outline:none;resize:vertical;min-height:64px;transition:border-color .2s}
 .just-input:focus{border-color:var(--rd)}
@@ -239,14 +238,17 @@ function render(){
 
     const gargHtml=g?`<div class="garg-box">🔥 Maior gargalo: ${g.lb} — ${durStr(g.ms)}</div>`:"";
 
-    const motivosHtml=MOTIVOS.map(m=>`
-      <button class="motivo-btn" data-id="${c.id}" data-motivo="${m}" onclick="selMotivo('${c.id}','${m}')">${m}</button>
-    `).join("");
+    const motivosHtml=`
+      <select class="motivo-select" id="mot-${c.id}" onchange="selMotivo('${c.id}')">
+        <option value="">— Selecione o motivo —</option>
+        ${MOTIVOS.map(m=>`<option value="${m}">${m}</option>`).join("")}
+      </select>
+    `;
 
     const formHtml=`
-      <div class="motivos-label">Selecione o motivo macro:</div>
-      <div class="motivos-grid" id="motivos-${c.id}">${motivosHtml}</div>
-      <div class="just-label">Complemento (opcional):</div>
+      <div class="motivos-label">Motivo do atraso:</div>
+      ${motivosHtml}
+      <div class="just-label" style="margin-top:10px">Complemento (opcional):</div>
       <textarea class="just-input" id="desc-${c.id}" placeholder="Descreva mais detalhes se necessário..."></textarea>
       <button class="save-btn" id="savebtn-${c.id}" onclick="salvar('${c.id}')" disabled>💾 Salvar Justificativa</button>
     `;
@@ -294,19 +296,18 @@ window.toggleCard=id=>{
   chev.style.transform=open?"rotate(180deg)":"";
 };
 
-window.selMotivo=(id,motivo)=>{
-  document.querySelectorAll(`[data-id="${id}"]`).forEach(b=>{
-    b.classList.toggle("sel",b.dataset.motivo===motivo);
-  });
-  document.getElementById("savebtn-"+id).disabled=false;
+window.selMotivo=id=>{
+  const sel=document.getElementById("mot-"+id);
+  const btn=document.getElementById("savebtn-"+id);
+  if(btn)btn.disabled=!sel||!sel.value;
 };
 
 window.salvar=async(id)=>{
   const btn=document.getElementById("savebtn-"+id);
-  const desc=document.getElementById("desc-"+id).value.trim();
-  const motivoBtn=document.querySelector(`[data-id="${id}"].sel`);
-  if(!motivoBtn){return;}
-  const motivo=motivoBtn.dataset.motivo;
+  const sel=document.getElementById("mot-"+id);
+  const desc=document.getElementById("desc-"+id)?.value.trim()||"";
+  if(!sel||!sel.value){return;}
+  const motivo=sel.value;
   btn.disabled=true;btn.textContent="Salvando...";
   try{
     await updateDoc(doc(db,"caminhoes_rastreio",id),{
@@ -321,15 +322,15 @@ window.salvar=async(id)=>{
 
 window.editJust=id=>{
   const c=ALL.find(x=>x.id===id);if(!c)return;
-  const motivosHtml=MOTIVOS.map(m=>`
-    <button class="motivo-btn${c.justificativa?.motivo===m?" sel":""}" data-id="${id}" data-motivo="${m}" onclick="selMotivo('${id}','${m}')">${m}</button>
-  `).join("");
+  const motivoAtual=c.justificativa?.motivo||"";
+  const optsHtml=`<option value="">— Selecione o motivo —</option>`+
+    MOTIVOS.map(m=>`<option value="${m}"${m===motivoAtual?" selected":""}>${m}</option>`).join("");
   document.getElementById("form-"+id).innerHTML=`
-    <div class="motivos-label">Selecione o motivo macro:</div>
-    <div class="motivos-grid" id="motivos-${id}">${motivosHtml}</div>
-    <div class="just-label">Complemento (opcional):</div>
+    <div class="motivos-label">Motivo do atraso:</div>
+    <select class="motivo-select" id="mot-${id}" onchange="selMotivo('${id}')">${optsHtml}</select>
+    <div class="just-label" style="margin-top:10px">Complemento (opcional):</div>
     <textarea class="just-input" id="desc-${id}" placeholder="Descreva mais detalhes...">${c.justificativa?.descricao||""}</textarea>
-    <button class="save-btn" id="savebtn-${id}" onclick="salvar('${id}')"${c.justificativa?.motivo?"":"disabled"}>💾 Salvar Justificativa</button>
+    <button class="save-btn" id="savebtn-${id}" onclick="salvar('${id}')"${motivoAtual?"":"disabled"}>💾 Salvar Justificativa</button>
   `;
 };
 </script>
