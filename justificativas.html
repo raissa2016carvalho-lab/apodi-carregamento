@@ -176,18 +176,22 @@ window.setStatus=(f,el)=>{MF=f;document.querySelectorAll(".fbtn").forEach(b=>b.c
 
 function getAtrasados(){
   const{s,e}=periodDates(MP);
-  return ALL.filter(c=>{
-    if(c.data<s||c.data>e)return false;
+  const result=ALL.filter(c=>{
+    if(!c.data||c.data<s||c.data>e)return false;
     if(c.setorAtual!=="concluido")return false;
-    const tmac=calcTMAC(c);
-    return tmac!==null&&tmac>LIMITE_MS;
+    const en=getTS(c,"entrada","ts");
+    const sa=getTS(c,"faturamento","ts");
+    if(!en||!sa)return false;
+    const tmac=sa.getTime()-en.getTime();
+    return tmac>LIMITE_MS;
   });
+  return result;
 }
 
 function render(){
   const atList=getAtrasados();
-  const pend=atList.filter(c=>!c.justificativa?.motivo);
-  const ok=atList.filter(c=>!!c.justificativa?.motivo);
+  const pend=atList.filter(c=>!(c.justificativa&&c.justificativa.motivo));
+  const ok=atList.filter(c=>!!(c.justificativa&&c.justificativa.motivo));
   document.getElementById("cnt-pend").textContent=pend.length;
   document.getElementById("cnt-ok").textContent=ok.length;
   document.getElementById("cnt-all").textContent=atList.length;
@@ -213,7 +217,7 @@ function render(){
     const turno=getTurno(en);
     const tipoLabel=c.tipoCargaLabel||c.tipoCarga||"—";
     const g=gargalo(c);
-    const temJust=!!c.justificativa?.motivo;
+    const temJust=!!(c.justificativa&&c.justificativa.motivo);
 
     const steps=[
       {lb:"Espera",ms:getTS(c,"triagem","inicio")&&en?getTS(c,"triagem","inicio")-en:null,avg:avgMap.triagem*0.4,cor:"#00d4ff"},
@@ -222,7 +226,7 @@ function render(){
       {lb:"Enlone",ms:(()=>{const i=getTS(c,"enlonamento","inicio"),f=getTS(c,"enlonamento","fim");return(i&&f)?f-i:null;})(),avg:avgMap.enlonamento,cor:"#a78bfa"},
       {lb:"Faturamento",ms:(()=>{const f=getTS(c,"enlonamento","fim"),s=getTS(c,"faturamento","ts");return(f&&s)?s-f:null;})(),avg:avgMap.carregamento*0.3,cor:"#00e896"},
     ].filter(s=>s.ms);
-    const maxMs=Math.max(...steps.map(s=>s.ms),1);
+    const maxMs=steps.length?Math.max(...steps.map(s=>s.ms)):1;
 
     const barsHtml=steps.map(s=>{
       const pct=Math.round(s.ms/maxMs*100);
@@ -249,9 +253,9 @@ function render(){
 
     const savedHtml=`
       <div class="saved-box">
-        <div class="saved-motivo">✅ ${c.justificativa.motivo}</div>
-        ${c.justificativa.descricao?`<div class="saved-desc">"${c.justificativa.descricao}"</div>`:""}
-        <div class="saved-by">Registrado em ${fmtDT(c.justificativa.dataRegistro?.toDate?.())}</div>
+        <div class="saved-motivo">✅ ${c.justificativa?.motivo||""}</div>
+        ${c.justificativa?.descricao?`<div class="saved-desc">"${c.justificativa.descricao}"</div>`:""}
+        <div class="saved-by">Registrado em ${fmtDT(c.justificativa?.dataRegistro?.toDate?.())}</div>
       </div>
       <button class="edit-btn" onclick="editJust('${c.id}')">✏️ Editar</button>
     `;
