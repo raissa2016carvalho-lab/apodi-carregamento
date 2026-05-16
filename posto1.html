@@ -18,6 +18,12 @@ body{background:var(--bg);color:var(--tx);font-family:system-ui,-apple-system,sa
 .fg input{background:var(--c1);border:2px solid var(--bd);border-radius:var(--rs);color:var(--tx);padding:14px 16px;font-size:16px;font-family:system-ui,sans-serif;outline:none;transition:border-color .2s;width:100%}
 .fg input:focus{border-color:var(--ac)}
 .placa-inp{text-transform:uppercase;letter-spacing:3px;font-weight:700;font-family:monospace;font-size:20px;text-align:center}
+.tipo-label{font-size:10px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px}
+.tipo-group{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px}
+.tipo-btn{padding:14px 8px;border:2px solid var(--bd);border-radius:var(--rs);background:var(--c1);color:var(--t2);font-size:13px;font-weight:700;cursor:pointer;text-align:center;transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:5px}
+.tipo-btn .tipo-ic{font-size:24px}
+.tipo-btn:active{transform:scale(.97)}
+.tipo-btn.on{border-color:var(--ac);color:var(--ac);background:rgba(0,212,255,.08)}
 .go{width:100%;padding:16px;border:none;border-radius:var(--rs);font-size:16px;font-weight:800;cursor:pointer;text-transform:uppercase;letter-spacing:1px;background:linear-gradient(135deg,var(--ac),#0099bb);color:#000;transition:all .2s;margin-top:4px}
 .go:active{transform:scale(.97)}
 .go:disabled{opacity:.3;cursor:not-allowed}
@@ -32,7 +38,7 @@ body{background:var(--bg);color:var(--tx);font-family:system-ui,-apple-system,sa
   <div class="hdr">
     <span class="ic">🏁</span>
     <h1>Posto 1 — Entrada</h1>
-    <p>Digite a AC e a placa do caminhão</p>
+    <p>Preencha os dados do caminhão</p>
   </div>
   <div id="msg" class="msg"></div>
   <div class="fg">
@@ -43,41 +49,64 @@ body{background:var(--bg);color:var(--tx);font-family:system-ui,-apple-system,sa
     <label>Placa do Caminhão</label>
     <input id="pl" type="text" placeholder="ABC1234" maxlength="8" autocomplete="off" oninput="chk()" class="placa-inp"/>
   </div>
+  <div class="tipo-label">Tipo de Carga</div>
+  <div class="tipo-group">
+    <button class="tipo-btn" id="tb-ensacado" onclick="setTipo('ensacado',this)">
+      <span class="tipo-ic">🛍️</span>Ensacado
+    </button>
+    <button class="tipo-btn" id="tb-granel" onclick="setTipo('granel',this)">
+      <span class="tipo-ic">⛏️</span>Granel
+    </button>
+    <button class="tipo-btn" id="tb-bigbag" onclick="setTipo('bigbag',this)">
+      <span class="tipo-ic">📦</span>Big Bag
+    </button>
+  </div>
   <button class="go" id="go" onclick="registrar()" disabled>✅ Registrar Entrada</button>
 </div>
 <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
-import{getFirestore,collection,addDoc,onSnapshot,query,orderBy,Timestamp}from"https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+import{getFirestore,collection,addDoc,onSnapshot,orderBy,query,Timestamp}from"https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
 const app=initializeApp({apiKey:"AIzaSyCMacFP0kGkgOTCqdWzf6Y65LN2q4tw28Y",authDomain:"cimento-6163b.firebaseapp.com",projectId:"cimento-6163b",storageBucket:"cimento-6163b.firebasestorage.app",messagingSenderId:"773785464621",appId:"1:773785464621:web:02dc9de04a7e2af231ada4"});
 const db=getFirestore(app);
 const hoje=()=>new Date().toLocaleDateString("pt-BR",{timeZone:"America/Fortaleza"}).split("/").reverse().join("-");
 const fmtT=d=>d?d.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit",second:"2-digit"}):"—";
-let HD=[];
+let HD=[],TIPO=null;
 onSnapshot(query(collection(db,"caminhoes_rastreio"),orderBy("criadoEm","desc")),snap=>{
   HD=snap.docs.map(d=>{return{id:d.id,...d.data()}}).filter(c=>c.data===hoje());
 });
+window.setTipo=(t,el)=>{
+  TIPO=t;
+  document.querySelectorAll(".tipo-btn").forEach(b=>b.classList.remove("on"));
+  el.classList.add("on");
+  chk();
+};
 window.chk=()=>{
   const ac=document.getElementById("ac").value.trim();
   const pl=document.getElementById("pl").value.replace(/[^A-Z0-9]/gi,"");
-  document.getElementById("go").disabled=!(ac.length>=2&&pl.length>=7);
+  document.getElementById("go").disabled=!(ac.length>=2&&pl.length>=7&&TIPO);
 };
 window.registrar=async()=>{
   const ac=document.getElementById("ac").value.trim().toUpperCase();
   const pl=document.getElementById("pl").value.toUpperCase().replace(/[^A-Z0-9]/g,"");
   if(!ac||pl.length<7){showMsg("er","Preencha a AC e a placa.");return;}
+  if(!TIPO){showMsg("er","Selecione o tipo de carga.");return;}
   if(HD.find(c=>c.placa===pl&&c.setorAtual!=="concluido")){showMsg("er","Placa "+pl+" já está em processo hoje!");return;}
   document.getElementById("go").disabled=true;
   try{
     const ts=new Date();
+    const tipoLabel={ensacado:"Ensacado",granel:"Granel",bigbag:"Big Bag"}[TIPO];
     await addDoc(collection(db,"caminhoes_rastreio"),{
       ac,placa:pl,setorAtual:"posto1",
+      tipoCarga:TIPO,tipoCargaLabel:tipoLabel,
       entrada:{ts:Timestamp.fromDate(ts)},
       triagem:null,carregamento:null,enlonamento:null,faturamento:null,
       data:hoje(),criadoEm:Timestamp.fromDate(ts)
     });
-    showMsg("ok","✅ "+pl+" registrado! AC: "+ac+" · "+fmtT(ts));
+    showMsg("ok","✅ "+pl+" registrado! AC: "+ac+" · "+tipoLabel+" · "+fmtT(ts));
     document.getElementById("ac").value="";
     document.getElementById("pl").value="";
+    TIPO=null;
+    document.querySelectorAll(".tipo-btn").forEach(b=>b.classList.remove("on"));
   }catch(e){showMsg("er","Erro: "+e.message);}
   document.getElementById("go").disabled=false;
 };
