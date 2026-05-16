@@ -35,13 +35,13 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',sans-serif;min-hei
 .pb:hover:not(.on){border-color:var(--t2);color:var(--tx)}
 .fb{padding:6px 14px;border:1px solid var(--bd);border-radius:20px;background:transparent;color:var(--t2);font-size:10px;font-weight:600;cursor:pointer;transition:all .2s;text-transform:uppercase;white-space:nowrap}
 .fb.on,.fb:hover{border-color:var(--bl);color:var(--bl);background:rgba(0,212,255,.07)}
-.tb{padding:6px 14px;border:1px solid var(--bd);border-radius:20px;background:transparent;color:var(--t2);font-size:10px;font-weight:700;cursor:pointer;transition:all .2s;white-space:nowrap;letter-spacing:.3px}
+.tb{padding:6px 0;border:1px solid var(--bd);border-radius:20px;background:transparent;color:var(--t2);font-size:10px;font-weight:700;cursor:pointer;transition:all .2s;white-space:nowrap;letter-spacing:.3px;min-width:100px;text-align:center}
 .tb:hover:not(.on){border-color:var(--t2);color:var(--tx)}
 .tb-todos.on{border-color:var(--bl);color:var(--bl);background:rgba(0,212,255,.07)}
 .tb-a.on{border-color:var(--bl);color:var(--bl);background:rgba(0,212,255,.12)}
 .tb-b.on{border-color:var(--ye);color:var(--ye);background:rgba(255,208,0,.10)}
 .tb-c.on{border-color:var(--pu);color:var(--pu);background:rgba(167,139,250,.10)}
-.ttb{padding:6px 14px;border:1px solid var(--bd);border-radius:20px;background:transparent;color:var(--t2);font-size:10px;font-weight:700;cursor:pointer;transition:all .2s;white-space:nowrap;letter-spacing:.3px}
+.ttb{padding:6px 0;border:1px solid var(--bd);border-radius:20px;background:transparent;color:var(--t2);font-size:10px;font-weight:700;cursor:pointer;transition:all .2s;white-space:nowrap;letter-spacing:.3px;min-width:110px;text-align:center}
 .ttb:hover:not(.on){border-color:var(--t2);color:var(--tx)}
 .ttb-todos.on{border-color:var(--bl);color:var(--bl);background:rgba(0,212,255,.07)}
 .ttb-ensacado.on{border-color:#00d4ff;color:#00d4ff;background:rgba(0,212,255,.10)}
@@ -181,7 +181,7 @@ tr.alerta .turno{opacity:.7}
   <!-- Card: Aguardando Triagem -->
   <div id="card-aguardando" style="display:none;background:var(--bg2);border:1px solid rgba(0,212,255,.25);border-left:3px solid var(--bl);border-radius:var(--r);padding:12px 16px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between">
     <div style="display:flex;align-items:center;gap:12px">
-      <div style="font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;color:var(--bl);letter-spacing:.5px">🏁 STATUS DO PATIO </div>
+      <div style="font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;color:var(--bl);letter-spacing:.5px">🏁 AGUARDANDO TRIAGEM</div>
       <div style="font-family:'Rajdhani',sans-serif;font-size:28px;font-weight:800;color:var(--bl)" id="cnt-aguardando">0</div>
       <div style="font-size:11px;color:var(--t2)" id="txt-aguardando"></div>
     </div>
@@ -295,8 +295,8 @@ function isAlerta(c){
   if(!c.setorAtual||c.setorAtual==="concluido"||c.setorAtual==="posto1")return false;
   const en=getTS(c,"entrada","ts");
   if(!en)return false;
-  // Pulsa se passou mais de 1h50 desde a entrada
-  return(Date.now()-en.getTime())>110*60*1000;
+  // Pulsa se passou mais de 1h30 desde a entrada
+  return(Date.now()-en.getTime())>90*60*1000;
 }
 function statusFinal(c){
   if(c.setorAtual==="concluido")return`<span class="status-icon status-concluido" title="Concluído">✔</span>`;
@@ -439,7 +439,7 @@ window.render=()=>{
     const hoje2=new Date().toLocaleDateString("pt-BR",{timeZone:"America/Fortaleza"}).split("/").reverse().join("-");
     const incompleto=c.data&&c.data<hoje2&&c.setorAtual!=="concluido";
     return`<tr${alerta?' class="alerta"':incompleto?' class="incompleto"':''}>
-      <td><span class="ptag">${c.placa}</span>${turnoPill(en)}${tipoPill(c)}${alerta?'<span class="alerta-badge">+1h50</span>':''}</td>
+      <td><span class="ptag">${c.placa}</span>${turnoPill(en)}${tipoPill(c)}${alerta?'<span class="alerta-badge">+1h30</span>':''}</td>
       <td style="color:var(--t2)">${c.ac}</td>
       <td style="color:var(--t2);font-size:10px">${c.data||"—"}</td>
       <td class="ec">${en?`<span class="d">${fmtT(en)}</span>`:"—"}</td>
@@ -471,7 +471,7 @@ window.render=()=>{
       </div>`;
     }).join("");
     return`<div class="crd${alerta?" alerta":""}">
-      <div class="crd-top"><span class="crd-pl">${c.placa}${alerta?'<span class="alerta-badge" style="font-size:8px">+1h50</span>':''}</span>${pill(c.setorAtual)}</div>
+      <div class="crd-top"><span class="crd-pl">${c.placa}${alerta?'<span class="alerta-badge" style="font-size:8px">+1h30</span>':''}</span>${pill(c.setorAtual)}</div>
       <div class="crd-sub">AC: ${c.ac} · ${c.data||""} · Entrada: ${en?fmtT(en):"—"} ${turnoPill(en)} ${tipoPill(c)}</div>
       <div class="crd-grid">${etapas}</div>
       ${sa?`<div style="font-size:11px;color:var(--gr);margin-top:8px;font-weight:700">🧾 Saída: ${fmtT(sa)}</div>`:""}
