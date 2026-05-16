@@ -245,7 +245,7 @@ function render(){
   const sortIcon=(col)=>SORT_COL===col?(SORT_DIR===1?" ▲":" ▼"):"";
 
   let html=`<table><thead><tr>`;
-  html+=`<th class="placa-th${}" onclick="setSort('placa')" style="cursor:pointer">Placa${sortIcon('placa')}</th>`;
+  html+=`<th class="placa-th" onclick="setSort('placa')" style="cursor:pointer">Placa${sortIcon('placa')}</th>`;
   html+=`<th class="visit-th">Visita</th>`;
   html+=`<th onclick="setSort('entrada')" style="cursor:pointer">Entrada${sortIcon('entrada')}</th>`;
   days.forEach(d=>html+=`<th onclick="setSort('day_${d}')" style="cursor:pointer">${fmtDay(d)}${sortIcon('day_'+d)}</th>`);
