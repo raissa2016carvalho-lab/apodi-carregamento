@@ -1,11 +1,12 @@
 {
   "rewrites": [
-    { "source": "/posto1", "destination": "/posto1.html" },
-    { "source": "/triagem", "destination": "/triagem.html" },
-    { "source": "/carregamento", "destination": "/carregamento.html" },
-    { "source": "/enlonamento", "destination": "/enlonamento.html" },
-    { "source": "/faturamento", "destination": "/faturamento.html" },
-    { "source": "/master", "destination": "/master.html" },
-    { "source": "/analise", "destination": "/analise.html" }
+    { "source": "/posto1",         "destination": "/posto1.html"         },
+    { "source": "/triagem",        "destination": "/triagem.html"        },
+    { "source": "/carregamento",   "destination": "/carregamento.html"   },
+    { "source": "/enlonamento",    "destination": "/enlonamento.html"    },
+    { "source": "/faturamento",    "destination": "/faturamento.html"    },
+    { "source": "/master",         "destination": "/master.html"         },
+    { "source": "/analise",        "destination": "/analise.html"        },
+    { "source": "/justificativas", "destination": "/justificativas.html" }
   ]
 }
