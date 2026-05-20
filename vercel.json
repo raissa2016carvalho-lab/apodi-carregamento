@@ -1,17 +1,60 @@
 {
   "rewrites": [
-    { "source": "/login",          "destination": "/login.html"          },
-    { "source": "/operador",       "destination": "/operador.html"       },
-    { "source": "/posto1",         "destination": "/posto1.html"         },
-    { "source": "/triagem",        "destination": "/triagem.html"        },
-    { "source": "/carregamento",   "destination": "/carregamento.html"   },
-    { "source": "/enlonamento",    "destination": "/enlonamento.html"    },
-    { "source": "/faturamento",    "destination": "/faturamento.html"    },
-    { "source": "/master",         "destination": "/master.html"         },
-    { "source": "/analise",        "destination": "/analise.html"        },
-    { "source": "/justificativas", "destination": "/justificativas.html" },
-    { "source": "/patio",          "destination": "/patio.html"          },
-    { "source": "/admin",          "destination": "/admin.html"          },
-    { "source": "/placas",         "destination": "/placas.html"         }
+    {
+      "source": "/login",
+      "destination": "/login.html"
+    },
+    {
+      "source": "/operador",
+      "destination": "/operador.html"
+    },
+    {
+      "source": "/posto1",
+      "destination": "/posto1.html"
+    },
+    {
+      "source": "/triagem",
+      "destination": "/triagem.html"
+    },
+    {
+      "source": "/carregamento",
+      "destination": "/carregamento.html"
+    },
+    {
+      "source": "/enlonamento",
+      "destination": "/enlonamento.html"
+    },
+    {
+      "source": "/faturamento",
+      "destination": "/faturamento.html"
+    },
+    {
+      "source": "/master",
+      "destination": "/master.html"
+    },
+    {
+      "source": "/analise",
+      "destination": "/analise.html"
+    },
+    {
+      "source": "/justificativas",
+      "destination": "/justificativas.html"
+    },
+    {
+      "source": "/patio",
+      "destination": "/patio.html"
+    },
+    {
+      "source": "/admin",
+      "destination": "/admin.html"
+    },
+    {
+      "source": "/placas",
+      "destination": "/placas.html"
+    },
+    {
+      "source": "/senha",
+      "destination": "/senha.html"
+    }
   ]
 }
