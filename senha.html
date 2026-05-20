@@ -6,184 +6,271 @@
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@700;800;900&family=Inter:wght@400;600;700&display=swap');
 *{box-sizing:border-box;margin:0;padding:0}
-:root{--bg:#03080f;--bg2:#060f1c;--bg3:#091828;--bd:#102840;--bl:#00d4ff;--gr:#00e896;--ye:#ffd000;--rd:#ff4466;--tx:#e2eeff;--t2:#5a8ab0}
-body{background:var(--bg);color:var(--tx);font-family:'Inter',sans-serif;min-height:100vh;display:flex;flex-direction:column;overflow:hidden}
-.top{background:var(--bg2);border-bottom:3px solid var(--bl);height:70px;display:flex;align-items:center;padding:0 40px;gap:20px;flex-shrink:0}
-.logo{font-family:'Rajdhani',sans-serif;font-size:24px;font-weight:900;color:var(--bl);letter-spacing:2px;flex:1}
-.clock{font-family:'Rajdhani',sans-serif;font-size:32px;font-weight:800;color:var(--ye);letter-spacing:2px}
+:root{
+  --bg:#03080f;--bg2:#060f1c;--bg3:#091828;--bd:#102840;
+  --bl:#00d4ff;--gr:#00e896;--ye:#ffd000;--rd:#ff4466;--or:#fb923c;
+  --tx:#e2eeff;--t2:#5a8ab0;--t3:#2a4870;
+}
+body{background:var(--bg);color:var(--tx);font-family:'Inter',sans-serif;height:100vh;display:flex;flex-direction:column;overflow:hidden}
+
+/* HEADER */
+.top{background:var(--bg2);border-bottom:3px solid var(--bl);height:72px;display:flex;align-items:center;padding:0 40px;gap:24px;flex-shrink:0}
+.logo{font-family:'Rajdhani',sans-serif;font-size:22px;font-weight:900;color:var(--bl);letter-spacing:2px;flex:1}
+.clock{font-family:'Rajdhani',sans-serif;font-size:36px;font-weight:900;color:var(--ye);letter-spacing:3px;min-width:140px;text-align:right}
 .live{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:var(--gr)}
 .dot{width:10px;height:10px;background:var(--gr);border-radius:50%;animation:pu 1.4s ease-in-out infinite}
 @keyframes pu{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.3;transform:scale(1.5)}}
-.main{flex:1;display:grid;grid-template-columns:1.2fr 1fr;gap:0;overflow:hidden}
-/* LEFT - CHAMADA ATUAL */
-.chamada{background:var(--bg2);border-right:2px solid var(--bd);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px;position:relative;overflow:hidden}
-.chamada::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at center,rgba(0,212,255,.04) 0%,transparent 70%);pointer-events:none}
-.ch-label{font-size:13px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:3px;margin-bottom:20px}
-.ch-num{font-family:'Rajdhani',sans-serif;font-size:160px;font-weight:900;color:var(--bl);line-height:1;animation:pulse-num 2s ease-in-out infinite;text-shadow:0 0 60px rgba(0,212,255,.4)}
-@keyframes pulse-num{0%,100%{opacity:1}50%{opacity:.85}}
-.ch-placa{font-family:'Rajdhani',sans-serif;font-size:52px;font-weight:900;letter-spacing:6px;color:var(--ye);margin-top:10px;background:rgba(255,208,0,.08);border:2px solid rgba(255,208,0,.25);border-radius:12px;padding:8px 32px}
-.ch-ac{font-size:18px;color:var(--t2);margin-top:12px;font-weight:600}
-.ch-tipo{font-size:14px;color:var(--gr);margin-top:6px;font-weight:700;text-transform:uppercase;letter-spacing:2px}
-.ch-empty{font-family:'Rajdhani',sans-serif;font-size:32px;font-weight:700;color:var(--t2);text-align:center;line-height:1.5}
-.ch-attn{font-size:60px;margin-bottom:16px;display:block;animation:bounce 1s ease-in-out infinite}
-@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
-/* RIGHT - FILA */
-.fila{display:flex;flex-direction:column;overflow:hidden}
-.fila-header{background:var(--bg3);border-bottom:1px solid var(--bd);padding:18px 24px;flex-shrink:0}
-.fila-title{font-family:'Rajdhani',sans-serif;font-size:18px;font-weight:800;color:var(--tx);letter-spacing:1px}
-.fila-sub{font-size:12px;color:var(--t2);margin-top:2px}
-.fila-body{flex:1;overflow-y:auto;padding:12px}
-.fila-body::-webkit-scrollbar{width:4px}
-.fila-body::-webkit-scrollbar-track{background:transparent}
-.fila-body::-webkit-scrollbar-thumb{background:var(--bd);border-radius:2px}
-.fi-item{background:var(--bg3);border:1px solid var(--bd);border-radius:10px;padding:14px 16px;margin-bottom:8px;display:flex;align-items:center;gap:14px;transition:all .3s}
-.fi-item.atual{background:rgba(0,232,150,.06);border-color:rgba(0,232,150,.3)}
-.fi-pos{font-family:'Rajdhani',sans-serif;font-size:28px;font-weight:900;color:var(--t2);min-width:40px;text-align:center}
-.fi-item.atual .fi-pos{color:var(--gr)}
-.fi-info{flex:1}
-.fi-placa{font-family:'Rajdhani',sans-serif;font-size:20px;font-weight:800;letter-spacing:2px;color:var(--tx)}
-.fi-item.atual .fi-placa{color:var(--gr)}
-.fi-ac{font-size:11px;color:var(--t2);margin-top:2px}
-.fi-tipo{font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;display:inline-block;margin-top:4px}
-.tp-ensacado{background:rgba(0,212,255,.1);color:var(--bl);border:1px solid rgba(0,212,255,.2)}
-.tp-granel{background:rgba(251,146,60,.1);color:#fb923c;border:1px solid rgba(251,146,60,.2)}
-.tp-bigbag{background:rgba(0,232,150,.1);color:var(--gr);border:1px solid rgba(0,232,150,.2)}
-.fi-tempo{font-family:'Rajdhani',sans-serif;font-size:16px;font-weight:700;color:var(--ye);text-align:right}
-.fi-tempo-label{font-size:9px;color:var(--t2);text-transform:uppercase;text-align:right}
-.fi-badge-atual{font-size:10px;font-weight:800;color:var(--gr);text-transform:uppercase;letter-spacing:1px;text-align:right}
-.empty-fila{text-align:center;padding:40px;color:var(--t2);font-size:14px}
-.bottom{background:var(--bg2);border-top:2px solid var(--bd);height:50px;display:flex;align-items:center;padding:0 40px;gap:20px;flex-shrink:0}
-.bottom-msg{font-size:13px;color:var(--t2);flex:1}
-.bottom-count{font-family:'Rajdhani',sans-serif;font-size:18px;font-weight:800;color:var(--bl)}
-/* FLASH ao chamar */
-@keyframes flash{0%,100%{background:var(--bg2)}25%,75%{background:rgba(0,212,255,.08)}}
-.chamada.flash{animation:flash .4s ease 3}
+
+/* MAIN LAYOUT: left = chamada grande | right = 3 filas */
+.main{flex:1;display:grid;grid-template-columns:1.4fr 1fr;overflow:hidden}
+
+/* ── PAINEL ESQUERDO: CHAMADA ── */
+.painel-chamada{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px 40px;border-right:2px solid var(--bd);position:relative;overflow:hidden;gap:0}
+.painel-chamada::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at center,rgba(0,212,255,.05) 0%,transparent 70%);pointer-events:none}
+
+/* Estado vazio */
+.empty-state{text-align:center}
+.empty-ic{font-size:72px;display:block;animation:bounce 1.5s ease-in-out infinite;margin-bottom:20px}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+.empty-txt{font-family:'Rajdhani',sans-serif;font-size:28px;font-weight:700;color:var(--t2)}
+
+/* Estado chamado */
+.chamada-wrap{text-align:center;width:100%}
+.ch-label{font-size:12px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:4px;margin-bottom:6px}
+.ch-tipo-badge{display:inline-block;font-family:'Rajdhani',sans-serif;font-size:16px;font-weight:800;padding:4px 20px;border-radius:6px;letter-spacing:2px;margin-bottom:16px;text-transform:uppercase}
+.badge-granel{background:rgba(251,146,60,.15);color:var(--or);border:2px solid rgba(251,146,60,.4)}
+.badge-ensacado{background:rgba(0,212,255,.12);color:var(--bl);border:2px solid rgba(0,212,255,.3)}
+.badge-bigbag{background:rgba(0,232,150,.12);color:var(--gr);border:2px solid rgba(0,232,150,.3)}
+.ch-placa{font-family:'Rajdhani',sans-serif;font-size:110px;font-weight:900;letter-spacing:8px;line-height:1;padding:16px 40px;border-radius:16px;margin:0 auto;display:inline-block;animation:pulse-placa 2s ease-in-out infinite}
+.ch-placa-granel{color:var(--or);background:rgba(251,146,60,.07);border:3px solid rgba(251,146,60,.3);text-shadow:0 0 40px rgba(251,146,60,.5)}
+.ch-placa-ensacado{color:var(--bl);background:rgba(0,212,255,.07);border:3px solid rgba(0,212,255,.3);text-shadow:0 0 40px rgba(0,212,255,.5)}
+.ch-placa-bigbag{color:var(--gr);background:rgba(0,232,150,.07);border:3px solid rgba(0,232,150,.3);text-shadow:0 0 40px rgba(0,232,150,.5)}
+@keyframes pulse-placa{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.9;transform:scale(1.01)}}
+.ch-ac{font-size:22px;color:var(--t2);margin-top:18px;font-weight:600;letter-spacing:1px}
+.ch-num{font-family:'Rajdhani',sans-serif;font-size:18px;color:var(--t3);margin-top:8px;letter-spacing:2px}
+
+/* ── PAINEL DIREITO: 3 FILAS ── */
+.painel-filas{display:flex;flex-direction:column;overflow:hidden}
+.fila-bloco{flex:1;border-bottom:1px solid var(--bd);display:flex;flex-direction:column;overflow:hidden;min-height:0}
+.fila-bloco:last-child{border-bottom:none}
+.fila-header{padding:10px 16px;display:flex;align-items:center;gap:10px;flex-shrink:0}
+.fila-header.h-granel{background:rgba(251,146,60,.06);border-bottom:2px solid rgba(251,146,60,.25)}
+.fila-header.h-ensacado{background:rgba(0,212,255,.05);border-bottom:2px solid rgba(0,212,255,.2)}
+.fila-header.h-bigbag{background:rgba(0,232,150,.05);border-bottom:2px solid rgba(0,232,150,.2)}
+.fila-titulo{font-family:'Rajdhani',sans-serif;font-size:16px;font-weight:800;letter-spacing:1px;flex:1}
+.h-granel .fila-titulo{color:var(--or)}
+.h-ensacado .fila-titulo{color:var(--bl)}
+.h-bigbag .fila-titulo{color:var(--gr)}
+.fila-cnt{font-size:11px;font-weight:700;padding:2px 8px;border-radius:4px}
+.h-granel .fila-cnt{background:rgba(251,146,60,.15);color:var(--or)}
+.h-ensacado .fila-cnt{background:rgba(0,212,255,.12);color:var(--bl)}
+.h-bigbag .fila-cnt{background:rgba(0,232,150,.12);color:var(--gr)}
+.fila-list{flex:1;overflow-y:auto;padding:6px 10px}
+.fila-list::-webkit-scrollbar{width:3px}
+.fila-list::-webkit-scrollbar-thumb{background:var(--bd);border-radius:2px}
+.fi{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;border:1px solid var(--bd);background:var(--bg3);margin-bottom:5px}
+.fi.proximo{border-width:2px}
+.fi-granel.proximo{border-color:rgba(251,146,60,.5);background:rgba(251,146,60,.05)}
+.fi-ensacado.proximo{border-color:rgba(0,212,255,.4);background:rgba(0,212,255,.04)}
+.fi-bigbag.proximo{border-color:rgba(0,232,150,.4);background:rgba(0,232,150,.04)}
+.fi-num{font-family:'Rajdhani',sans-serif;font-size:22px;font-weight:900;color:var(--t2);min-width:32px;text-align:center}
+.fi-granel.proximo .fi-num{color:var(--or)}
+.fi-ensacado.proximo .fi-num{color:var(--bl)}
+.fi-bigbag.proximo .fi-num{color:var(--gr)}
+.fi-pl{font-family:'Rajdhani',sans-serif;font-size:18px;font-weight:800;letter-spacing:1px;flex:1}
+.fi-ac{font-size:10px;color:var(--t2)}
+.fi-wait{font-size:11px;color:var(--ye);font-weight:700;text-align:right}
+.fi-prx{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:1px;text-align:right}
+.fi-granel.proximo .fi-prx{color:var(--or)}
+.fi-ensacado.proximo .fi-prx{color:var(--bl)}
+.fi-bigbag.proximo .fi-prx{color:var(--gr)}
+.fila-empty{text-align:center;padding:16px;color:var(--t3);font-size:12px}
+
+/* FLASH */
+@keyframes flashAnim{0%,100%{opacity:1}20%,60%{opacity:.3}40%,80%{opacity:1}}
+.painel-chamada.flashing{animation:flashAnim .5s ease 3}
+
+/* BOTTOM */
+.bottom{background:var(--bg2);border-top:1px solid var(--bd);height:44px;display:flex;align-items:center;padding:0 32px;gap:16px;flex-shrink:0}
+.bt-msg{font-size:12px;color:var(--t2);flex:1}
+.bt-total{font-family:'Rajdhani',sans-serif;font-size:16px;font-weight:800;color:var(--t2)}
 </style>
 </head>
 <body>
 <div class="top">
-  <div class="logo">🏭 APODI CIMENTOS — SISTEMA DE CHAMADA</div>
-  <div class="clock" id="clock">00:00:00</div>
+  <div class="logo">🏭 APODI CIMENTOS — PAINEL DE CHAMADA</div>
   <div class="live"><div class="dot"></div>AO VIVO</div>
+  <div class="clock" id="clock">00:00:00</div>
 </div>
+
 <div class="main">
-  <div class="chamada" id="chamada">
-    <div class="ch-empty">
-      <span class="ch-attn">📢</span>
-      Aguardando<br>próxima chamada...
+  <!-- CHAMADA ATUAL -->
+  <div class="painel-chamada" id="painel-chamada">
+    <div class="empty-state" id="empty-state">
+      <span class="empty-ic">📢</span>
+      <div class="empty-txt">Aguardando<br>próxima chamada...</div>
     </div>
+    <div class="chamada-wrap" id="chamada-wrap" style="display:none"></div>
   </div>
-  <div class="fila">
-    <div class="fila-header">
-      <div class="fila-title">📋 Fila de Espera</div>
-      <div class="fila-sub" id="fila-sub">Aguardando dados...</div>
+
+  <!-- 3 FILAS -->
+  <div class="painel-filas">
+    <!-- GRANEL -->
+    <div class="fila-bloco">
+      <div class="fila-header h-granel">
+        <div class="fila-titulo">🚛 GRANEL</div>
+        <span class="fila-cnt" id="cnt-granel">0</span>
+      </div>
+      <div class="fila-list" id="list-granel">
+        <div class="fila-empty">Fila vazia</div>
+      </div>
     </div>
-    <div class="fila-body" id="fila-body">
-      <div class="empty-fila">Nenhum veículo na fila</div>
+    <!-- ENSACADO -->
+    <div class="fila-bloco">
+      <div class="fila-header h-ensacado">
+        <div class="fila-titulo">📦 ENSACADO</div>
+        <span class="fila-cnt" id="cnt-ensacado">0</span>
+      </div>
+      <div class="fila-list" id="list-ensacado">
+        <div class="fila-empty">Fila vazia</div>
+      </div>
+    </div>
+    <!-- BIG BAG -->
+    <div class="fila-bloco">
+      <div class="fila-header h-bigbag">
+        <div class="fila-titulo">🛍️ BIG BAG</div>
+        <span class="fila-cnt" id="cnt-bigbag">0</span>
+      </div>
+      <div class="fila-list" id="list-bigbag">
+        <div class="fila-empty">Fila vazia</div>
+      </div>
     </div>
   </div>
 </div>
+
 <div class="bottom">
-  <div class="bottom-msg" id="bottom-msg">Sistema de chamada de veículos — Fábrica Apodi Cimentos</div>
-  <div class="bottom-count" id="bottom-count"></div>
+  <div class="bt-msg">Sistema de chamada de veículos — Fábrica Apodi Cimentos</div>
+  <div class="bt-total" id="bt-total"></div>
 </div>
+
 <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
-import{getFirestore,collection,onSnapshot,query,orderBy}from"https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+import{getFirestore,collection,onSnapshot}from"https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
 const app=initializeApp({apiKey:"AIzaSyCMacFP0kGkgOTCqdWzf6Y65LN2q4tw28Y",authDomain:"cimento-6163b.firebaseapp.com",projectId:"cimento-6163b",storageBucket:"cimento-6163b.firebasestorage.app",messagingSenderId:"773785464621",appId:"1:773785464621:web:02dc9de04a7e2af231ada4"});
 const db=getFirestore(app);
 
 // Clock
 function tick(){
-  const n=new Date();
-  document.getElementById("clock").textContent=n.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit",second:"2-digit",timeZone:"America/Fortaleza"});
+  document.getElementById("clock").textContent=new Date().toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit",second:"2-digit",timeZone:"America/Fortaleza"});
 }
 tick();setInterval(tick,1000);
 
 const hoje=()=>new Date().toLocaleDateString("pt-BR",{timeZone:"America/Fortaleza"}).split("/").reverse().join("-");
-const fmtT=d=>d?d.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"}):"—";
 function durStr(ms){if(!ms||ms<0)return"";const m=Math.round(ms/60000);return m<60?m+"min":Math.floor(m/60)+"h"+(m%60>0?" "+m%60+"m":"");}
-function tipoCls(t){return{ensacado:"tp-ensacado",granel:"tp-granel",bigbag:"tp-bigbag"}[t]||"";}
-function tipoLabel(t){return{ensacado:"Ensacado",granel:"Granel",bigbag:"Big Bag"}[t]||t||"";}
 
-let ultimoChamado=null;
-let fila=[];
+let filas={granel:[],ensacado:[],bigbag:[]};
+let ultimoChamadoId=null;
 
+// ── Fila de veículos ──
 onSnapshot(collection(db,"caminhoes_rastreio"),snap=>{
   const hj=hoje();
-  // Fila = posto1 ordenado por criadoEm
-  fila=snap.docs.map(d=>({id:d.id,...d.data()}))
+  const todos=snap.docs.map(d=>({id:d.id,...d.data()}))
     .filter(c=>c.data===hj&&c.setorAtual==="posto1")
     .sort((a,b)=>(a.criadoEm?.toDate?.()?.getTime()||0)-(b.criadoEm?.toDate?.()?.getTime()||0));
-  renderFila();
+  filas.granel=todos.filter(c=>c.tipoCarga==="granel");
+  filas.ensacado=todos.filter(c=>c.tipoCarga==="ensacado");
+  filas.bigbag=todos.filter(c=>c.tipoCarga==="bigbag");
+  renderFilas();
 });
 
-// Escuta chamadas
+// ── Chamadas ──
 onSnapshot(collection(db,"chamadas_fila"),snap=>{
   const docs=snap.docs.map(d=>({id:d.id,...d.data()}))
     .filter(c=>c.data===hoje())
-    .sort((a,b)=>(b.criadoEm?.toDate?.()?.getTime()||0)-(a.criadoEm?.toDate?.()?.getTime()||0));
-  if(!docs.length){renderChamadaVazia();return;}
+    .sort((a,b)=>(b.criadoEm?.seconds||0)-(a.criadoEm?.seconds||0));
+  if(!docs.length){mostrarVazio();return;}
   const ultima=docs[0];
-  if(ultima.id!==ultimoChamado){
-    ultimoChamado=ultima.id;
-    renderChamada(ultima);
-    flashEfeito();
+  if(ultima.id!==ultimoChamadoId){
+    ultimoChamadoId=ultima.id;
+    mostrarChamada(ultima);
+    flash();
+    som();
   }
 });
 
-function renderChamada(c){
-  const ch=document.getElementById("chamada");
-  ch.innerHTML=`
-    <div class="ch-label">🔔 Chamada Nº</div>
-    <div class="ch-num">${String(c.numero||"?").padStart(3,"0")}</div>
-    <div class="ch-placa">${c.placa||"—"}</div>
+function mostrarChamada(c){
+  const tipo=c.tipoCarga||"";
+  const cls={granel:"granel",ensacado:"ensacado",bigbag:"bigbag"}[tipo]||"ensacado";
+  const label={granel:"🚛 GRANEL",ensacado:"📦 ENSACADO",bigbag:"🛍️ BIG BAG"}[tipo]||tipo;
+  document.getElementById("empty-state").style.display="none";
+  const wrap=document.getElementById("chamada-wrap");
+  wrap.style.display="block";
+  wrap.innerHTML=`
+    <div class="ch-label">🔔 VEÍCULO LIBERADO PARA ENTRAR</div>
+    <div class="ch-tipo-badge badge-${cls}">${label}</div>
+    <div class="ch-placa ch-placa-${cls}">${c.placa||"—"}</div>
     <div class="ch-ac">AC: ${c.ac||"—"}</div>
-    <div class="ch-tipo">${tipoLabel(c.tipoCarga)}</div>
+    <div class="ch-num">Chamada Nº ${String(c.numero||"?").padStart(3,"0")}</div>
   `;
 }
-function renderChamadaVazia(){
-  document.getElementById("chamada").innerHTML=`<div class="ch-empty"><span class="ch-attn">📢</span>Aguardando<br>próxima chamada...</div>`;
+function mostrarVazio(){
+  document.getElementById("empty-state").style.display="block";
+  document.getElementById("chamada-wrap").style.display="none";
 }
-function flashEfeito(){
-  const ch=document.getElementById("chamada");
-  ch.classList.remove("flash");
-  void ch.offsetWidth;
-  ch.classList.add("flash");
-  // Som de notificação
-  try{const ctx=new AudioContext();const o=ctx.createOscillator();const g=ctx.createGain();o.connect(g);g.connect(ctx.destination);o.type="sine";o.frequency.setValueAtTime(880,ctx.currentTime);o.frequency.setValueAtTime(1100,ctx.currentTime+.15);g.gain.setValueAtTime(.3,ctx.currentTime);g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.5);o.start(ctx.currentTime);o.stop(ctx.currentTime+.5);}catch(e){}
-}
-function renderFila(){
-  const body=document.getElementById("fila-body");
-  const sub=document.getElementById("fila-sub");
-  const count=document.getElementById("bottom-count");
-  if(!fila.length){
-    body.innerHTML=`<div class="empty-fila">Nenhum veículo aguardando</div>`;
-    sub.textContent="Fila vazia";
-    count.textContent="";
-    return;
-  }
-  sub.textContent=`${fila.length} veículo${fila.length!==1?"s":""} aguardando`;
-  count.textContent=`${fila.length} na fila`;
-  body.innerHTML=fila.map((c,i)=>{
+
+function renderFila(tipo,listId,cntId){
+  const lista=filas[tipo]||[];
+  document.getElementById(cntId).textContent=lista.length;
+  const el=document.getElementById(listId);
+  if(!lista.length){el.innerHTML=`<div class="fila-empty">Fila vazia</div>`;return;}
+  el.innerHTML=lista.map((c,i)=>{
     const en=c.entrada?.ts?.toDate?.();
     const espera=en?Date.now()-en.getTime():null;
-    const isAtual=i===0;
-    return`<div class="fi-item${isAtual?" atual":""}">
-      <div class="fi-pos">${i+1}</div>
-      <div class="fi-info">
-        <div class="fi-placa">${c.placa}</div>
+    const prx=i===0;
+    return`<div class="fi fi-${tipo}${prx?" proximo":""}">
+      <div class="fi-num">${i+1}</div>
+      <div style="flex:1">
+        <div class="fi-pl">${c.placa}</div>
         <div class="fi-ac">AC: ${c.ac}</div>
-        ${c.tipoCarga?`<span class="fi-tipo ${tipoCls(c.tipoCarga)}">${tipoLabel(c.tipoCarga)}</span>`:""}
       </div>
-      <div>
-        ${espera?`<div class="fi-tempo">${durStr(espera)}</div><div class="fi-tempo-label">aguardando</div>`:""}
-        ${isAtual?`<div class="fi-badge-atual">✓ próximo</div>`:""}
+      <div style="text-align:right">
+        ${espera?`<div class="fi-wait">${durStr(espera)}</div>`:""}
+        ${prx?`<div class="fi-prx">✓ próximo</div>`:""}
       </div>
     </div>`;
   }).join("");
-  // Atualiza tempos a cada minuto
-  setInterval(renderFila,60000);
 }
+
+function renderFilas(){
+  renderFila("granel","list-granel","cnt-granel");
+  renderFila("ensacado","list-ensacado","cnt-ensacado");
+  renderFila("bigbag","list-bigbag","cnt-bigbag");
+  const total=filas.granel.length+filas.ensacado.length+filas.bigbag.length;
+  document.getElementById("bt-total").textContent=total?`${total} veículo${total!==1?"s":""} na fila`:"";
+}
+
+function flash(){
+  const el=document.getElementById("painel-chamada");
+  el.classList.remove("flashing");
+  void el.offsetWidth;
+  el.classList.add("flashing");
+}
+function som(){
+  try{
+    const ctx=new AudioContext();
+    const o=ctx.createOscillator();const g=ctx.createGain();
+    o.connect(g);g.connect(ctx.destination);
+    o.type="sine";
+    o.frequency.setValueAtTime(660,ctx.currentTime);
+    o.frequency.setValueAtTime(880,ctx.currentTime+.15);
+    o.frequency.setValueAtTime(1100,ctx.currentTime+.30);
+    g.gain.setValueAtTime(.4,ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.7);
+    o.start(ctx.currentTime);o.stop(ctx.currentTime+.7);
+  }catch(e){}
+}
+
+// Atualiza tempos de espera a cada 30s
+setInterval(renderFilas,30000);
 </script>
 </body></html>
