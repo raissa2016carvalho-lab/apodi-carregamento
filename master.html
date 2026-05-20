@@ -104,6 +104,13 @@ tr.alerta .turno{opacity:.7}
 .crd.alerta{animation:rowAlert 1.2s ease-in-out infinite;border-color:rgba(255,68,102,.4) !important}
 .crd.alerta .crd-pl{color:#ff4466}
 .alerta-badge{display:inline-block;background:rgba(255,68,102,.2);border:1px solid rgba(255,68,102,.4);color:#ff4466;font-size:9px;font-weight:800;padding:1px 6px;border-radius:4px;margin-left:5px;letter-spacing:.3px;vertical-align:middle;animation:rowAlert 1.2s ease-in-out infinite}
+@keyframes rowPreso{0%,100%{background:rgba(255,208,0,.10)}50%{background:rgba(255,208,0,.25)}}
+tr.preso td{animation:rowPreso 1.4s ease-in-out infinite;border-bottom-color:rgba(255,208,0,.2) !important}
+tr.preso .ptag{color:var(--ye);border-color:rgba(255,208,0,.5);background:rgba(255,208,0,.12)}
+tr.preso td{color:#ffe566 !important}
+.crd.preso{animation:rowPreso 1.4s ease-in-out infinite;border-color:rgba(255,208,0,.5) !important;border-left:3px solid var(--ye) !important}
+.crd.preso .crd-pl{color:var(--ye)}
+.preso-badge{display:inline-block;background:rgba(255,208,0,.2);border:1px solid rgba(255,208,0,.5);color:var(--ye);font-size:9px;font-weight:800;padding:1px 6px;border-radius:4px;margin-left:5px;letter-spacing:.3px;vertical-align:middle;animation:rowPreso 1.4s ease-in-out infinite}
 .cards{display:none;flex-direction:column;gap:10px}
 .crd{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:14px}
 .crd-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
@@ -292,12 +299,15 @@ function calcTMAC(c){
   return sa-en;
 }
 function isAlerta(c){
-  // So nao pulsa se concluido
   if(!c.setorAtual||c.setorAtual==="concluido")return false;
   const en=getTS(c,"entrada","ts");
   if(!en)return false;
-  // Pulsa se passou mais de 1h30 desde a entrada
   return(Date.now()-en.getTime())>90*60*1000;
+}
+function isPreso(c){
+  if(!c.setorAtual||c.setorAtual==="concluido")return false;
+  const hoje=new Date().toLocaleDateString("pt-BR",{timeZone:"America/Fortaleza"}).split("/").reverse().join("-");
+  return c.data&&c.data<hoje;
 }
 function statusFinal(c){
   if(c.setorAtual==="concluido")return`<span class="status-icon status-concluido" title="Concluído">✔</span>`;
@@ -350,8 +360,11 @@ window.setTipoCarga=(t,el)=>{MTC=t;document.querySelectorAll(".ttb").forEach(b=>
 function getFiltered(){
   const{s,e}=periodDates(MP);
   let list=ALL.filter(c=>c.data>=s&&c.data<=e);
-  if(MT!=="t")list=list.filter(c=>getTurno(getTS(c,"entrada","ts"))===MT);
-  if(MTC!=="t")list=list.filter(c=>c.tipoCarga===MTC);
+  // Sempre inclui carros presos (de dia anterior, não concluídos), mesmo no filtro "hoje"
+  const presos=ALL.filter(c=>isPreso(c)&&!list.find(x=>x.id===c.id));
+  list=[...presos,...list];
+  if(MT!=="t")list=list.filter(c=>!isPreso(c)?getTurno(getTS(c,"entrada","ts"))===MT:true);
+  if(MTC!=="t")list=list.filter(c=>!isPreso(c)?c.tipoCarga===MTC:true);
   if(MF==="a")list=list.filter(c=>c.setorAtual!=="concluido");
   if(MF==="c")list=list.filter(c=>c.setorAtual==="concluido");
   const q=(document.getElementById("q")?.value||"").toUpperCase();
@@ -436,10 +449,12 @@ window.render=()=>{
     const sa=getTS(c,"faturamento","ts");
     const tmac=calcTMAC(c);
     const alerta=isAlerta(c);
+    const preso=isPreso(c);
     const hoje2=new Date().toLocaleDateString("pt-BR",{timeZone:"America/Fortaleza"}).split("/").reverse().join("-");
     const incompleto=c.data&&c.data<hoje2&&c.setorAtual!=="concluido";
-    return`<tr${alerta?' class="alerta"':incompleto?' class="incompleto"':''}>
-      <td><span class="ptag">${c.placa}</span>${turnoPill(en)}${tipoPill(c)}${alerta?'<span class="alerta-badge">+1h30</span>':''}</td>
+    const rowClass=preso?'preso':alerta?'alerta':incompleto?'incompleto':'';
+    return`<tr${rowClass?` class="${rowClass}"`:''}> 
+      <td><span class="ptag">${c.placa}</span>${turnoPill(en)}${tipoPill(c)}${preso?`<span class="preso-badge">⚠️ PRESO</span>`:alerta?'<span class="alerta-badge">+1h30</span>':''}</td>
       <td style="color:var(--t2)">${c.ac}</td>
       <td style="color:var(--t2);font-size:10px">${c.data||"—"}</td>
       <td class="ec">${en?`<span class="d">${fmtT(en)}</span>`:"—"}</td>
@@ -452,7 +467,7 @@ window.render=()=>{
       <td class="ec">${cell(enF,enI)}</td>
       <td class="ec">${sa?`<span class="d">${fmtT(sa)}</span>`:`<span class="w">aguardando</span>`}</td>
       <td>${tmac!=null?`<span class="tmac-cell" style="color:${tmac>130*60*1000?'var(--rd)':'var(--gr)'}">${durStr(tmac)}</span>`:`<span class="tmac-cell w">${incompleto?"não concluído":"em processo"}</span>`}</td>
-      <td style="text-align:center;font-size:16px">${statusFinal(c)}</td>
+      <td style="text-align:center;font-size:16px">${preso?'⚠️':statusFinal(c)}</td>
     </tr>`;
   }).join("");
 
@@ -461,6 +476,7 @@ window.render=()=>{
     const sa=getTS(c,"faturamento","ts");
     const tmac=calcTMAC(c);
     const alerta=isAlerta(c);
+    const preso=isPreso(c);
     const etapas=[["📦 Triagem","triagem"],["🏗️ Carga","carregamento"],["🪢 Enlone","enlonamento"]].map(([lb,sn])=>{
       const ini=getTS(c,sn,"inicio"),fim=getTS(c,sn,"fim");
       const d=ini&&fim?durStr(fim-ini):"";
@@ -470,8 +486,8 @@ window.render=()=>{
         ${d?`<div class="ed">⏱ ${d}</div>`:""}
       </div>`;
     }).join("");
-    return`<div class="crd${alerta?" alerta":""}">
-      <div class="crd-top"><span class="crd-pl">${c.placa}${alerta?'<span class="alerta-badge" style="font-size:8px">+1h30</span>':''}</span>${pill(c.setorAtual)}</div>
+    return`<div class="crd${preso?" preso":alerta?" alerta":""}">
+      <div class="crd-top"><span class="crd-pl">${c.placa}${preso?`<span class="preso-badge" style="font-size:8px">⚠️ PRESO</span>`:alerta?'<span class="alerta-badge" style="font-size:8px">+1h30</span>':''}</span>${pill(c.setorAtual)}</div>
       <div class="crd-sub">AC: ${c.ac} · ${c.data||""} · Entrada: ${en?fmtT(en):"—"} ${turnoPill(en)} ${tipoPill(c)}</div>
       <div class="crd-grid">${etapas}</div>
       ${sa?`<div style="font-size:11px;color:var(--gr);margin-top:8px;font-weight:700">🧾 Saída: ${fmtT(sa)}</div>`:""}
