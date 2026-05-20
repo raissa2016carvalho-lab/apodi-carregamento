@@ -96,6 +96,7 @@ tr.incompleto .ptag{color:var(--t2);border-color:var(--bd)}
 .ag-chip .ag-tempo{font-size:10px;font-weight:700;color:var(--ye);margin-top:2px}
 .spin{width:28px;height:28px;border:3px solid var(--bd);border-top-color:var(--bl);border-radius:50%;animation:ro .7s linear infinite;margin:40px auto 10px}
 @keyframes ro{to{transform:rotate(360deg)}}
+@keyframes rowPulse{0%,100%{background:rgba(255,208,0,.07)}50%{background:rgba(255,208,0,.14)}}
 @keyframes rowAlert{0%,100%{background:rgba(255,68,102,.13)}50%{background:rgba(255,68,102,.28)}}
 tr.alerta td{animation:rowAlert 1.2s ease-in-out infinite;border-bottom-color:rgba(255,68,102,.2) !important}
 tr.alerta td .d,tr.alerta td .w,tr.alerta td{color:#ff8099 !important}
@@ -429,6 +430,7 @@ window.render=()=>{
   }
 
   tb.innerHTML=list.map(c=>{
+    const isPendente=c.data!==hoje()&&c.setorAtual!=="concluido";
     const en=getTS(c,"entrada","ts");
     const trI=getTS(c,"triagem","inicio"),trF=getTS(c,"triagem","fim");
     const caI=getTS(c,"carregamento","inicio"),caF=getTS(c,"carregamento","fim");
@@ -441,6 +443,7 @@ window.render=()=>{
     return`<tr${alerta?' class="alerta"':incompleto?' class="incompleto"':''}>
       <td><span class="ptag">${c.placa}</span>${turnoPill(en)}${tipoPill(c)}${alerta?'<span class="alerta-badge">+1h30</span>':''}</td>
       <td style="color:var(--t2)">${c.ac}</td>
+      <td style="color:${c.data!==hoje()?'var(--ye)':'var(--t2)'};font-size:11px;font-weight:${c.data!==hoje()?700:400}">${c.data||'—'}</td>
       <td style="color:var(--t2);font-size:10px">${c.data||"—"}</td>
       <td class="ec">${en?`<span class="d">${fmtT(en)}</span>`:"—"}</td>
       <td>${pill(c.setorAtual)}</td>
