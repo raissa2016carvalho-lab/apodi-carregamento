@@ -68,6 +68,13 @@ body{background:var(--bg);color:var(--tx);font-family:system-ui,-apple-system,sa
   <div style="margin-top:16px;border-top:1px solid rgba(255,255,255,.08);padding-top:16px">
     <button class="go" id="btn-chamar" onclick="chamarProximo()" style="background:linear-gradient(135deg,#00e896,#009960);margin-bottom:8px">📢 Chamar Próximo da Fila</button>
     <div id="chamada-info" style="font-size:12px;color:#7aafcc;text-align:center;min-height:18px"></div>
+    <div id="chamada-info-extra" style="font-size:11px;color:#ffd000;text-align:center;min-height:16px;margin-top:2px"></div>
+    <div id="timer-bar-wrap" style="display:none;margin-top:10px;width:100%">
+      <div style="background:#0a1628;border-radius:6px;height:6px;overflow:hidden;margin-bottom:4px">
+        <div id="timer-bar" style="height:100%;width:0%;background:linear-gradient(90deg,#00e896,#ffd000);border-radius:6px;transition:width 1s linear"></div>
+      </div>
+      <div id="timer-txt" style="font-size:10px;color:#7aafcc;text-align:center"></div>
+    </div>
   </div>
 
   <!-- JUSTIFICATIVA MODAL -->
@@ -151,6 +158,10 @@ let FILA=[];
 let ULTIMO_CHAMADO=null;
 let MOTIVO_SEL=null;
 let CONTADOR_CHAMADA=0;
+let TIMER_AUSENCIA=null;       // setTimeout dos 3min
+let PRIMEIRO_CHAMADO_TS=null;  // timestamp da 1ª chamada do veículo atual
+let CHAMADAS_VEIC=0;           // quantas vezes chamou o mesmo veículo
+let AGUARD_JUST=false;         // popup obrigatório ativo
 
 // Carrega contador do dia
 async function loadContador(){
@@ -162,48 +173,131 @@ async function loadContador(){
 }
 loadContador();
 
-// Observa fila
+// Observa fila (todas as categorias)
 onSnapshot(query(collection(db,"caminhoes_rastreio"),orderBy("criadoEm","asc")),snap=>{
   FILA=snap.docs.map(d=>{return{id:d.id,...d.data()}})
     .filter(c=>c.data===hoje()&&c.setorAtual==="posto1");
-  const info=document.getElementById("chamada-info");
-  if(FILA.length){
-    info.textContent=`${FILA.length} veículo${FILA.length!==1?"s":""} aguardando · Próximo: ${FILA[0].placa}`;
-  } else {
-    info.textContent="Fila vazia";
-  }
+  atualizarInfo();
 });
 
-window.chamarProximo=async()=>{
-  if(!FILA.length){showMsg("er","Fila vazia — nenhum veículo aguardando.");return;}
-  const proximo=FILA[0];
-  ULTIMO_CHAMADO=proximo;
+function atualizarInfo(){
+  const info=document.getElementById("chamada-info");
+  if(!FILA.length){info.textContent="Fila vazia";return;}
+  const total=FILA.length;
+  const prox=FILA[0];
+  info.textContent=`${total} veículo${total!==1?"s":""} aguardando · Próximo: ${prox.placa} (${prox.tipoCargaLabel||prox.tipoCarga||"?"})`;
+}
+
+function resetEstadoChamada(){
+  // Limpa timer e estado
+  if(TIMER_AUSENCIA)clearTimeout(TIMER_AUSENCIA);
+  TIMER_AUSENCIA=null;
+  ULTIMO_CHAMADO=null;
+  PRIMEIRO_CHAMADO_TS=null;
+  CHAMADAS_VEIC=0;
+  AGUARD_JUST=false;
+  // Reseta botão
+  const btn=document.getElementById("btn-chamar");
+  btn.textContent="📢 Chamar Próximo da Fila";
+  btn.onclick=chamarProximo;
+  btn.style.background="linear-gradient(135deg,#00e896,#009960)";
+  btn.style.opacity="1";
+  btn.disabled=false;
+  document.getElementById("timer-bar-wrap").style.display="none";
+  document.getElementById("chamada-info-extra").textContent="";
+}
+
+async function registrarChamada(veiculo){
   CONTADOR_CHAMADA++;
   try{
-    const {addDoc,doc,setDoc}=await import("https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js");
+    const {addDoc,doc,setDoc,Timestamp}=await import("https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js");
     const ts=new Date();
     await addDoc(collection(db,"chamadas_fila"),{
       numero:CONTADOR_CHAMADA,
-      placa:proximo.placa,
-      ac:proximo.ac,
-      tipoCarga:proximo.tipoCarga||null,
-      veiculoId:proximo.id,
+      placa:veiculo.placa,
+      ac:veiculo.ac,
+      tipoCarga:veiculo.tipoCarga||null,
+      veiculoId:veiculo.id,
       data:hoje(),
       criadoEm:{toDate:()=>ts,seconds:ts.getTime()/1000},
       status:"chamado"
     });
-    // Salva contador
     await setDoc(doc(db,"config","chamadas_contador_"+hoje()),{n:CONTADOR_CHAMADA});
-    showMsg("ok","📢 Chamando "+proximo.placa+" — Nº "+String(CONTADOR_CHAMADA).padStart(3,"0"));
-    document.getElementById("btn-chamar").textContent="⚠️ Não compareceu?";
-    document.getElementById("btn-chamar").onclick=abrirModal;
-    document.getElementById("btn-chamar").style.background="linear-gradient(135deg,#ffd000,#cc9900)";
-  }catch(e){showMsg("er","Erro: "+e.message);}
+  }catch(e){showMsg("er","Erro ao registrar: "+e.message);}
+}
+
+function iniciarTimerAusencia(){
+  if(TIMER_AUSENCIA)clearTimeout(TIMER_AUSENCIA);
+  const LIMITE=3*60*1000; // 3 minutos
+  const inicio=Date.now();
+  
+  // Barra de progresso
+  document.getElementById("timer-bar-wrap").style.display="block";
+  
+  // Atualiza barra a cada segundo
+  const barInterval=setInterval(()=>{
+    const passado=Date.now()-inicio;
+    const pct=Math.min(100,(passado/LIMITE)*100);
+    document.getElementById("timer-bar").style.width=pct+"%";
+    const restante=Math.max(0,Math.round((LIMITE-passado)/1000));
+    const m=Math.floor(restante/60),s=restante%60;
+    document.getElementById("timer-txt").textContent=`⏱ ${m}:${String(s).padStart(2,"0")} para justificativa obrigatória`;
+    if(pct>=100)clearInterval(barInterval);
+  },1000);
+  
+  TIMER_AUSENCIA=setTimeout(()=>{
+    clearInterval(barInterval);
+    AGUARD_JUST=true;
+    // Muda botão para vermelho piscando
+    const btn=document.getElementById("btn-chamar");
+    btn.style.background="linear-gradient(135deg,#ff4466,#cc0033)";
+    btn.textContent="🚨 Chamar novamente (justificativa obrigatória)";
+    document.getElementById("timer-txt").textContent="⚠️ 3 min esgotados — justificativa obrigatória antes de passar a vez";
+    document.getElementById("timer-bar").style.width="100%";
+    document.getElementById("timer-bar").style.background="#ff4466";
+  },LIMITE);
+}
+
+window.chamarProximo=async()=>{
+  if(!FILA.length){showMsg("er","Fila vazia — nenhum veículo aguardando.");return;}
+  
+  // Se popup obrigatório: abre justificativa
+  if(AGUARD_JUST){
+    abrirModal();
+    return;
+  }
+  
+  const proximo=FILA[0];
+  
+  // Se é o mesmo veículo sendo chamado novamente (sem justificativa ainda)
+  if(ULTIMO_CHAMADO&&ULTIMO_CHAMADO.id===proximo.id){
+    CHAMADAS_VEIC++;
+    await registrarChamada(proximo);
+    showMsg("ok",`📢 Chamando novamente ${proximo.placa} (${CHAMADAS_VEIC+1}ª vez)`);
+    iniciarTimerAusencia(); // reinicia o timer
+    return;
+  }
+  
+  // Primeiro chamado do veículo
+  ULTIMO_CHAMADO=proximo;
+  PRIMEIRO_CHAMADO_TS=Date.now();
+  CHAMADAS_VEIC=1;
+  AGUARD_JUST=false;
+  
+  await registrarChamada(proximo);
+  showMsg("ok","📢 Chamando "+proximo.placa+" — Nº "+String(CONTADOR_CHAMADA).padStart(3,"0"));
+  
+  const btn=document.getElementById("btn-chamar");
+  btn.textContent="📢 Chamar novamente";
+  btn.style.background="linear-gradient(135deg,#ffd000,#cc9900)";
+  
+  // Inicia timer de 3 min
+  iniciarTimerAusencia();
 };
 
 window.abrirModal=()=>{
-  if(!ULTIMO_CHAMADO){return;}
-  document.getElementById("modal-placa-info").textContent="Placa: "+ULTIMO_CHAMADO.placa+" · AC: "+ULTIMO_CHAMADO.ac;
+  if(!ULTIMO_CHAMADO)return;
+  document.getElementById("modal-placa-info").textContent="Placa: "+ULTIMO_CHAMADO.placa+" · AC: "+ULTIMO_CHAMADO.ac+" · Chamado "+CHAMADAS_VEIC+"x";
   document.getElementById("modal-just").style.display="flex";
   MOTIVO_SEL=null;
   document.querySelectorAll(".motivo-btn").forEach(b=>b.style.borderColor="#1e3558");
@@ -233,18 +327,29 @@ window.confirmarJust=async()=>{
       ac:ULTIMO_CHAMADO.ac,
       motivo,
       tipo:"nao_compareceu",
+      chamadas:CHAMADAS_VEIC,
       data:hoje(),
       criadoEm:new Date().toISOString()
     });
     fecharModal();
-    showMsg("wn","⚠️ Justificativa registrada para "+ULTIMO_CHAMADO.placa);
-    // Reset botão chamar
-    document.getElementById("btn-chamar").textContent="📢 Chamar Próximo da Fila";
-    document.getElementById("btn-chamar").onclick=chamarProximo;
-    document.getElementById("btn-chamar").style.background="linear-gradient(135deg,#00e896,#009960)";
-    ULTIMO_CHAMADO=null;
+    showMsg("wn","⚠️ Justificativa registrada · Passando para o próximo...");
+    resetEstadoChamada();
+    // Chama o próximo automaticamente após 1.5s
+    setTimeout(async()=>{
+      if(FILA.length>1){
+        // Pula o primeiro (ausente) e chama o segundo
+        const proximo=FILA[1]||FILA[0];
+        ULTIMO_CHAMADO=proximo;
+        PRIMEIRO_CHAMADO_TS=Date.now();
+        CHAMADAS_VEIC=1;
+        await registrarChamada(proximo);
+        showMsg("ok","📢 Próximo: "+proximo.placa);
+        document.getElementById("btn-chamar").textContent="📢 Chamar novamente";
+        document.getElementById("btn-chamar").style.background="linear-gradient(135deg,#ffd000,#cc9900)";
+        iniciarTimerAusencia();
+      }
+    },1500);
   }catch(e){showMsg("er","Erro: "+e.message);}
 };
-
 </script>
 </body></html>
