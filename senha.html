@@ -34,10 +34,6 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 
 /* ══════ MAIN ══════ */
 .main{flex:1;display:grid;grid-template-columns:1.6fr 1fr;overflow:hidden;min-height:0}
-.main.idle-mode{grid-template-columns:1fr 0}
-.main.idle-mode .right{display:none}
-.main.idle-mode .left{border-right:none}
-.placa-size-idle{font-size:clamp(80px,12vw,140px) !important}
 
 /* ══════ PAINEL ESQUERDO ══════ */
 .left{display:flex;flex-direction:column;border-right:1px solid var(--bd);position:relative;overflow:hidden;background:radial-gradient(ellipse at 50% 30%,rgba(0,212,255,.03) 0%,transparent 60%)}
@@ -177,6 +173,14 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 .bt-val{font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;color:var(--t2)}
 .bt-val b{font-family:'Orbitron',sans-serif;font-size:11px}
 .bt-val b.c-or{color:var(--or)}.bt-val b.c-bl{color:var(--bl)}.bt-val b.c-gr{color:var(--gr)}.bt-val b.c-ye{color:var(--ye)}
+/* ══════ BARRA DE VOZ ══════ */
+.voice-bar{height:48px;background:var(--bg2);border-top:1px solid var(--bd);display:flex;align-items:center;padding:0 16px;gap:10px;flex-shrink:0}
+.voice-input{flex:1;background:var(--bg3);border:1px solid var(--bd);border-radius:8px;color:var(--tx);padding:8px 14px;font-size:13px;font-family:'Inter',sans-serif;outline:none;transition:border-color .2s}
+.voice-input:focus{border-color:var(--bl)}
+.voice-btn{padding:8px 20px;border:none;border-radius:8px;background:linear-gradient(135deg,var(--bl),#0099bb);color:#000;font-size:12px;font-weight:800;cursor:pointer;text-transform:uppercase;letter-spacing:1px;white-space:nowrap;transition:all .2s;display:flex;align-items:center;gap:6px}
+.voice-btn:hover{opacity:.85}
+.voice-btn:active{transform:scale(.97)}
+.voice-label{font-size:10px;color:var(--t2);font-weight:700;text-transform:uppercase;letter-spacing:1px;white-space:nowrap}
 
 /* ══════ OVERLAY AUSÊNCIA ══════ */
 .overlay-aus{position:fixed;inset:0;z-index:1000;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.75);backdrop-filter:blur(4px)}
@@ -188,17 +192,6 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 .aus-card-placa{font-family:'Orbitron',sans-serif;font-size:32px;font-weight:900;color:var(--rd);margin:10px 0;text-shadow:0 0 30px rgba(255,68,102,.5)}
 .aus-card-sub{font-size:12px;color:var(--t2);margin-bottom:16px}
 .aus-card-motivo{background:rgba(255,68,102,.08);border:1px solid rgba(255,68,102,.2);border-radius:8px;padding:10px 16px;font-size:13px;color:rgba(255,68,102,.9);line-height:1.5}
-/* ══════ ATIVAR ÁUDIO ══════ */
-.audio-gate{position:fixed;inset:0;z-index:2000;display:flex;align-items:center;justify-content:center;background:rgba(2,8,16,.92);backdrop-filter:blur(6px)}
-.audio-gate.hide{display:none}
-.audio-card{text-align:center;display:flex;flex-direction:column;align-items:center;gap:18px}
-.audio-ic{font-size:72px;animation:audio-pulse 1.8s ease-in-out infinite}
-@keyframes audio-pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
-.audio-title{font-family:'Rajdhani',sans-serif;font-size:28px;font-weight:900;color:var(--tx);letter-spacing:2px}
-.audio-sub{font-size:13px;color:var(--t2);max-width:340px;line-height:1.6}
-.audio-btn{padding:16px 48px;border:none;border-radius:12px;background:linear-gradient(135deg,var(--bl),#0099bb);color:#000;font-family:'Rajdhani',sans-serif;font-size:18px;font-weight:900;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all .2s;box-shadow:0 0 30px rgba(0,212,255,.3)}
-.audio-btn:hover{transform:scale(1.04);box-shadow:0 0 50px rgba(0,212,255,.5)}
-.audio-btn:active{transform:scale(.97)}
 /* ══════ FLASH ══════ */
 @keyframes flash-screen{0%,100%{opacity:1}25%,75%{opacity:.4}50%{opacity:1}}
 .left.flash{animation:flash-screen .3s ease 4}
@@ -226,7 +219,7 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 </div>
 
 <!-- MAIN -->
-<div class="main idle-mode">
+<div class="main">
 
   <!-- ESQUERDA -->
   <div class="left" id="left-panel">
@@ -317,6 +310,13 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
   <div class="ausencia-track">
     <div class="ausencia-inner" id="ausencia-inner"></div>
   </div>
+</div>
+
+<!-- BARRA DE VOZ -->
+<div class="voice-bar">
+  <span class="voice-label">🔊 Falar:</span>
+  <input class="voice-input" id="voice-txt" type="text" value="Atenção motorista de placa A B C 1 2 3 4, comparecer no Posto 1 para coletar Autorização de Carregamento." placeholder="Digite o texto para falar..."/>
+  <button class="voice-btn" onclick="falarTexto()">▶ Falar</button>
 </div>
 
 <!-- BOTTOM -->
@@ -434,7 +434,6 @@ function showCall(c){
   // Inicia timer de ausência de 5min
   iniciarTimerAusencia(c.placa,c.ac,tp,c.numero);
   document.getElementById("idle").style.display="none";
-  document.querySelector(".main").classList.remove("idle-mode");
   const ca=document.getElementById("call-active");
   ca.style.display="flex";
   ca.className=`call-active c-${tp}`;
@@ -453,7 +452,6 @@ function showIdle(){
   document.getElementById("idle").style.display="flex";
   document.getElementById("call-active").style.display="none";
   document.getElementById("ticker").style.display="none";
-  document.querySelector(".main").classList.add("idle-mode");
 }
 
 // ── Render filas com auto-scroll ──
@@ -570,40 +568,32 @@ function doSound(){
     });
   }catch(e){}
 }
+
+// ── Voz automática da placa chamada ──
 function falarPlaca(placa){
-  if(!audioAtivo)return;
   const placaFalada=placa.split("").join(" ");
   const texto=`Atenção motorista de placa ${placaFalada}, comparecer no Posto 1 para coletar Autorização de Carregamento.`;
-  setTimeout(()=>{
-    const fala=new SpeechSynthesisUtterance(texto);
-    fala.lang="pt-BR";
-    fala.rate=1;
-    fala.pitch=1;
-    fala.volume=1;
-    speechSynthesis.cancel();
-    speechSynthesis.speak(fala);
-  },1200);
+  document.getElementById("voice-txt").value=texto;
+  setTimeout(()=>_falar(texto),1200);
 }
 
-let audioAtivo=false;
-window.ativarAudio=()=>{
-  // Dispara e cancela um utterance vazio para desbloquear o contexto de áudio
-  const teste=new SpeechSynthesisUtterance("");
-  teste.volume=0;
-  speechSynthesis.speak(teste);
-  speechSynthesis.cancel();
-  audioAtivo=true;
-  document.getElementById("audio-gate").classList.add("hide");
+// ── Falar texto da caixa (botão manual) ──
+window.falarTexto=()=>{
+  const texto=document.getElementById("voice-txt").value.trim();
+  if(!texto)return;
+  _falar(texto);
 };
+
+function _falar(texto){
+  const fala=new SpeechSynthesisUtterance(texto);
+  fala.lang="pt-BR";
+  fala.rate=1;
+  fala.pitch=1;
+  fala.volume=1;
+  speechSynthesis.cancel();
+  speechSynthesis.speak(fala);
+}
+
 setInterval(renderFilas,30000);
 </script>
-<!-- ATIVAR ÁUDIO GATE -->
-<div class="audio-gate" id="audio-gate">
-  <div class="audio-card">
-    <div class="audio-ic">🔊</div>
-    <div class="audio-title">Painel de Chamada</div>
-    <div class="audio-sub">Clique para ativar o sistema de áudio e começar a receber as chamadas com voz automática.</div>
-    <button class="audio-btn" onclick="ativarAudio()">▶ Ativar Áudio</button>
-  </div>
-</div>
 </body></html>
