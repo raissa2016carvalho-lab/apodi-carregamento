@@ -48,6 +48,10 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 @keyframes rotate-ring{to{transform:rotate(360deg)}}
 .idle-icon{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:48px}
 .idle-txt{font-family:'Rajdhani',sans-serif;font-size:28px;font-weight:800;color:var(--bl);line-height:1.4;letter-spacing:1px;text-shadow:0 0 20px rgba(0,212,255,.3)}
+.idle-placa{font-family:'Orbitron',sans-serif;font-size:clamp(60px,8vw,100px);font-weight:900;color:var(--bl);letter-spacing:8px;padding:14px 40px;border-radius:14px;background:rgba(0,212,255,.05);border:3px solid rgba(0,212,255,.25);text-shadow:0 0 40px rgba(0,212,255,.6);box-shadow:0 0 50px rgba(0,212,255,.07);margin-top:4px;display:none}
+.idle-placa.visivel{display:inline-block}
+.idle-ultima{font-size:11px;color:var(--t2);letter-spacing:3px;text-transform:uppercase;margin-top:6px;display:none}
+.idle-ultima.visivel{display:block}
 
 /* Chamada ativa */
 .call-active{display:none;flex-direction:column;align-items:center;gap:0;width:100%;text-align:center}
@@ -237,6 +241,8 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
           <div class="idle-icon">📢</div>
         </div>
         <div class="idle-txt">Aguardando<br>próxima chamada...</div>
+        <div class="idle-placa" id="idle-placa"></div>
+        <div class="idle-ultima" id="idle-ultima">última placa chamada</div>
       </div>
 
       <!-- CHAMADA ATIVA -->
@@ -352,7 +358,7 @@ const hoje=()=>new Date().toLocaleDateString("pt-BR",{timeZone:"America/Fortalez
 const durStr=ms=>{if(!ms||ms<0)return"";const m=Math.round(ms/60000);return m<60?m+"m":Math.floor(m/60)+"h"+(m%60?m%60+"m":"");};
 
 let filas={granel:[],ensacado:[],bigbag:[]};
-let lastId=null;
+let lastId=null,lastPlaca=null;
 
 // ── ausência ticker: lista de ausentes do dia (últimas 2h) ──
 let ausentes=[]; // [{placa, ac, motivo, ts}]
@@ -431,6 +437,7 @@ function iniciarTimerAusencia(placa,ac,tipo,numero){
 const TLABEL={granel:"🚛 GRANEL",ensacado:"📦 ENSACADO",bigbag:"🛍️ BIG BAG"};
 function showCall(c){
   const tp=c.tipoCarga||"ensacado";
+  lastPlaca=c.placa||null;
   // Inicia timer de ausência de 5min
   iniciarTimerAusencia(c.placa,c.ac,tp,c.numero);
   document.getElementById("idle").style.display="none";
@@ -452,6 +459,14 @@ function showIdle(){
   document.getElementById("idle").style.display="flex";
   document.getElementById("call-active").style.display="none";
   document.getElementById("ticker").style.display="none";
+  // Mostra última placa chamada se houver
+  const ip=document.getElementById("idle-placa");
+  const iu=document.getElementById("idle-ultima");
+  if(lastPlaca){
+    ip.textContent=lastPlaca;
+    ip.classList.add("visivel");
+    iu.classList.add("visivel");
+  }
 }
 
 // ── Render filas com auto-scroll ──
