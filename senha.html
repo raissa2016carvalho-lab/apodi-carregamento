@@ -42,12 +42,12 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 .call-area{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px 40px;position:relative;z-index:1}
 
 /* Estado vazio */
-.idle{display:flex;flex-direction:column;align-items:center;gap:20px;text-align:center}
-.idle-ring{position:relative;width:100px;height:100px}
+.idle{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center}
+.idle-ring{position:relative;width:60px;height:60px}
 .idle-ring svg{width:100%;height:100%;animation:rotate-ring 6s linear infinite}
 @keyframes rotate-ring{to{transform:rotate(360deg)}}
-.idle-icon{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:40px}
-.idle-txt{font-family:'Rajdhani',sans-serif;font-size:22px;font-weight:700;color:var(--t2);line-height:1.5}
+.idle-icon{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:24px}
+.idle-txt{font-family:'Rajdhani',sans-serif;font-size:16px;font-weight:700;color:var(--t2);line-height:1.4}
 
 /* Chamada ativa */
 .call-active{display:none;flex-direction:column;align-items:center;gap:0;width:100%;text-align:center}
@@ -126,7 +126,11 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 .fh-ensacado .fila-cnt{color:var(--bl);background:rgba(0,212,255,.08)}
 .fh-bigbag .fila-cnt{color:var(--gr);background:rgba(0,232,150,.08)}
 
-.fila-body{flex:1;overflow-y:auto;padding:4px 8px}
+.fila-body{flex:1;overflow:hidden;padding:4px 8px;position:relative}
+.fila-scroll{display:flex;flex-direction:column;gap:3px}
+.fila-scroll.auto-scroll{animation:scroll-up var(--sd,18s) linear infinite}
+.fila-scroll.auto-scroll:hover{animation-play-state:paused}
+@keyframes scroll-up{0%{transform:translateY(0)}100%{transform:translateY(-50%)}}
 .fila-body::-webkit-scrollbar{width:2px}
 .fila-body::-webkit-scrollbar-thumb{background:var(--bd)}
 
@@ -135,7 +139,7 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 .fi-granel.prx{border-color:rgba(251,146,60,.45);background:rgba(251,146,60,.04)}
 .fi-ensacado.prx{border-color:rgba(0,212,255,.4);background:rgba(0,212,255,.04)}
 .fi-bigbag.prx{border-color:rgba(0,232,150,.38);background:rgba(0,232,150,.04)}
-.fi-n{font-family:'Orbitron',sans-serif;font-size:12px;font-weight:800;color:var(--t3);min-width:22px;text-align:center}
+.fi-n{font-family:'Orbitron',sans-serif;font-size:13px;font-weight:800;color:#4a90c4;min-width:22px;text-align:center;background:rgba(74,144,196,.12);border-radius:4px;padding:2px 4px}
 .fi-granel.prx .fi-n{color:var(--or)}
 .fi-ensacado.prx .fi-n{color:var(--bl)}
 .fi-bigbag.prx .fi-n{color:var(--gr)}
@@ -150,14 +154,36 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 .fi-bigbag.prx .fi-prxtag{color:var(--gr)}
 .fila-empty{text-align:center;padding:12px;color:var(--t3);font-size:11px;font-style:italic}
 
+/* ══════ AUSÊNCIA TICKER ══════ */
+.ausencia-bar{height:32px;background:rgba(255,68,102,.04);border-top:1px solid rgba(255,68,102,.15);display:none;align-items:center;padding:0 16px;flex-shrink:0;overflow:hidden;position:relative;gap:8px}
+.ausencia-bar.has-items{display:flex}
+.ausencia-bar-label{font-size:9px;font-weight:800;color:var(--rd);text-transform:uppercase;letter-spacing:2px;white-space:nowrap;flex-shrink:0}
+.ausencia-track{flex:1;overflow:hidden;position:relative}
+.ausencia-inner{display:flex;gap:16px;width:max-content;animation:aus-scroll 40s linear infinite}
+.ausencia-inner:hover{animation-play-state:paused}
+@keyframes aus-scroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+.aus-item{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.aus-placa{font-family:'Orbitron',sans-serif;font-size:11px;font-weight:800;color:var(--rd)}
+.aus-motivo{font-size:10px;color:rgba(255,68,102,.7)}
+.aus-sep{color:var(--t3);font-size:10px}
 /* ══════ BOTTOM ══════ */
-.bottom{height:34px;background:var(--bg2);border-top:1px solid var(--bd);display:flex;align-items:center;padding:0 24px;gap:14px;flex-shrink:0}
+.bottom{height:32px;background:var(--bg2);border-top:1px solid var(--bd);display:flex;align-items:center;padding:0 24px;gap:14px;flex-shrink:0}
 .bt-info{font-size:9px;color:var(--t3);flex:1;letter-spacing:.5px;text-transform:uppercase}
 .bt-div{width:1px;height:14px;background:var(--bd)}
 .bt-val{font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;color:var(--t2)}
 .bt-val b{font-family:'Orbitron',sans-serif;font-size:11px}
 .bt-val b.c-or{color:var(--or)}.bt-val b.c-bl{color:var(--bl)}.bt-val b.c-gr{color:var(--gr)}.bt-val b.c-ye{color:var(--ye)}
 
+/* ══════ OVERLAY AUSÊNCIA ══════ */
+.overlay-aus{position:fixed;inset:0;z-index:1000;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.75);backdrop-filter:blur(4px)}
+.overlay-aus.show{display:flex}
+.aus-card{background:var(--bg2);border:2px solid var(--rd);border-radius:16px;padding:28px 36px;text-align:center;max-width:500px;width:90%;animation:aus-in .4s cubic-bezier(.34,1.56,.64,1)}
+@keyframes aus-in{0%{opacity:0;transform:scale(.8)}100%{opacity:1;transform:scale(1)}}
+.aus-card-icon{font-size:48px;margin-bottom:12px}
+.aus-card-title{font-family:'Rajdhani',sans-serif;font-size:22px;font-weight:900;color:var(--rd);letter-spacing:2px;margin-bottom:4px;text-transform:uppercase}
+.aus-card-placa{font-family:'Orbitron',sans-serif;font-size:32px;font-weight:900;color:var(--rd);margin:10px 0;text-shadow:0 0 30px rgba(255,68,102,.5)}
+.aus-card-sub{font-size:12px;color:var(--t2);margin-bottom:16px}
+.aus-card-motivo{background:rgba(255,68,102,.08);border:1px solid rgba(255,68,102,.2);border-radius:8px;padding:10px 16px;font-size:13px;color:rgba(255,68,102,.9);line-height:1.5}
 /* ══════ FLASH ══════ */
 @keyframes flash-screen{0%,100%{opacity:1}25%,75%{opacity:.4}50%{opacity:1}}
 .left.flash{animation:flash-screen .3s ease 4}
@@ -236,7 +262,7 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
         <div class="fila-titulo">Granel</div>
         <span class="fila-cnt" id="cnt-granel">0</span>
       </div>
-      <div class="fila-body" id="list-granel"><div class="fila-empty">Fila vazia</div></div>
+      <div class="fila-body" id="list-granel"><div class="fila-scroll"><div class="fila-empty">Fila vazia</div></div></div>
     </div>
     <!-- ENSACADO -->
     <div class="fila-bloco">
@@ -245,7 +271,7 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
         <div class="fila-titulo">Ensacado</div>
         <span class="fila-cnt" id="cnt-ensacado">0</span>
       </div>
-      <div class="fila-body" id="list-ensacado"><div class="fila-empty">Fila vazia</div></div>
+      <div class="fila-body" id="list-ensacado"><div class="fila-scroll"><div class="fila-empty">Fila vazia</div></div></div>
     </div>
     <!-- BIG BAG -->
     <div class="fila-bloco">
@@ -254,8 +280,27 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
         <div class="fila-titulo">Big Bag</div>
         <span class="fila-cnt" id="cnt-bigbag">0</span>
       </div>
-      <div class="fila-body" id="list-bigbag"><div class="fila-empty">Fila vazia</div></div>
+      <div class="fila-body" id="list-bigbag"><div class="fila-scroll"><div class="fila-empty">Fila vazia</div></div></div>
     </div>
+  </div>
+</div>
+
+<!-- OVERLAY AUSÊNCIA -->
+<div class="overlay-aus" id="overlay-aus">
+  <div class="aus-card">
+    <div class="aus-card-icon">⚠️</div>
+    <div class="aus-card-title">Veículo Não Compareceu</div>
+    <div class="aus-card-placa" id="ov-placa">—</div>
+    <div class="aus-card-sub" id="ov-sub">AC: — · Chamado há 5 min</div>
+    <div class="aus-card-motivo" id="ov-motivo">Aguardando justificativa...</div>
+  </div>
+</div>
+
+<!-- AUSÊNCIA TICKER -->
+<div class="ausencia-bar" id="ausencia-bar">
+  <div class="ausencia-bar-label">⚠️ Não compareceu</div>
+  <div class="ausencia-track">
+    <div class="ausencia-inner" id="ausencia-inner"></div>
   </div>
 </div>
 
@@ -281,19 +326,21 @@ const db=getFirestore(app);
 // ── Relógio ──
 const DIASEM=["Domingo","Segunda","Terça","Quarta","Quinta","Sexta","Sábado"];
 const MESES=["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];
-setInterval(()=>{
+function tickClock(){
   const d=new Date(new Date().toLocaleString("en-US",{timeZone:"America/Fortaleza"}));
   document.getElementById("clock").textContent=d.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit",second:"2-digit"});
   document.getElementById("date-str").textContent=`${DIASEM[d.getDay()]} · ${d.getDate()} ${MESES[d.getMonth()]} ${d.getFullYear()}`;
-},1000);
-// imediato
-(()=>{const d=new Date(new Date().toLocaleString("en-US",{timeZone:"America/Fortaleza"}));document.getElementById("clock").textContent=d.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit",second:"2-digit"});document.getElementById("date-str").textContent=`${DIASEM[d.getDay()]} · ${d.getDate()} ${MESES[d.getMonth()]} ${d.getFullYear()}`;})();
+}
+tickClock();setInterval(tickClock,1000);
 
 const hoje=()=>new Date().toLocaleDateString("pt-BR",{timeZone:"America/Fortaleza"}).split("/").reverse().join("-");
 const durStr=ms=>{if(!ms||ms<0)return"";const m=Math.round(ms/60000);return m<60?m+"m":Math.floor(m/60)+"h"+(m%60?m%60+"m":"");};
 
 let filas={granel:[],ensacado:[],bigbag:[]};
 let lastId=null;
+
+// ── ausência ticker: lista de ausentes do dia (últimas 2h) ──
+let ausentes=[]; // [{placa, ac, motivo, ts}]
 
 // ── Fila: veículos aguardando no posto1 ──
 onSnapshot(collection(db,"caminhoes_rastreio"),snap=>{
@@ -318,10 +365,59 @@ onSnapshot(collection(db,"chamadas_fila"),snap=>{
   if(last.id!==lastId){lastId=last.id;showCall(last);doFlash();doSound();}
 });
 
+// ── Justificativas (não comparecimento) ──
+onSnapshot(collection(db,"justificativas"),snap=>{
+  const hj=hoje();
+  const dois_h=Date.now()-2*60*60*1000;
+  // Fecha overlay se estava aberto e chegou justificativa nova
+  const novos=snap.docs.map(d=>({id:d.id,...d.data()}))
+    .filter(c=>c.data===hj&&c.tipo==="nao_compareceu");
+  
+  // Atualiza lista de ausentes (últimas 2h)
+  ausentes=novos.filter(c=>{
+    const ts=c.criadoEm?new Date(c.criadoEm).getTime():0;
+    return ts>dois_h;
+  }).map(c=>({placa:c.placa,ac:c.ac,motivo:c.motivo||"Não compareceu",ts:c.criadoEm}));
+  
+  renderAusenciaTicker();
+
+  // Se overlay estava aberto para este veículo, fecha e mostra no ticker
+  const ov=document.getElementById("overlay-aus");
+  if(ov.classList.contains("show")){
+    const ovPlaca=document.getElementById("ov-placa").textContent;
+    const match=novos.find(c=>c.placa===ovPlaca);
+    if(match){
+      document.getElementById("ov-motivo").textContent=`✓ Justificativa: ${match.motivo}`;
+      setTimeout(()=>{ov.classList.remove("show");},3000);
+    }
+  }
+});
+
+// ── Chamadas com ausência: monitora 5min ──
+let ausenciaTimer=null;
+let ausenciaPlaca=null;
+let ausenciaAc=null;
+let ausenciaTipo=null;
+
+function iniciarTimerAusencia(placa,ac,tipo,numero){
+  if(ausenciaTimer)clearTimeout(ausenciaTimer);
+  ausenciaPlaca=placa;ausenciaAc=ac;ausenciaTipo=tipo;
+  ausenciaTimer=setTimeout(()=>{
+    // Mostra overlay de ausência
+    const ov=document.getElementById("overlay-aus");
+    document.getElementById("ov-placa").textContent=placa;
+    document.getElementById("ov-sub").textContent=`AC: ${ac} · Nº ${numero?String(numero).padStart(3,"0"):"?"} · Chamado há 5 min`;
+    document.getElementById("ov-motivo").textContent="Aguardando justificativa do Posto 1...";
+    ov.classList.add("show");
+  },5*60*1000); // 5 minutos
+}
+
 // ── Render chamada ──
 const TLABEL={granel:"🚛 GRANEL",ensacado:"📦 ENSACADO",bigbag:"🛍️ BIG BAG"};
 function showCall(c){
   const tp=c.tipoCarga||"ensacado";
+  // Inicia timer de ausência de 5min
+  iniciarTimerAusencia(c.placa,c.ac,tp,c.numero);
   document.getElementById("idle").style.display="none";
   const ca=document.getElementById("call-active");
   ca.style.display="flex";
@@ -333,27 +429,31 @@ function showCall(c){
   setTimeout(()=>{pb.classList.replace("enter","beat");},520);
   const ac=document.getElementById("call-ac");
   ac.textContent="AC: "+(c.ac||"—");
-  ac.style.color=tp==="granel"?"rgba(251,146,60,.7)":tp==="bigbag"?"rgba(0,232,150,.7)":"rgba(0,212,255,.7)";
+  ac.style.color=tp==="granel"?"rgba(251,146,60,.75)":tp==="bigbag"?"rgba(0,232,150,.75)":"rgba(0,212,255,.75)";
   document.getElementById("call-num").textContent=c.numero?`Chamada Nº ${String(c.numero).padStart(3,"0")}`:"";
 }
 function showIdle(){
+  if(ausenciaTimer){clearTimeout(ausenciaTimer);ausenciaTimer=null;}
   document.getElementById("idle").style.display="flex";
   document.getElementById("call-active").style.display="none";
   document.getElementById("ticker").style.display="none";
 }
 
-// ── Render filas ──
-function renderFila(tipo,listId,cntId){
+// ── Render filas com auto-scroll ──
+function renderFila(tipo,containerId,cntId){
   const l=filas[tipo]||[];
   document.getElementById(cntId).textContent=l.length;
-  const el=document.getElementById(listId);
-  if(!l.length){el.innerHTML=`<div class="fila-empty">Fila vazia</div>`;return;}
-  el.innerHTML=l.map((c,i)=>{
+  const container=document.getElementById(containerId);
+  const scroll=container.querySelector(".fila-scroll");
+  if(!l.length){scroll.innerHTML=`<div class="fila-empty">Fila vazia</div>`;scroll.className="fila-scroll";return;}
+  
+  const makeItems=()=>l.map((c,i)=>{
     const en=c.entrada?.ts?.toDate?.();
     const wait=en?Date.now()-en.getTime():null;
     const prx=i===0;
+    const numColor=tipo==="granel"?"var(--or)":tipo==="bigbag"?"var(--gr)":"var(--bl)";
     return`<div class="fi fi-${tipo}${prx?" prx":""}">
-      <div class="fi-n">${i+1}</div>
+      <div class="fi-n" style="${prx?`color:${numColor};background:rgba(${tipo==="granel"?"251,146,60":tipo==="bigbag"?"0,232,150":"0,212,255"},.18);border:1px solid rgba(${tipo==="granel"?"251,146,60":tipo==="bigbag"?"0,232,150":"0,212,255"},.3)`:""}">${i+1}</div>
       <div class="fi-data">
         <div class="fi-pl">${c.placa}</div>
         <div class="fi-ac">AC: ${c.ac}</div>
@@ -364,6 +464,17 @@ function renderFila(tipo,listId,cntId){
       </div>
     </div>`;
   }).join("");
+
+  // Auto-scroll: duplica conteúdo para loop contínuo, só se tiver >3 itens
+  if(l.length>3){
+    scroll.innerHTML=makeItems()+makeItems();
+    scroll.className="fila-scroll auto-scroll";
+    const dur=Math.max(10,l.length*3);
+    scroll.style.setProperty("--sd",dur+"s");
+  } else {
+    scroll.innerHTML=makeItems();
+    scroll.className="fila-scroll";
+  }
 }
 function renderFilas(){
   renderFila("granel","list-granel","cnt-granel");
@@ -376,7 +487,7 @@ function renderFilas(){
   document.getElementById("bt-b").textContent=b;
 }
 
-// ── Ticker ──
+// ── Ticker próximos ──
 function renderTicker(){
   const all=[
     ...filas.granel.map((c,i)=>({...c,pos:i+1,tipo:"granel"})),
@@ -395,10 +506,27 @@ function renderTicker(){
       <span class="t-tip tt-${c.tipo}">${c.tipo==="bigbag"?"BIG BAG":c.tipo.toUpperCase()}</span>
     </div>`).join("");
   const inner=document.getElementById("ticker-inner");
-  // duplica para loop contínuo
   inner.innerHTML=makeItems()+makeItems();
   inner.className="ticker-inner"+(all.length>2?" running":"");
   inner.style.animationDuration=Math.max(14,all.length*5)+"s";
+}
+
+// ── Ticker ausência rodapé ──
+function renderAusenciaTicker(){
+  const bar=document.getElementById("ausencia-bar");
+  const inner=document.getElementById("ausencia-inner");
+  if(!ausentes.length){bar.classList.remove("has-items");return;}
+  bar.classList.add("has-items");
+  const makeItems=()=>ausentes.map(a=>`
+    <div class="aus-item">
+      <span class="aus-placa">${a.placa}</span>
+      <span class="aus-sep">·</span>
+      <span class="aus-motivo">AC: ${a.ac} — ${a.motivo}</span>
+      <span class="aus-sep">⬥</span>
+    </div>`).join("");
+  inner.innerHTML=makeItems()+makeItems();
+  const dur=Math.max(20,ausentes.length*8);
+  inner.style.animationDuration=dur+"s";
 }
 
 // ── Flash ──
