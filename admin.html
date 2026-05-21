@@ -182,52 +182,79 @@ tr.data-row.selected td:first-child{border-left:3px solid var(--rd)}
     <!-- FILTROS -->
     <div class="filter-block">
 
-      <!-- Linha 1: Período + Exportar -->
-      <div class="filter-row">
-        <span class="row-label">📅 Período</span>
-        <button class="pb pb-periodo on" onclick="setPeriod('hoje',this)">Hoje</button>
-        <button class="pb pb-periodo" onclick="setPeriod('ontem',this)">Ontem</button>
-        <button class="pb pb-periodo" onclick="setPeriod('semana',this)">Semana</button>
-        <button class="pb pb-periodo" onclick="setPeriod('mes',this)">Mês</button>
-        <button class="pb pb-periodo" onclick="setPeriod('ano',this)">Ano</button>
-        <button class="export-btn" onclick="exportExcel()">📊 Exportar Excel</button>
-      </div>
+      <!-- Layout: filtros à esquerda | calendário à direita -->
+      <div style="display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap">
 
-      <!-- Linha 2: Dias da semana -->
-      <div class="filter-row">
-        <span class="row-label">📆 Dia</span>
-        <button class="pb pb-dia on" onclick="setDia('t',this)">Todos</button>
-        <button class="pb pb-dia" onclick="setDia('0',this)">Dom</button>
-        <button class="pb pb-dia" onclick="setDia('1',this)">Seg</button>
-        <button class="pb pb-dia" onclick="setDia('2',this)">Ter</button>
-        <button class="pb pb-dia" onclick="setDia('3',this)">Qua</button>
-        <button class="pb pb-dia" onclick="setDia('4',this)">Qui</button>
-        <button class="pb pb-dia" onclick="setDia('5',this)">Sex</button>
-        <button class="pb pb-dia" onclick="setDia('6',this)">Sáb</button>
-      </div>
+        <!-- Coluna esquerda: todos os filtros em linha -->
+        <div style="flex:1;min-width:300px;display:flex;flex-direction:column;gap:10px">
 
-      <!-- Linha 3: Turno -->
-      <div class="filter-row">
-        <span class="row-label">🕐 Turno</span>
-        <button class="pb pb-turno-todos on" onclick="setTurno('t',this)">Todos</button>
-        <button class="pb pb-turno-a" onclick="setTurno('A',this)">A · 23h–07h</button>
-        <button class="pb pb-turno-b" onclick="setTurno('B',this)">B · 07h–15h</button>
-        <button class="pb pb-turno-c" onclick="setTurno('C',this)">C · 15h–23h</button>
-      </div>
+          <!-- Linha 1: Período + Exportar -->
+          <div class="filter-row">
+            <span class="row-label">📅 Período</span>
+            <button class="pb pb-periodo on" onclick="setPeriod('hoje',this)">Hoje</button>
+            <button class="pb pb-periodo" onclick="setPeriod('ontem',this)">Ontem</button>
+            <button class="pb pb-periodo" onclick="setPeriod('semana',this)">Semana</button>
+            <button class="pb pb-periodo" onclick="setPeriod('mes',this)">Mês</button>
+            <button class="pb pb-periodo" onclick="setPeriod('ano',this)">Ano</button>
+            <button class="export-btn" onclick="exportExcel()">📊 Exportar Excel</button>
+          </div>
 
-      <!-- Linha 4: Tipo de carga -->
-      <div class="filter-row">
-        <span class="row-label">📦 Carga</span>
-        <button class="pb pb-carga-todos on" onclick="setCarga('t',this)">Todos</button>
-        <button class="pb pb-carga-ensacado" onclick="setCarga('ensacado',this)">Ensacado</button>
-        <button class="pb pb-carga-granel" onclick="setCarga('granel',this)">Granel</button>
-        <button class="pb pb-carga-bigbag" onclick="setCarga('bigbag',this)">Big Bag</button>
-      </div>
+          <!-- Linha 2: Dias da semana -->
+          <div class="filter-row">
+            <span class="row-label">📆 Dia</span>
+            <button class="pb pb-dia on" onclick="setDia('t',this)">Todos</button>
+            <button class="pb pb-dia" onclick="setDia('0',this)">Dom</button>
+            <button class="pb pb-dia" onclick="setDia('1',this)">Seg</button>
+            <button class="pb pb-dia" onclick="setDia('2',this)">Ter</button>
+            <button class="pb pb-dia" onclick="setDia('3',this)">Qua</button>
+            <button class="pb pb-dia" onclick="setDia('4',this)">Qui</button>
+            <button class="pb pb-dia" onclick="setDia('5',this)">Sex</button>
+            <button class="pb pb-dia" onclick="setDia('6',this)">Sáb</button>
+          </div>
 
-      <!-- Linha 5: Calendário -->
-      <div class="filter-row" style="align-items:flex-start">
-        <span class="row-label" style="padding-top:8px">📅 Data</span>
-        <div class="cal-wrap" id="cal-wrap">
+          <!-- Linha 3: Turno -->
+          <div class="filter-row">
+            <span class="row-label">🕐 Turno</span>
+            <button class="pb pb-turno-todos on" onclick="setTurno('t',this)">Todos</button>
+            <button class="pb pb-turno-a" onclick="setTurno('A',this)">A · 23h–07h</button>
+            <button class="pb pb-turno-b" onclick="setTurno('B',this)">B · 07h–15h</button>
+            <button class="pb pb-turno-c" onclick="setTurno('C',this)">C · 15h–23h</button>
+          </div>
+
+          <!-- Linha 4: Tipo de carga -->
+          <div class="filter-row">
+            <span class="row-label">📦 Carga</span>
+            <button class="pb pb-carga-todos on" onclick="setCarga('t',this)">Todos</button>
+            <button class="pb pb-carga-ensacado" onclick="setCarga('ensacado',this)">Ensacado</button>
+            <button class="pb pb-carga-granel" onclick="setCarga('granel',this)">Granel</button>
+            <button class="pb pb-carga-bigbag" onclick="setCarga('bigbag',this)">Big Bag</button>
+          </div>
+
+          <!-- Linha 5: Status + Setor + Busca -->
+          <div class="filter-row">
+            <span class="row-label">🔎 Status</span>
+            <button class="pb pb-status on" onclick="setStatus('t',this)">Todos</button>
+            <button class="pb pb-status" onclick="setStatus('a',this)">Em Processo</button>
+            <button class="pb pb-status" onclick="setStatus('c',this)">Concluídos</button>
+            <select class="dselect-filter" id="f-setor-filter" onchange="render()">
+              <option value="">— Setor Atual —</option>
+              <option value="posto1">Entrada</option>
+              <option value="triagem_inicio">Em Triagem</option>
+              <option value="triagem_fim">Triagem OK</option>
+              <option value="carregamento_inicio">Carregando</option>
+              <option value="carregamento_fim">Carregado</option>
+              <option value="enlonamento_inicio">Enlonando</option>
+              <option value="enlonamento_fim">Enlonado</option>
+              <option value="faturamento_aguardando">Ag. Faturamento</option>
+              <option value="concluido">Concluído</option>
+            </select>
+            <input class="fi" id="q-global" type="text" placeholder="🔍 Placa ou AC..." oninput="render()" style="min-width:140px;flex:1"/>
+          </div>
+
+        </div><!-- /coluna esquerda -->
+
+        <!-- Coluna direita: Calendário -->
+        <div class="cal-wrap" id="cal-wrap" style="flex-shrink:0">
           <div class="cal-nav">
             <button onclick="calMove(-1)">‹</button>
             <span class="cal-month" id="cal-title"></span>
@@ -236,28 +263,8 @@ tr.data-row.selected td:first-child{border-left:3px solid var(--rd)}
           <div class="cal-grid" id="cal-grid"></div>
           <button class="cal-clear" id="cal-clear" onclick="calClear()" style="display:none">✕ Limpar data selecionada</button>
         </div>
-      </div>
 
-      <!-- Linha 5: Status + Setor + Busca -->
-      <div class="filter-row">
-        <span class="row-label">🔎 Status</span>
-        <button class="pb pb-status on" onclick="setStatus('t',this)">Todos</button>
-        <button class="pb pb-status" onclick="setStatus('a',this)">Em Processo</button>
-        <button class="pb pb-status" onclick="setStatus('c',this)">Concluídos</button>
-        <select class="dselect-filter" id="f-setor-filter" onchange="render()">
-          <option value="">— Setor Atual —</option>
-          <option value="posto1">Entrada</option>
-          <option value="triagem_inicio">Em Triagem</option>
-          <option value="triagem_fim">Triagem OK</option>
-          <option value="carregamento_inicio">Carregando</option>
-          <option value="carregamento_fim">Carregado</option>
-          <option value="enlonamento_inicio">Enlonando</option>
-          <option value="enlonamento_fim">Enlonado</option>
-          <option value="faturamento_aguardando">Ag. Faturamento</option>
-          <option value="concluido">Concluído</option>
-        </select>
-        <input class="fi" id="q-global" type="text" placeholder="🔍 Placa ou AC..." oninput="render()" style="min-width:140px;flex:1"/>
-      </div>
+      </div><!-- /layout dois lados -->
 
     </div><!-- /filter-block -->
 
