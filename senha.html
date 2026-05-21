@@ -383,7 +383,23 @@ onSnapshot(collection(db,"chamadas_fila"),snap=>{
     .sort((a,b)=>(b.criadoEm?.seconds||0)-(a.criadoEm?.seconds||0));
   if(!docs.length){showIdle();return;}
   const last=docs[0];
-  if(last.id!==lastId){lastId=last.id;showCall(last);doFlash();doSound();falarPlaca(last.placa||"");}
+  if(last.id!==lastId){
+    lastId=last.id;
+    lastPlaca=last.placa||null;
+    // Mostra placa no idle em destaque
+    const ip=document.getElementById("idle-placa");
+    const iu=document.getElementById("idle-ultima");
+    const itxt=document.getElementById("idle");
+    if(last.placa){
+      ip.textContent=last.placa;
+      ip.classList.add("visivel");
+      iu.textContent="🔔 veículo chamado para entrada";
+      iu.classList.add("visivel");
+    }
+    document.getElementById("idle").style.display="flex";
+    document.getElementById("call-active").style.display="none";
+    doFlash();doSound();falarPlaca(last.placa||"");
+  }
 });
 
 // ── Justificativas (não comparecimento) ──
@@ -465,6 +481,7 @@ function showIdle(){
   if(lastPlaca){
     ip.textContent=lastPlaca;
     ip.classList.add("visivel");
+    iu.textContent="última placa chamada";
     iu.classList.add("visivel");
   }
 }
