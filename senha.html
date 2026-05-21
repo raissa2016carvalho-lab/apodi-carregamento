@@ -34,6 +34,10 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 
 /* ══════ MAIN ══════ */
 .main{flex:1;display:grid;grid-template-columns:1.6fr 1fr;overflow:hidden;min-height:0}
+.main.idle-mode{grid-template-columns:1fr 0}
+.main.idle-mode .right{display:none}
+.main.idle-mode .left{border-right:none}
+.placa-size-idle{font-size:clamp(80px,12vw,140px) !important}
 
 /* ══════ PAINEL ESQUERDO ══════ */
 .left{display:flex;flex-direction:column;border-right:1px solid var(--bd);position:relative;overflow:hidden;background:radial-gradient(ellipse at 50% 30%,rgba(0,212,255,.03) 0%,transparent 60%)}
@@ -211,7 +215,7 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 </div>
 
 <!-- MAIN -->
-<div class="main">
+<div class="main idle-mode">
 
   <!-- ESQUERDA -->
   <div class="left" id="left-panel">
@@ -362,7 +366,7 @@ onSnapshot(collection(db,"chamadas_fila"),snap=>{
     .sort((a,b)=>(b.criadoEm?.seconds||0)-(a.criadoEm?.seconds||0));
   if(!docs.length){showIdle();return;}
   const last=docs[0];
-  if(last.id!==lastId){lastId=last.id;showCall(last);doFlash();doSound();}
+  if(last.id!==lastId){lastId=last.id;showCall(last);doFlash();doSound();falarPlaca(last.placa||"");}
 });
 
 // ── Justificativas (não comparecimento) ──
@@ -419,6 +423,7 @@ function showCall(c){
   // Inicia timer de ausência de 5min
   iniciarTimerAusencia(c.placa,c.ac,tp,c.numero);
   document.getElementById("idle").style.display="none";
+  document.querySelector(".main").classList.remove("idle-mode");
   const ca=document.getElementById("call-active");
   ca.style.display="flex";
   ca.className=`call-active c-${tp}`;
@@ -437,6 +442,7 @@ function showIdle(){
   document.getElementById("idle").style.display="flex";
   document.getElementById("call-active").style.display="none";
   document.getElementById("ticker").style.display="none";
+  document.querySelector(".main").classList.add("idle-mode");
 }
 
 // ── Render filas com auto-scroll ──
@@ -552,6 +558,21 @@ function doSound(){
       o.start(A.currentTime+t);o.stop(A.currentTime+t+dur+.05);
     });
   }catch(e){}
+}
+function falarPlaca(placa){
+  // Formata placa para fala: "ABC1234" -> "A B C 1 2 3 4"
+  const placaFalada=placa.split("").join(" ");
+  const texto=`Atenção motorista de placa ${placaFalada}, comparecer no Posto 1 para coletar Autorização de Carregamento.`;
+  // Aguarda 1.2s após o som para falar
+  setTimeout(()=>{
+    const fala=new SpeechSynthesisUtterance(texto);
+    fala.lang="pt-BR";
+    fala.rate=1;
+    fala.pitch=1;
+    fala.volume=1;
+    speechSynthesis.cancel();
+    speechSynthesis.speak(fala);
+  },1200);
 }
 
 setInterval(renderFilas,30000);
