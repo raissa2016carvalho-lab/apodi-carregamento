@@ -35,6 +35,45 @@ body{background:var(--bg);color:var(--tx);font-family:system-ui,-apple-system,sa
 .ok{background:rgba(0,232,150,.1);border:1px solid rgba(0,232,150,.3);color:#00e896}
 .er{background:rgba(255,68,102,.1);border:1px solid rgba(255,68,102,.3);color:#ff4466}
 .wn{background:rgba(255,208,0,.1);border:1px solid rgba(255,208,0,.3);color:#ffd000}
+
+.rodape-label{font-size:10px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.6px;margin-bottom:7px}
+.chamado-strip{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--rs);background:rgba(0,232,150,.07);border:1.5px solid rgba(0,232,150,.3);margin-bottom:6px}
+.chamado-strip.vazio{background:rgba(30,53,88,.25);border-color:var(--bd)}
+.ch-placa{font-family:monospace;font-size:19px;font-weight:700;color:#00e896;letter-spacing:2px}
+.ch-meta{font-size:10px;color:var(--t2);margin-top:2px}
+.ch-timer .t{font-family:monospace;font-size:18px;font-weight:700;color:var(--ye);text-align:right}
+.ch-timer .tl{font-size:9px;color:var(--t3);text-align:right}
+.ch-actions{display:flex;gap:6px;margin-bottom:8px}
+.btn-nao{flex:1;padding:10px;border:1.5px solid rgba(255,68,102,.4);border-radius:var(--rs);background:rgba(255,68,102,.07);color:#ff4466;font-size:12px;font-weight:700;cursor:pointer;text-transform:uppercase;letter-spacing:.4px}
+.btn-chegou{flex:1;padding:10px;border:1.5px solid rgba(0,232,150,.4);border-radius:var(--rs);background:rgba(0,232,150,.07);color:#00e896;font-size:12px;font-weight:700;cursor:pointer;text-transform:uppercase;letter-spacing:.4px}
+.fila-list-r{max-height:200px;overflow-y:auto;display:flex;flex-direction:column;gap:5px;padding-right:2px}
+.fila-list-r::-webkit-scrollbar{width:4px}
+.fila-list-r::-webkit-scrollbar-thumb{background:var(--bd);border-radius:2px}
+.placa-row{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:var(--rs);border:1.5px solid var(--bd);background:var(--c1);cursor:pointer;transition:all .2s}
+.placa-row:hover{border-color:var(--ac);background:rgba(0,212,255,.05)}
+.placa-row.ativo{border-color:#00e896;background:rgba(0,232,150,.05)}
+.p-pos{font-family:monospace;font-size:11px;font-weight:700;color:var(--t3);min-width:18px}
+.p-num{font-family:monospace;font-size:16px;font-weight:700;letter-spacing:2px;color:var(--ac)}
+.p-sub{font-size:10px;color:var(--t3);margin-top:1px}
+.p-cim{color:var(--ye);font-weight:700}
+.p-badge{font-size:8px;font-weight:800;padding:2px 7px;border-radius:4px;text-transform:uppercase;margin-left:auto;flex-shrink:0}
+.pb-gr{background:rgba(251,146,60,.15);color:#fb923c;border:1px solid rgba(251,146,60,.3)}
+.pb-en{background:rgba(0,212,255,.12);color:var(--ac);border:1px solid rgba(0,212,255,.25)}
+.pb-bb{background:rgba(0,232,150,.12);color:#00e896;border:1px solid rgba(0,232,150,.25)}
+.modal-r{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:999;align-items:center;justify-content:center;padding:20px}
+.modal-r.show{display:flex}
+.modal-r-box{background:var(--c1);border:2px solid #ff4466;border-radius:14px;padding:22px;width:100%;max-width:420px}
+.mr-title{font-size:14px;font-weight:800;color:#ff4466;margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px}
+.mr-placa{font-family:monospace;font-size:22px;font-weight:700;color:#ff4466;letter-spacing:2px;margin-bottom:12px}
+.mr-motivo{width:100%;padding:11px 14px;border:1.5px solid var(--bd);border-radius:var(--rs);background:var(--bg);color:var(--tx);font-size:13px;cursor:pointer;text-align:left;margin-bottom:6px;font-family:inherit;font-weight:600}
+.mr-motivo.on{border-color:var(--ye);color:var(--ye);background:rgba(255,208,0,.07)}
+.btn-conf{width:100%;padding:13px;border:none;border-radius:var(--rs);background:#ff4466;color:#fff;font-size:14px;font-weight:800;cursor:pointer;text-transform:uppercase;letter-spacing:.5px;margin-top:4px}
+.btn-cancel-r{width:100%;padding:10px;border:1.5px solid var(--bd);border-radius:var(--rs);background:transparent;color:var(--t3);font-size:12px;cursor:pointer;margin-top:6px}
+.hist-item{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border-radius:var(--rs);border:1.5px solid rgba(255,68,102,.3);background:rgba(255,68,102,.06);margin-bottom:5px}
+.hi-placa{font-family:monospace;font-size:15px;font-weight:700;color:#ff4466;letter-spacing:1.5px}
+.hi-meta{font-size:10px;color:rgba(255,68,102,.6);margin-top:1px}
+.hi-obs{font-size:10px;color:rgba(255,68,102,.45);font-style:italic;margin-top:2px}
+.hi-badge{font-size:9px;font-weight:800;padding:2px 8px;border-radius:4px;background:rgba(255,68,102,.15);color:#ff4466;border:1px solid rgba(255,68,102,.3);white-space:nowrap;flex-shrink:0;margin-left:auto}
 </style>
 </head>
 <body>
@@ -73,39 +112,50 @@ body{background:var(--bg);color:var(--tx);font-family:system-ui,-apple-system,sa
   </div>
   <button class="go" id="go" onclick="registrar()" disabled>✅ Registrar Entrada</button>
 
-  <!-- CHAMAR PRÓXIMO -->
-  <div style="margin-top:16px;border-top:1px solid rgba(255,255,255,.08);padding-top:16px">
-    <button class="go" id="btn-chamar" onclick="chamarProximo()" style="background:linear-gradient(135deg,#00e896,#009960);margin-bottom:8px">📢 Chamar Próximo da Fila</button>
-    <div id="chamada-info" style="font-size:12px;color:#7aafcc;text-align:center;min-height:18px"></div>
-    <div id="chamada-info-extra" style="font-size:11px;color:#ffd000;text-align:center;min-height:16px;margin-top:2px"></div>
-    <div id="timer-bar-wrap" style="display:none;margin-top:10px;width:100%">
-      <div style="background:#0a1628;border-radius:6px;height:6px;overflow:hidden;margin-bottom:4px">
-        <div id="timer-bar" style="height:100%;width:0%;background:linear-gradient(90deg,#00e896,#ffd000);border-radius:6px;transition:width 1s linear"></div>
+  <!-- RODAPÉ FILA -->
+  <div style="margin-top:18px;border-top:1px solid rgba(255,255,255,.07);padding-top:16px">
+    <div class="rodape-label">Veículo chamado</div>
+    <div class="chamado-strip vazio" id="strip">
+      <div style="flex:1">
+        <div class="ch-placa" id="ch-placa">—</div>
+        <div class="ch-meta" id="ch-meta">Nenhum veículo chamado</div>
       </div>
-      <div id="timer-txt" style="font-size:10px;color:#7aafcc;text-align:center"></div>
+      <div class="ch-timer">
+        <div class="t" id="ch-counter">00:00</div>
+        <div class="tl">aguardando</div>
+      </div>
     </div>
-  </div>
-
-  <!-- JUSTIFICATIVA MODAL -->
-  <div id="modal-just" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:999;display:none;align-items:center;justify-content:center;padding:20px">
-    <div style="background:#0f1a2e;border:2px solid #ffd000;border-radius:14px;padding:24px;width:100%;max-width:400px">
-      <div style="font-size:16px;font-weight:800;color:#ffd000;margin-bottom:6px">⚠️ Registrar Não Comparecimento</div>
-      <div style="font-size:12px;color:#7aafcc;margin-bottom:16px">Veículo chamado mas motorista não compareceu</div>
-      <div style="font-size:13px;font-weight:700;color:#dff0ff;margin-bottom:12px" id="modal-placa-info"></div>
-      <div style="font-size:10px;font-weight:700;color:#7aafcc;text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px">Motivo</div>
-      <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px">
-        <button class="motivo-btn" onclick="selMotivo(this,'Motorista não compareceu')" style="padding:12px;border:2px solid #1e3558;border-radius:10px;background:#0a1628;color:#dff0ff;font-size:13px;cursor:pointer;text-align:left;font-weight:600">🚶 Motorista não compareceu</button>
-        <button class="motivo-btn" onclick="selMotivo(this,'Motorista recusou o carregamento')" style="padding:12px;border:2px solid #1e3558;border-radius:10px;background:#0a1628;color:#dff0ff;font-size:13px;cursor:pointer;text-align:left;font-weight:600">❌ Motorista recusou o carregamento</button>
-        <button class="motivo-btn" onclick="selMotivo(this,'Veículo com problema mecânico')" style="padding:12px;border:2px solid #1e3558;border-radius:10px;background:#0a1628;color:#dff0ff;font-size:13px;cursor:pointer;text-align:left;font-weight:600">🔧 Veículo com problema mecânico</button>
-        <button class="motivo-btn" onclick="selMotivo(this,'Outro')" style="padding:12px;border:2px solid #1e3558;border-radius:10px;background:#0a1628;color:#dff0ff;font-size:13px;cursor:pointer;text-align:left;font-weight:600">📝 Outro motivo</button>
+    <div class="ch-actions" id="ch-actions" style="display:none">
+      <button class="btn-nao" onclick="abrirModalJust()">✕ Não compareceu</button>
+      <button class="btn-chegou" onclick="confirmarChegada()">✓ Chegou</button>
+    </div>
+    <div class="modal-r" id="modal-just">
+      <div class="modal-r-box">
+        <div class="mr-title">⚠️ Justificativa — não compareceu</div>
+        <div class="mr-placa" id="mr-placa">—</div>
+        <button class="mr-motivo" onclick="selMotR(this,'Saiu da fila sem avisar')">🚶 Saiu da fila sem avisar</button>
+        <button class="mr-motivo" onclick="selMotR(this,'Problema mecânico')">🔧 Problema mecânico</button>
+        <button class="mr-motivo" onclick="selMotR(this,'Motorista não localizado')">📵 Motorista não localizado</button>
+        <button class="mr-motivo" onclick="selMotR(this,'Desistiu do carregamento')">❌ Desistiu do carregamento</button>
+        <button class="mr-motivo" onclick="selMotR(this,'Outro')">📝 Outro motivo</button>
+        <input id="outro-r" type="text" placeholder="Descreva o motivo..." style="display:none;width:100%;background:var(--bg);border:1.5px solid var(--bd);border-radius:var(--rs);color:var(--tx);padding:10px 14px;font-size:13px;outline:none;margin-bottom:6px;font-family:inherit"/>
+        <button class="btn-conf" onclick="confirmarJustR()">Confirmar e tirar da fila</button>
+        <button class="btn-cancel-r" onclick="fecharModalJust()">Cancelar</button>
       </div>
-      <div id="outro-wrap" style="display:none;margin-bottom:12px">
-        <textarea id="outro-txt" placeholder="Descreva o motivo..." style="width:100%;background:#0a1628;border:2px solid #1e3558;border-radius:10px;color:#dff0ff;padding:12px;font-size:13px;resize:none;height:80px;outline:none;font-family:inherit"></textarea>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px">
+      <div class="rodape-label" style="margin:0">Fila · toque para chamar</div>
+      <span style="font-size:10px;color:var(--t3)" id="fila-count-r"></span>
+    </div>
+    <div class="fila-list-r" id="fila-list-r">
+      <div style="text-align:center;padding:16px;color:var(--t3);font-size:12px;font-style:italic">Fila vazia</div>
+    </div>
+    <div id="hist-wrap" style="display:none;margin-top:14px;border-top:1px solid rgba(255,68,102,.15);padding-top:12px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px">
+        <div class="rodape-label" style="margin:0;color:#ff4466">⚠️ Não compareceram hoje</div>
+        <span style="font-size:10px;color:rgba(255,68,102,.5)" id="hist-count">0 ocorrências</span>
       </div>
-      <div style="display:flex;gap:8px">
-        <button onclick="fecharModal()" style="flex:1;padding:12px;border:1px solid #1e3558;border-radius:10px;background:transparent;color:#7aafcc;font-size:13px;cursor:pointer;font-weight:700">Cancelar</button>
-        <button onclick="confirmarJust()" style="flex:1;padding:12px;border:none;border-radius:10px;background:linear-gradient(135deg,#ffd000,#cc9900);color:#000;font-size:13px;cursor:pointer;font-weight:800">Registrar</button>
-      </div>
+      <div id="hist-list"></div>
     </div>
   </div>
 
@@ -171,202 +221,146 @@ function showMsg(type,txt){
   if(type==="ok")setTimeout(()=>{el.className="msg";el.textContent="";},5000);
 }
 
-let FILA=[];
-let ULTIMO_CHAMADO=null;
-let MOTIVO_SEL=null;
-let CONTADOR_CHAMADA=0;
-let TIMER_AUSENCIA=null;       // setTimeout dos 3min
-let PRIMEIRO_CHAMADO_TS=null;  // timestamp da 1ª chamada do veículo atual
-let CHAMADAS_VEIC=0;           // quantas vezes chamou o mesmo veículo
-let AGUARD_JUST=false;         // popup obrigatório ativo
+let FILA=[],CHAMADO_ATUAL=null,MOT_SEL=null,CH_SECS=0,CH_INTERVAL=null,CONTADOR_CHAMADA=0;
 
-// Carrega contador do dia
-async function loadContador(){
+(async()=>{
   try{
-    const {doc,getDoc}=await import("https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js");
+    const{doc,getDoc}=await import("https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js");
     const snap=await getDoc(doc(db,"config","chamadas_contador_"+hoje()));
     if(snap.exists())CONTADOR_CHAMADA=snap.data().n||0;
   }catch(e){}
-}
-loadContador();
+})();
 
-// Observa fila (todas as categorias)
 onSnapshot(query(collection(db,"caminhoes_rastreio"),orderBy("criadoEm","asc")),snap=>{
-  FILA=snap.docs.map(d=>{return{id:d.id,...d.data()}})
-    .filter(c=>c.data===hoje()&&c.setorAtual==="posto1");
-  atualizarInfo();
+  FILA=snap.docs.map(d=>({id:d.id,...d.data()})).filter(c=>c.data===hoje()&&c.setorAtual==="posto1");
+  renderFila();
 });
 
-function atualizarInfo(){
-  const info=document.getElementById("chamada-info");
-  if(!FILA.length){info.textContent="Fila vazia";return;}
-  const total=FILA.length;
-  const prox=FILA[0];
-  info.textContent=`${total} veículo${total!==1?"s":""} aguardando · Próximo: ${prox.placa} (${prox.tipoCargaLabel||prox.tipoCarga||"?"})`;
+function renderFila(){
+  const el=document.getElementById("fila-list-r");
+  const cnt=document.getElementById("fila-count-r");
+  if(!FILA.length){
+    el.innerHTML='<div style="text-align:center;padding:16px;color:var(--t3);font-size:12px;font-style:italic">Fila vazia</div>';
+    cnt.textContent="";return;
+  }
+  cnt.textContent=FILA.length+" veículo"+(FILA.length!==1?"s":"");
+  const bc={granel:"pb-gr",ensacado:"pb-en",bigbag:"pb-bb"};
+  const bl={granel:"Granel",ensacado:"Ensacado",bigbag:"Big Bag"};
+  el.innerHTML=FILA.map((c,i)=>{
+    const cim=c.tipoCimento||c.tipoCimentoLabel||"";
+    const tp=c.tipoCarga||"";
+    const ativo=CHAMADO_ATUAL&&CHAMADO_ATUAL.id===c.id?" ativo":"";
+    return`<div class="placa-row${ativo}" onclick="chamarPlaca('${c.id}')">
+      <span class="p-pos">${i+1}°</span>
+      <div style="flex:1">
+        <div class="p-num">${c.placa}</div>
+        <div class="p-sub">${cim?`<span class="p-cim">${cim}</span> · `:""}${bl[tp]||tp} · ${c.ac}</div>
+      </div>
+      <span class="p-badge ${bc[tp]||"pb-en"}">${bl[tp]||tp}</span>
+    </div>`;
+  }).join("");
 }
 
-function resetEstadoChamada(){
-  // Limpa timer e estado
-  if(TIMER_AUSENCIA)clearTimeout(TIMER_AUSENCIA);
-  TIMER_AUSENCIA=null;
-  ULTIMO_CHAMADO=null;
-  PRIMEIRO_CHAMADO_TS=null;
-  CHAMADAS_VEIC=0;
-  AGUARD_JUST=false;
-  // Reseta botão
-  const btn=document.getElementById("btn-chamar");
-  btn.textContent="📢 Chamar Próximo da Fila";
-  btn.onclick=chamarProximo;
-  btn.style.background="linear-gradient(135deg,#00e896,#009960)";
-  btn.style.opacity="1";
-  btn.disabled=false;
-  document.getElementById("timer-bar-wrap").style.display="none";
-  document.getElementById("chamada-info-extra").textContent="";
-}
-
-async function registrarChamada(veiculo){
+window.chamarPlaca=async(id)=>{
+  const v=FILA.find(c=>c.id===id);if(!v)return;
+  CHAMADO_ATUAL=v;
+  CH_SECS=0;if(CH_INTERVAL)clearInterval(CH_INTERVAL);
+  CH_INTERVAL=setInterval(()=>{
+    CH_SECS++;
+    document.getElementById("ch-counter").textContent=String(Math.floor(CH_SECS/60)).padStart(2,"0")+":"+String(CH_SECS%60).padStart(2,"0");
+  },1000);
+  const cim=v.tipoCimento||v.tipoCimentoLabel||"";
+  const tpL={granel:"Granel",ensacado:"Ensacado",bigbag:"Big Bag"}[v.tipoCarga]||v.tipoCarga||"";
+  const hora=new Date().toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"});
+  document.getElementById("ch-placa").textContent=v.placa;
+  document.getElementById("ch-meta").textContent=(cim?cim+" · ":"")+tpL+" · "+v.ac+" · chamado "+hora;
+  document.getElementById("strip").className="chamado-strip";
+  document.getElementById("ch-actions").style.display="flex";
+  renderFila();
   CONTADOR_CHAMADA++;
   try{
-    const {addDoc,doc,setDoc,Timestamp}=await import("https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js");
+    const{addDoc:aD,doc,setDoc,Timestamp:TS}=await import("https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js");
     const ts=new Date();
-    await addDoc(collection(db,"chamadas_fila"),{
-      numero:CONTADOR_CHAMADA,
-      placa:veiculo.placa,
-      ac:veiculo.ac,
-      tipoCarga:veiculo.tipoCarga||null,
-      veiculoId:veiculo.id,
-      data:hoje(),
-      criadoEm:{toDate:()=>ts,seconds:ts.getTime()/1000},
-      status:"chamado"
+    await aD(collection(db,"chamadas_fila"),{
+      numero:CONTADOR_CHAMADA,placa:v.placa,ac:v.ac,
+      tipoCarga:v.tipoCarga||null,tipoCimento:v.tipoCimento||null,
+      veiculoId:v.id,data:hoje(),
+      criadoEm:{toDate:()=>ts,seconds:ts.getTime()/1000},status:"chamado"
     });
     await setDoc(doc(db,"config","chamadas_contador_"+hoje()),{n:CONTADOR_CHAMADA});
-  }catch(e){showMsg("er","Erro ao registrar: "+e.message);}
-}
-
-function iniciarTimerAusencia(){
-  if(TIMER_AUSENCIA)clearTimeout(TIMER_AUSENCIA);
-  const LIMITE=3*60*1000; // 3 minutos
-  const inicio=Date.now();
-  
-  // Barra de progresso
-  document.getElementById("timer-bar-wrap").style.display="block";
-  
-  // Atualiza barra a cada segundo
-  const barInterval=setInterval(()=>{
-    const passado=Date.now()-inicio;
-    const pct=Math.min(100,(passado/LIMITE)*100);
-    document.getElementById("timer-bar").style.width=pct+"%";
-    const restante=Math.max(0,Math.round((LIMITE-passado)/1000));
-    const m=Math.floor(restante/60),s=restante%60;
-    document.getElementById("timer-txt").textContent=`⏱ ${m}:${String(s).padStart(2,"0")} para justificativa obrigatória`;
-    if(pct>=100)clearInterval(barInterval);
-  },1000);
-  
-  TIMER_AUSENCIA=setTimeout(()=>{
-    clearInterval(barInterval);
-    AGUARD_JUST=true;
-    // Muda botão para vermelho piscando
-    const btn=document.getElementById("btn-chamar");
-    btn.style.background="linear-gradient(135deg,#ff4466,#cc0033)";
-    btn.textContent="🚨 Chamar novamente (justificativa obrigatória)";
-    document.getElementById("timer-txt").textContent="⚠️ 3 min esgotados — justificativa obrigatória antes de passar a vez";
-    document.getElementById("timer-bar").style.width="100%";
-    document.getElementById("timer-bar").style.background="#ff4466";
-  },LIMITE);
-}
-
-window.chamarProximo=async()=>{
-  if(!FILA.length){showMsg("er","Fila vazia — nenhum veículo aguardando.");return;}
-  
-  // Se popup obrigatório: abre justificativa
-  if(AGUARD_JUST){
-    abrirModal();
-    return;
-  }
-  
-  const proximo=FILA[0];
-  
-  // Se é o mesmo veículo sendo chamado novamente (sem justificativa ainda)
-  if(ULTIMO_CHAMADO&&ULTIMO_CHAMADO.id===proximo.id){
-    CHAMADAS_VEIC++;
-    await registrarChamada(proximo);
-    showMsg("ok",`📢 Chamando novamente ${proximo.placa} (${CHAMADAS_VEIC+1}ª vez)`);
-    iniciarTimerAusencia(); // reinicia o timer
-    return;
-  }
-  
-  // Primeiro chamado do veículo
-  ULTIMO_CHAMADO=proximo;
-  PRIMEIRO_CHAMADO_TS=Date.now();
-  CHAMADAS_VEIC=1;
-  AGUARD_JUST=false;
-  
-  await registrarChamada(proximo);
-  showMsg("ok","📢 Chamando "+proximo.placa+" — Nº "+String(CONTADOR_CHAMADA).padStart(3,"0"));
-  
-  const btn=document.getElementById("btn-chamar");
-  btn.textContent="📢 Chamar novamente";
-  btn.style.background="linear-gradient(135deg,#ffd000,#cc9900)";
-  
-  // Inicia timer de 3 min
-  iniciarTimerAusencia();
+  }catch(e){showMsg("er","Erro: "+e.message);}
+  showMsg("ok","📢 "+v.placa+" chamado — Nº "+String(CONTADOR_CHAMADA).padStart(3,"0"));
 };
 
-window.abrirModal=()=>{
-  if(!ULTIMO_CHAMADO)return;
-  document.getElementById("modal-placa-info").textContent="Placa: "+ULTIMO_CHAMADO.placa+" · AC: "+ULTIMO_CHAMADO.ac+" · Chamado "+CHAMADAS_VEIC+"x";
-  document.getElementById("modal-just").style.display="flex";
-  MOTIVO_SEL=null;
-  document.querySelectorAll(".motivo-btn").forEach(b=>b.style.borderColor="#1e3558");
-  document.getElementById("outro-wrap").style.display="none";
+window.confirmarChegada=()=>{
+  if(CH_INTERVAL)clearInterval(CH_INTERVAL);
+  CHAMADO_ATUAL=null;CH_SECS=0;
+  document.getElementById("ch-placa").textContent="—";
+  document.getElementById("ch-meta").textContent="Nenhum veículo chamado";
+  document.getElementById("strip").className="chamado-strip vazio";
+  document.getElementById("ch-actions").style.display="none";
+  document.getElementById("ch-counter").textContent="00:00";
+  renderFila();
 };
-window.fecharModal=()=>{
-  document.getElementById("modal-just").style.display="none";
+
+window.abrirModalJust=()=>{
+  if(!CHAMADO_ATUAL)return;
+  document.getElementById("mr-placa").textContent=CHAMADO_ATUAL.placa;
+  document.getElementById("modal-just").classList.add("show");
+  document.querySelectorAll(".mr-motivo").forEach(b=>b.classList.remove("on"));
+  document.getElementById("outro-r").style.display="none";
+  MOT_SEL=null;
 };
-window.selMotivo=(el,m)=>{
-  MOTIVO_SEL=m;
-  document.querySelectorAll(".motivo-btn").forEach(b=>b.style.borderColor="#1e3558");
-  el.style.borderColor="#ffd000";
-  document.getElementById("outro-wrap").style.display=m==="Outro"?"block":"none";
+window.fecharModalJust=()=>{document.getElementById("modal-just").classList.remove("show");};
+window.selMotR=(el,m)=>{
+  MOT_SEL=m;
+  document.querySelectorAll(".mr-motivo").forEach(b=>b.classList.remove("on"));
+  el.classList.add("on");
+  document.getElementById("outro-r").style.display=m==="Outro"?"block":"none";
 };
-window.confirmarJust=async()=>{
-  if(!MOTIVO_SEL){showMsg("er","Selecione o motivo.");return;}
-  let motivo=MOTIVO_SEL;
+window.confirmarJustR=async()=>{
+  if(!MOT_SEL){showMsg("er","Selecione o motivo.");return;}
+  let motivo=MOT_SEL;
   if(motivo==="Outro"){
-    const t=document.getElementById("outro-txt").value.trim();
+    const t=document.getElementById("outro-r").value.trim();
     if(!t){showMsg("er","Descreva o motivo.");return;}
     motivo=t;
   }
+  const v=CHAMADO_ATUAL;if(!v)return;
   try{
-    const {addDoc}=await import("https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js");
-    await addDoc(collection(db,"justificativas"),{
-      placa:ULTIMO_CHAMADO.placa,
-      ac:ULTIMO_CHAMADO.ac,
-      motivo,
-      tipo:"nao_compareceu",
-      chamadas:CHAMADAS_VEIC,
-      data:hoje(),
-      criadoEm:new Date().toISOString()
+    const{addDoc:aD}=await import("https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js");
+    await aD(collection(db,"justificativas"),{
+      placa:v.placa,ac:v.ac,motivo,tipo:"nao_compareceu",
+      tipoCarga:v.tipoCarga||null,tipoCimento:v.tipoCimento||null,
+      data:hoje(),criadoEm:new Date().toISOString()
     });
-    fecharModal();
-    showMsg("wn","⚠️ Justificativa registrada · Passando para o próximo...");
-    resetEstadoChamada();
-    // Chama o próximo automaticamente após 1.5s
-    setTimeout(async()=>{
-      if(FILA.length>1){
-        // Pula o primeiro (ausente) e chama o segundo
-        const proximo=FILA[1]||FILA[0];
-        ULTIMO_CHAMADO=proximo;
-        PRIMEIRO_CHAMADO_TS=Date.now();
-        CHAMADAS_VEIC=1;
-        await registrarChamada(proximo);
-        showMsg("ok","📢 Próximo: "+proximo.placa);
-        document.getElementById("btn-chamar").textContent="📢 Chamar novamente";
-        document.getElementById("btn-chamar").style.background="linear-gradient(135deg,#ffd000,#cc9900)";
-        iniciarTimerAusencia();
-      }
-    },1500);
-  }catch(e){showMsg("er","Erro: "+e.message);}
+  }catch(e){showMsg("er","Erro: "+e.message);return;}
+  const cim=v.tipoCimento||v.tipoCimentoLabel||"";
+  const tpL={granel:"Granel",ensacado:"Ensacado",bigbag:"Big Bag"}[v.tipoCarga]||v.tipoCarga||"";
+  const hora=new Date().toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"});
+  document.getElementById("hist-list").insertAdjacentHTML("afterbegin",`
+    <div class="hist-item">
+      <div style="flex:1">
+        <div class="hi-placa">${v.placa}</div>
+        <div class="hi-meta">${cim?cim+" · ":""}${tpL} · ${v.ac} · ${hora}</div>
+        <div class="hi-obs">${motivo}</div>
+      </div>
+      <div class="hi-badge">Sem AC nova</div>
+    </div>`);
+  const n=document.getElementById("hist-list").children.length;
+  document.getElementById("hist-count").textContent=n+" ocorrência"+(n!==1?"s":"");
+  document.getElementById("hist-wrap").style.display="block";
+  fecharModalJust();
+  showMsg("wn","⚠️ Justificativa registrada para "+v.placa);
+  if(CH_INTERVAL)clearInterval(CH_INTERVAL);
+  CHAMADO_ATUAL=null;CH_SECS=0;
+  document.getElementById("ch-placa").textContent="—";
+  document.getElementById("ch-meta").textContent="Nenhum veículo chamado";
+  document.getElementById("strip").className="chamado-strip vazio";
+  document.getElementById("ch-actions").style.display="none";
+  document.getElementById("ch-counter").textContent="00:00";
+  renderFila();
 };
+
 </script>
 </body></html>
