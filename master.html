@@ -431,7 +431,7 @@ window.render=()=>{
   document.getElementById("s9").textContent=tmfVals.length?durStr(tmfVals.reduce((a,b)=>a+b,0)/tmfVals.length):"—";
 
   const list=getFiltered(); 
-  document.getElementById("cnt").textContent=list.length+" registro"+(list.length!==1?"s":"");
+  document.getElementById("cnt").textContent=list.length+" veículo"+(list.length!==1?"s":"");
 
   const tb=document.getElementById("tbody"),em=document.getElementById("emp"),cards=document.getElementById("cards");
   if(!list.length){tb.innerHTML="";em.style.display="block";cards.innerHTML="<div class='empty'>🔍 Nenhum resultado.</div>";return;}
