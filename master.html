@@ -363,10 +363,15 @@ window.setTipoCimento=(t,el)=>{MTCIM=t;document.querySelectorAll(".ttb-cim-todos
 
 function getFiltered(){
   const{s,e}=periodDates(MP);
-  let list=ALL.filter(c=>c.data>=s&&c.data<=e);
-  if(MT!=="t")list=list.filter(c=>getTurno(getTS(c,"entrada","ts"))===MT);
-  if(MTC!=="t")list=list.filter(c=>c.tipoCarga===MTC);
-  if(MTCIM!=="t")list=list.filter(c=>c.tipoCimento===MTCIM);
+  // Inclui veículos do período selecionado + veículos de dias anteriores ainda não concluídos (presos)
+  const presos=ALL.filter(c=>c.data<s&&c.setorAtual!=="concluido");
+  let list=[...presos,...ALL.filter(c=>c.data>=s&&c.data<=e)];
+  // Remove duplicatas (segurança)
+  const seen=new Set();
+  list=list.filter(c=>{if(seen.has(c.id))return false;seen.add(c.id);return true;});
+  if(MT!=="t")list=list.filter(c=>isPreso(c)||getTurno(getTS(c,"entrada","ts"))===MT);
+  if(MTC!=="t")list=list.filter(c=>isPreso(c)||c.tipoCarga===MTC);
+  if(MTCIM!=="t")list=list.filter(c=>isPreso(c)||c.tipoCimento===MTCIM);
   if(MF==="a")list=list.filter(c=>c.setorAtual!=="concluido");
   if(MF==="c")list=list.filter(c=>c.setorAtual==="concluido");
   const q=(document.getElementById("q")?.value||"").toUpperCase();
