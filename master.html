@@ -430,8 +430,9 @@ window.render=()=>{
   }).filter(v=>v!=null);
   document.getElementById("s9").textContent=tmfVals.length?durStr(tmfVals.reduce((a,b)=>a+b,0)/tmfVals.length):"—";
 
-  const list=getFiltered();
-  document.getElementById("cnt").textContent=list.length+" caminhão"+(list.length!==1?"s":"");
+const total = list.length;
+document.getElementById("cnt").textContent =
+  total + " " + (total === 1 ? "caminhão" : "caminhões");
 
   const tb=document.getElementById("tbody"),em=document.getElementById("emp"),cards=document.getElementById("cards");
   if(!list.length){tb.innerHTML="";em.style.display="block";cards.innerHTML="<div class='empty'>🔍 Nenhum resultado.</div>";return;}
