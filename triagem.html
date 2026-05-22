@@ -142,7 +142,7 @@ function showErrBox(id,html){const el=document.getElementById(id);if(el){el.styl
 function hideErrBox(id){const el=document.getElementById(id);if(el)el.style.display="none";}
 function setCamState(id,state,b64,tsText){const area=document.getElementById(id);area.classList.remove("analyzing","success","fail");if(state)area.classList.add(state);if(b64){const p=area.querySelector(".prev");if(p)p.src=b64;}const te=area.querySelector(".tsbar");if(te&&tsText!==undefined)te.textContent=tsText;}
 const B64={},TS={},DC={};let HD=[];
-onSnapshot(collection(db,"caminhoes_rastreio"),snap=>{HD=snap.docs.map(d=>{return{id:d.id,...d.data()}}).filter(c=>c.data===hoje());});
+onSnapshot(collection(db,"caminhoes_rastreio"),snap=>{const hj=hoje();HD=snap.docs.map(d=>{return{id:d.id,...d.data()}}).filter(c=>c.data===hj||(c.data<hj&&c.setorAtual!=="concluido"));});
 function find(pl){return HD.find(d=>d.placa===pl&&d.setorAtual!=="concluido")||null;}
 window.onEditPlaca=cid=>{const t=cid==="ini"?"i":"f";const pl=document.getElementById("pl-"+cid).value;DC[t]=find(pl);document.getElementById("ci-"+cid).innerHTML=DC[t]?"✅ AC: "+DC[t].ac+"<br>Setor: "+DC[t].setorAtual.replace(/_/g," "):"⚠️ Não encontrado hoje";};
 function setupCam(t){
