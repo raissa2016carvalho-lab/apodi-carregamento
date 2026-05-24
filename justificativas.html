@@ -72,6 +72,24 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',sans-serif;min-hei
 .edit-btn{margin-top:8px;padding:6px 14px;border:1px solid var(--bd);border-radius:var(--rs);background:transparent;color:var(--t2);font-size:11px;cursor:pointer}
 .edit-btn:hover{border-color:var(--bl);color:var(--bl)}
 @media(max-width:600px){.kpis-sm{grid-template-columns:repeat(2,1fr)}}
+@media print{
+  body{background:#fff!important;color:#000!important}
+  .modal-rel{position:static!important;display:block!important;background:none!important;padding:0!important;backdrop-filter:none!important}
+  .modal-box{border:none!important;box-shadow:none!important;max-width:100%!important}
+  .modal-head{border-bottom:2px solid #003366!important;padding:12px 0!important}
+  .modal-title{color:#003366!important;font-size:16pt!important}
+  .modal-close,.modal-foot,.top,.wrap,.exp-btn{display:none!important}
+  .rel-table{width:90%!important;margin:0 auto!important;border-collapse:collapse!important;font-size:9pt!important}
+  .rel-table th{background:#003366!important;color:#fff!important;padding:6px 8px!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+  .rel-table td{padding:5px 8px!important;border:1px solid #ccc!important}
+  .rel-table tr:nth-child(even) td{background:#f0f4fb!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+  .modal-info{color:#555!important;font-size:9pt!important;margin-bottom:8pt!important;text-align:center!important}
+  .modal-body{padding:0!important}
+  .print-header{display:block!important}
+}
+.print-header{display:none;text-align:center;margin-bottom:12pt}
+.print-header h1{font-size:14pt;color:#003366;margin-bottom:4pt}
+.print-header p{font-size:9pt;color:#555}
 .rel-btn{padding:7px 16px;border:1px solid var(--gr);border-radius:20px;background:rgba(0,232,150,.08);color:var(--gr);font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap;transition:all .2s}
 .rel-btn:hover{background:rgba(0,232,150,.18)}
 /* Modal relatório */
@@ -82,9 +100,9 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',sans-serif;min-hei
 .modal-title{font-family:'Rajdhani',sans-serif;font-size:18px;font-weight:800;color:var(--tx);flex:1;letter-spacing:1px}
 .modal-close{width:30px;height:30px;border:1px solid var(--bd);border-radius:6px;background:transparent;color:var(--t2);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center}
 .modal-close:hover{border-color:var(--rd);color:var(--rd)}
-.modal-body{padding:16px 20px;overflow-x:auto}
+.modal-body{padding:16px 20px;overflow-x:auto;text-align:center}
 .modal-info{font-size:11px;color:var(--t2);margin-bottom:12px}
-.rel-table{width:100%;border-collapse:collapse;font-size:11px}
+.rel-table{width:100%;max-width:100%;border-collapse:collapse;font-size:11px;margin:0 auto}
 .rel-table th{text-align:left;padding:8px 10px;font-size:9px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;border-bottom:2px solid var(--bd);white-space:nowrap}
 .rel-table td{padding:8px 10px;border-bottom:1px solid var(--bd);vertical-align:middle;color:var(--tx)}
 .rel-table tr:hover td{background:var(--bg3)}
@@ -111,12 +129,16 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',sans-serif;min-hei
       <button class="modal-close" onclick="document.getElementById('modal-rel').classList.remove('show')">✕</button>
     </div>
     <div class="modal-body">
+      <div class="print-header">
+        <h1>CONTROLE DE JUSTIFICATIVAS POR VEÍCULOS</h1>
+        <p id="print-sub">Apodi Cimentos</p>
+      </div>
       <div class="modal-info" id="rel-info"></div>
       <div id="rel-body"></div>
     </div>
     <div class="modal-foot">
       <button class="modal-close" style="padding:8px 16px;width:auto" onclick="document.getElementById('modal-rel').classList.remove('show')">Fechar</button>
-      <button class="exp-btn" onclick="exportarDoc()">📄 Exportar .doc</button>
+      <button class="exp-btn" onclick="exportarPdf()">📄 Exportar .pdf</button>
     </div>
   </div>
 </div>
@@ -452,82 +474,20 @@ window.abrirRelatorio=()=>{
   document.getElementById("modal-rel").classList.add("show");
 };
 
-window.exportarDoc=()=>{
+window.exportarPdf=()=>{
+  // Atualiza subtítulo para impressão
   const{s,e}=periodDates(MP);
-  const atrasados=ALL.filter(c=>{
-    if(!c.data||c.data<s||c.data>e)return false;
-    if(c.setorAtual==="posto1")return false;
-    const en=getTS(c,"entrada","ts");
-    if(!en)return false;
-    const sa=getTS(c,"faturamento","ts");
-    const agora=sa||new Date();
-    return(agora-en)>LIMITE_MS;
-  });
-
-  const linhas=atrasados.map(c=>{
-    const en=getTS(c,"entrada","ts");
-    const sa=getTS(c,"faturamento","ts");
-    const agora=sa||new Date();
-    const tmacMs=agora-en;
-    const turno=getTurno(en);
-    const concluido=c.setorAtual==="concluido";
-    const tipoLabel=(c.tipoCimento?c.tipoCimento+" ":"")+({granel:"Granel",ensacado:"Ensacado",bigbag:"Big Bag"}[c.tipoCarga]||c.tipoCarga||"—");
-    const g=gargalo(c);
-    const temJust=!!(c.justificativa?.motivo);
-    return`    <tr>
-      <td style="border:1px solid #ccc;padding:6px 10px;font-weight:bold">${c.placa}</td>
-      <td style="border:1px solid #ccc;padding:6px 10px">${c.ac||"—"}</td>
-      <td style="border:1px solid #ccc;padding:6px 10px;text-align:center">${turno}</td>
-      <td style="border:1px solid #ccc;padding:6px 10px">${tipoLabel}</td>
-      <td style="border:1px solid #ccc;padding:6px 10px;text-align:center">${fmtT(en)}</td>
-      <td style="border:1px solid #ccc;padding:6px 10px;text-align:center">${concluido?fmtT(sa):"Em processo"}</td>
-      <td style="border:1px solid #ccc;padding:6px 10px;text-align:center;color:red;font-weight:bold">${durStr(tmacMs)}</td>
-      <td style="border:1px solid #ccc;padding:6px 10px">${g?g.lb:"—"}</td>
-      <td style="border:1px solid #ccc;padding:6px 10px;text-align:center">${g?durStr(g.ms):"—"}</td>
-      <td style="border:1px solid #ccc;padding:6px 10px;text-align:center">${temJust?"✅ Justificado":"⏳ Pendente"}</td>
-      <td style="border:1px solid #ccc;padding:6px 10px">${c.justificativa?.motivo||"—"}${c.justificativa?.descricao?" — "+c.justificativa.descricao:""}</td>
-    </tr>`;
-  }).join("");
-
   const hoje=new Date().toLocaleDateString("pt-BR",{timeZone:"America/Fortaleza"});
-  const horaAgora=new Date().toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit",timeZone:"America/Fortaleza"});
-
-  const docHtml=`<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
-<head><meta charset="UTF-8">
-<style>
-  body{font-family:Arial,sans-serif;font-size:11pt;margin:2cm}
-  h1{font-size:14pt;color:#003366;text-align:center;margin-bottom:4pt}
-  h2{font-size:11pt;color:#003366;margin-bottom:2pt}
-  .sub{font-size:10pt;color:#555;text-align:center;margin-bottom:16pt}
-  table{border-collapse:collapse;width:100%;font-size:9pt}
-  th{background:#003366;color:#fff;padding:7px 10px;text-align:left;font-size:8.5pt}
-  tr:nth-child(even) td{background:#f2f6fc}
-  .footer{margin-top:20pt;font-size:8pt;color:#888;text-align:center;border-top:1pt solid #ccc;padding-top:6pt}
-</style>
-</head>
-<body>
-<h1>CONTROLE DE JUSTIFICATIVAS POR VEÍCULOS</h1>
-<div class="sub">Apodi Cimentos · Período: ${s===e?s:s+" a "+e} · Gerado em: ${hoje} às ${horaAgora}</div>
-<div class="sub" style="color:red;font-weight:bold">Veículos com TMAC superior a 2h10 — Total: ${atrasados.length}</div>
-<br>
-<table>
-<thead><tr>
-  <th>Placa</th><th>AC</th><th>Turno</th><th>Tipo</th>
-  <th>Entrada</th><th>Saída</th><th>TMAC</th>
-  <th>Gargalo Principal</th><th>Tempo Gargalo</th>
-  <th>Status</th><th>Justificativa</th>
-</tr></thead>
-<tbody>${linhas}</tbody>
-</table>
-<div class="footer">Documento gerado automaticamente pelo Sistema de Rastreio de Carregamento — Apodi Cimentos</div>
-</body></html>`;
-
-  const blob=new Blob(['﻿'+docHtml],{type:"application/msword;charset=utf-8"});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement("a");
-  const per=s===e?s:s+"_"+e;
-  a.href=url;a.download=`relatorio_tmac_${per}.doc`;
-  a.click();URL.revokeObjectURL(url);
+  const hora=new Date().toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit",timeZone:"America/Fortaleza"});
+  const printSub=document.getElementById("print-sub");
+  if(printSub)printSub.textContent=`Apodi Cimentos · Período: ${s===e?s:s+" a "+e} · Gerado em: ${hoje} às ${hora}`;
+  // Garante que o modal está aberto (com o relatório gerado)
+  if(!document.getElementById("modal-rel").classList.contains("show")){
+    abrirRelatorio();
+    setTimeout(()=>window.print(),400);
+  } else {
+    window.print();
+  }
 };
 </script>
 </body></html>
