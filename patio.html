@@ -56,54 +56,53 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',sans-serif;min-hei
 <body>
 <div class="top">
   <div class="logo">🏭 STATUS DO PÁTIO</div>
-  <div class="live"><div class="dot"></div>AO VIVO</div>
-  <a class="back-btn" href="/master">← Master</a>
+  <a href="/analise" style="padding:6px 14px;border:1px solid rgba(167,139,250,.4);border-radius:20px;background:rgba(167,139,250,.07);color:var(--pu);font-size:11px;font-weight:700;text-decoration:none;white-space:nowrap;transition:all .2s" onmouseover="this.style.background='rgba(167,139,250,.15)'" onmouseout="this.style.background='rgba(167,139,250,.07)'">📊 Análise</a>
+  <a href="/placas" style="padding:6px 14px;border:1px solid rgba(167,139,250,.4);border-radius:20px;background:rgba(167,139,250,.07);color:var(--pu);font-size:11px;font-weight:700;text-decoration:none;white-space:nowrap;transition:all .2s" onmouseover="this.style.background='rgba(167,139,250,.15)'" onmouseout="this.style.background='rgba(167,139,250,.07)'">🔍 Placas</a>
+  <a href="/justificativas" style="padding:6px 14px;border:1px solid rgba(255,68,102,.4);border-radius:20px;background:rgba(255,68,102,.07);color:var(--rd);font-size:11px;font-weight:700;text-decoration:none;white-space:nowrap;transition:all .2s" onmouseover="this.style.background='rgba(255,68,102,.15)'" onmouseout="this.style.background='rgba(255,68,102,.07)'">⚠️ Justificativas</a>
+  <a href="/patio" style="padding:6px 14px;border:1px solid rgba(0,232,150,.4);border-radius:20px;background:rgba(0,232,150,.07);color:var(--gr);font-size:11px;font-weight:700;text-decoration:none;white-space:nowrap;transition:all .2s" onmouseover="this.style.background='rgba(0,232,150,.15)'" onmouseout="this.style.background='rgba(0,232,150,.07)'">🏭 Pátio</a>
+  <a href="/master" style="padding:6px 14px;border:1px solid var(--b2);border-radius:20px;background:transparent;color:var(--t2);font-size:11px;font-weight:700;text-decoration:none;white-space:nowrap;transition:all .2s" onmouseover="this.style.background='rgba(0,212,255,.07)';this.style.color='var(--bl)'" onmouseout="this.style.background='transparent';this.style.color='var(--t2)'">← Master</a>
 </div>
 <div class="wrap">
   <div id="loading-wrap" class="loading-wrap"><div class="spin"></div><div>Carregando...</div></div>
   <div id="content" style="display:none">
     <div class="kpis">
-      <div class="kpi k0"><div class="kv" id="k-total">—</div><div class="kl">No Pátio (aguardando)</div></div>
+      <div class="kpi k0"><div class="kv" id="k-total">—</div><div class="kl">Total no Pátio</div></div>
+      <div class="kpi k1"><div class="kv" id="k-aguard">—</div><div class="kl">Aguard. Triagem</div></div>
+      <div class="kpi k2"><div class="kv" id="k-triagem">—</div><div class="kl">Em Triagem</div></div>
+      <div class="kpi k3"><div class="kv" id="k-carga">—</div><div class="kl">Carregando</div></div>
+      <div class="kpi k4"><div class="kv" id="k-enlone">—</div><div class="kl">Enlonando</div></div>
     </div>
 
     <!-- Aguardando Triagem -->
     <div id="sec-aguardando" style="display:none;margin-bottom:24px">
-      <div class="section-title">🏁 Veículos no Pátio — Aguardando Entrada <span id="cnt-aguardando"></span></div>
+      <div class="section-title">🏁 Aguardando Triagem <span id="cnt-aguardando"></span></div>
       <div class="grid" id="grid-aguardando"></div>
     </div>
 
-    <!-- REMOVIDO: Em Triagem -->
-    <!--
+    <!-- Em Triagem -->
     <div id="sec-triagem" style="display:none;margin-bottom:24px">
       <div class="section-title">📦 Em Triagem <span id="cnt-triagem"></span></div>
       <div class="grid" id="grid-triagem"></div>
     </div>
 
--->
-    <!-- REMOVIDO: Carregamento -->
-    <!--
+    <!-- Carregamento -->
     <div id="sec-carga" style="display:none;margin-bottom:24px">
       <div class="section-title">🏗️ Carregamento <span id="cnt-carga"></span></div>
       <div class="grid" id="grid-carga"></div>
     </div>
 
--->
-    <!-- REMOVIDO: Enlonamento -->
-    <!--
+    <!-- Enlonamento -->
     <div id="sec-enlone" style="display:none;margin-bottom:24px">
       <div class="section-title">🪢 Enlonamento <span id="cnt-enlone"></span></div>
       <div class="grid" id="grid-enlone"></div>
     </div>
 
--->
-    <!-- REMOVIDO: Ag. Faturamento -->
-    <!--
+    <!-- Ag. Faturamento -->
     <div id="sec-fat" style="display:none;margin-bottom:24px">
       <div class="section-title">🧾 Aguard. Faturamento <span id="cnt-fat"></span></div>
       <div class="grid" id="grid-fat"></div>
     </div>
 
--->
     <div id="empty-all" class="empty" style="display:none">Nenhum veículo no pátio agora.</div>
   </div>
 </div>
@@ -173,13 +172,17 @@ function showSection(id,gridId,cntId,list,label){
 onSnapshot(collection(db,"caminhoes_rastreio"),snap=>{
   const hj=hoje();
   const todos=snap.docs.map(d=>({id:d.id,...d.data()}))
-    .filter(c=>c.data===hj&&c.setorAtual==="posto1");
+    .filter(c=>c.data===hj&&c.setorAtual!=="concluido");
 
   document.getElementById("loading-wrap").style.display="none";
   document.getElementById("content").style.display="block";
 
   // KPIs
   document.getElementById("k-total").textContent=todos.length;
+  document.getElementById("k-aguard").textContent=todos.filter(c=>c.setorAtual==="posto1").length;
+  document.getElementById("k-triagem").textContent=todos.filter(c=>c.setorAtual?.startsWith("triagem")).length;
+  document.getElementById("k-carga").textContent=todos.filter(c=>c.setorAtual?.startsWith("carregamento")).length;
+  document.getElementById("k-enlone").textContent=todos.filter(c=>c.setorAtual?.startsWith("enlonamento")).length;
 
   // Seções
   const aguardando=todos.filter(c=>c.setorAtual==="posto1");
@@ -188,7 +191,11 @@ onSnapshot(collection(db,"caminhoes_rastreio"),snap=>{
   const enlone=todos.filter(c=>c.setorAtual?.startsWith("enlonamento"));
   const fat=todos.filter(c=>c.setorAtual==="faturamento_aguardando");
 
-  showSection("sec-aguardando","grid-aguardando","cnt-aguardando",todos);
+  showSection("sec-aguardando","grid-aguardando","cnt-aguardando",aguardando);
+  showSection("sec-triagem","grid-triagem","cnt-triagem",triagem);
+  showSection("sec-carga","grid-carga","cnt-carga",carga);
+  showSection("sec-enlone","grid-enlone","cnt-enlone",enlone);
+  showSection("sec-fat","grid-fat","cnt-fat",fat);
 
   const emptyAll=document.getElementById("empty-all");
   emptyAll.style.display=todos.length===0?"block":"none";
