@@ -510,9 +510,9 @@ function getFiltered(){
   let list=ALL.filter(c=>noperiodo(c,s,e,mdata));
   const seen=new Set();
   list=list.filter(c=>{if(seen.has(c.id))return false;seen.add(c.id);return true;});
-  if(MT!=="t")list=list.filter(c=>isPreso(c)||getTurno(getTS(c,"entrada","ts"))===MT);
-  if(MTC!=="t")list=list.filter(c=>isPreso(c)||c.tipoCarga===MTC);
-  if(MTCIM!=="t")list=list.filter(c=>isPreso(c)||c.tipoCimento===MTCIM);
+  if(MT!=="t")list=list.filter(c=>getTurno(getTS(c,"entrada","ts"))===MT);
+  if(MTC!=="t")list=list.filter(c=>c.tipoCarga===MTC);
+  if(MTCIM!=="t")list=list.filter(c=>c.tipoCimento===MTCIM);
   if(MF==="a")list=list.filter(c=>c.setorAtual!=="concluido");
   if(MF==="c")list=list.filter(c=>c.setorAtual==="concluido");
   const q=(document.getElementById("q")?.value||"").toUpperCase();
@@ -533,9 +533,9 @@ window.render=()=>{
   let period=ALL.filter(c=>noperiodo(c,s,e,mdata));
   const seenSt=new Set();
   period=period.filter(c=>{if(seenSt.has(c.id))return false;seenSt.add(c.id);return true;});
-  if(MT!=="t")period=period.filter(c=>isPreso(c)||getTurno(getTS(c,"entrada","ts"))===MT);
-  if(MTC!=="t")period=period.filter(c=>isPreso(c)||c.tipoCarga===MTC);
-  if(MTCIM!=="t")period=period.filter(c=>isPreso(c)||c.tipoCimento===MTCIM);
+  if(MT!=="t")period=period.filter(c=>getTurno(getTS(c,"entrada","ts"))===MT);
+  if(MTC!=="t")period=period.filter(c=>c.tipoCarga===MTC);
+  if(MTCIM!=="t")period=period.filter(c=>c.tipoCimento===MTCIM);
 
   document.getElementById("s0").textContent=period.length;
   document.getElementById("s1").textContent=period.filter(c=>c.setorAtual?.startsWith("triagem")).length;
@@ -581,7 +581,7 @@ window.render=()=>{
   document.getElementById("s9").textContent=tmfVals.length?durStr(tmfVals.reduce((a,b)=>a+b,0)/tmfVals.length):"—";
 
   const list=getFiltered();
-  document.getElementById("cnt").textContent=list.length+" caminhão"+(list.length!==1?"s":"");
+  document.getElementById("cnt").textContent=list.length+" "+(list.length===1?"caminhão":"caminhões");
 
   const tb=document.getElementById("tbody"),em=document.getElementById("emp"),cards=document.getElementById("cards");
   if(!list.length){tb.innerHTML="";em.style.display="block";cards.innerHTML="<div class='empty'>🔍 Nenhum resultado.</div>";return;}
