@@ -188,12 +188,20 @@ window.chk=()=>{
   const pl=document.getElementById("pl").value.replace(/[^A-Z0-9]/gi,"");
   document.getElementById("go").disabled=!(ac.length>=2&&pl.length>=7&&TIPO&&TIPO_CIMENTO);
 };
+let REGISTRANDO=false;
 window.registrar=async()=>{
+  if(REGISTRANDO)return; // trava contra duplo clique
   const ac=document.getElementById("ac").value.trim().toUpperCase();
   const pl=document.getElementById("pl").value.toUpperCase().replace(/[^A-Z0-9]/g,"");
   if(!ac||pl.length<7){showMsg("er","Preencha a AC e a placa.");return;}
   if(!TIPO){showMsg("er","Selecione o tipo de carga.");return;}
-  if(HD.find(c=>c.placa===pl&&c.setorAtual!=="concluido")){showMsg("er","Placa "+pl+" já está em processo hoje!");return;}
+  // Verifica duplicidade: mesma placa+AC já em processo (qualquer dia)
+  const dupPlacaAC=HD.find(c=>c.placa===pl&&c.ac===ac&&c.setorAtual!=="concluido");
+  if(dupPlacaAC){showMsg("er","⚠️ Placa "+pl+" com AC "+ac+" já está em processo. Verifique os dados.");return;}
+  // Verifica se placa já está em processo hoje com AC diferente
+  const dupPlaca=HD.find(c=>c.placa===pl&&c.setorAtual!=="concluido"&&c.data===hoje());
+  if(dupPlaca){showMsg("er","⚠️ Placa "+pl+" já está em processo hoje com AC "+dupPlaca.ac+".");return;}
+  REGISTRANDO=true;
   document.getElementById("go").disabled=true;
   try{
     const ts=new Date();
@@ -214,6 +222,7 @@ window.registrar=async()=>{
     document.querySelectorAll(".cimento-btn").forEach(b=>b.classList.remove("on"));
   }catch(e){showMsg("er","Erro: "+e.message);}
   document.getElementById("go").disabled=false;
+  REGISTRANDO=false;
 };
 function showMsg(type,txt){
   const el=document.getElementById("msg");
