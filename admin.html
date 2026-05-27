@@ -174,7 +174,17 @@ tr.data-row.selected td:first-child{border-left:3px solid var(--rd)}
 <div id="app-screen" style="display:none">
   <div class="top">
     <div class="logo">🔧 ADMIN — GESTÃO DE PROCESSOS</div>
-    <a class="nav-btn" href="/master">← Master</a>
+    <a class="nav-btn" href="/posto1" target="_blank">🏁 Posto 1</a>
+    <a class="nav-btn" href="/triagem" target="_blank">📦 Triagem</a>
+    <a class="nav-btn" href="/carregamento" target="_blank">🏗️ Carga</a>
+    <a class="nav-btn" href="/enlonamento" target="_blank">🪢 Enlone</a>
+    <a class="nav-btn" href="/faturamento" target="_blank">🧾 Fatur.</a>
+    <a class="nav-btn" href="/master" target="_blank">📊 Master</a>
+    <a class="nav-btn" href="/patio" target="_blank">🏭 Pátio</a>
+    <a class="nav-btn" href="/analise" target="_blank">📈 Análise</a>
+    <a class="nav-btn" href="/justificativas" target="_blank">⚠️ Justif.</a>
+    <a class="nav-btn" href="/placas" target="_blank">🔍 Placas</a>
+    <a class="nav-btn" href="/senha" target="_blank">📺 TV</a>
     <button class="sair-btn" onclick="doLogout()">Sair</button>
   </div>
   <div class="wrap">
@@ -368,7 +378,17 @@ import{getFirestore,collection,onSnapshot,query,orderBy,updateDoc,deleteDoc,doc,
 const app=initializeApp({apiKey:"AIzaSyCMacFP0kGkgOTCqdWzf6Y65LN2q4tw28Y",authDomain:"cimento-6163b.firebaseapp.com",projectId:"cimento-6163b",storageBucket:"cimento-6163b.firebasestorage.app",messagingSenderId:"773785464621",appId:"1:773785464621:web:02dc9de04a7e2af231ada4"});
 const db=getFirestore(app);
 const CREDS={user:"administrador",pwd:"admin2026"};
-let logado=sessionStorage.getItem("admin_auth")==="1";
+// Verifica sessão: sessionStorage (aba atual) OU localStorage (navegação entre abas)
+// Token de admin expira em 8 horas
+function isAdminLogado(){
+  if(sessionStorage.getItem("admin_auth")==="1")return true;
+  const ts=parseInt(localStorage.getItem("admin_auth_ts")||"0");
+  if(localStorage.getItem("admin_auth")==="1"&&Date.now()-ts<8*60*60*1000){
+    sessionStorage.setItem("admin_auth","1");return true;
+  }
+  return false;
+}
+let logado=isAdminLogado();
 let ALL=[],MP="hoje",MDIA="t",MT="t",MTC="t",MSTATUS="t",SELECTED_ID=null,MDATA=null;
 // calendário
 let CAL_Y=0,CAL_M=0;
@@ -664,7 +684,10 @@ window.doLogin=()=>{
   const u=document.getElementById("l-user").value.trim();
   const p=document.getElementById("l-pwd").value;
   if(u===CREDS.user&&p===CREDS.pwd){
-    sessionStorage.setItem("admin_auth","1");logado=true;
+    sessionStorage.setItem("admin_auth","1");
+    localStorage.setItem("admin_auth","1");
+    localStorage.setItem("admin_auth_ts",Date.now().toString());
+    logado=true;
     document.getElementById("login-err").className="login-err";
     document.getElementById("login-screen").style.display="none";
     document.getElementById("app-screen").style.display="block";
@@ -672,7 +695,10 @@ window.doLogin=()=>{
   }else{document.getElementById("login-err").className="login-err on";}
 };
 window.doLogout=()=>{
-  sessionStorage.removeItem("admin_auth");logado=false;
+  sessionStorage.removeItem("admin_auth");
+  localStorage.removeItem("admin_auth");
+  localStorage.removeItem("admin_auth_ts");
+  logado=false;
   document.getElementById("app-screen").style.display="none";
   document.getElementById("login-screen").style.display="flex";
   document.getElementById("l-user").value="";document.getElementById("l-pwd").value="";
