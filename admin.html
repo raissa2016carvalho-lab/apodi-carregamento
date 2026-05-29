@@ -334,6 +334,19 @@ tr.data-row.selected td:first-child{border-left:3px solid var(--rd)}
           </select>
         </div>
         <div class="dfield">
+          <label>Tipo de Cimento</label>
+          <select class="dselect" id="d-cimento">
+            <option value="">— Selecione —</option>
+            <option value="CP II F">CP II F</option>
+            <option value="CP III">CP III</option>
+            <option value="CP V">CP V</option>
+          </select>
+        </div>
+        <div class="dfield">
+          <label>Data do registro</label>
+          <input class="dinput" id="d-data" type="date"/>
+        </div>
+        <div class="dfield">
           <label>Setor Atual</label>
           <select class="dselect" id="d-setor">
             <option value="posto1">Entrada</option>
@@ -360,6 +373,15 @@ tr.data-row.selected td:first-child{border-left:3px solid var(--rd)}
         <div class="dfield"><label>Enlone — Início</label><input class="dinput" id="d-enI" type="datetime-local"/></div>
         <div class="dfield"><label>Enlone — Fim</label><input class="dinput" id="d-enF" type="datetime-local"/></div>
         <div class="dfield"><label>Saída (Faturamento)</label><input class="dinput" id="d-sa" type="datetime-local"/></div>
+      </div>
+    </div>
+    <div class="dsec">
+      <div class="dsec-title">Observações</div>
+      <div class="drow">
+        <div class="dfield" style="grid-column:1/-1">
+          <label>Observação / Justificativa</label>
+          <textarea class="dinput" id="d-obs" rows="3" style="resize:vertical;min-height:60px;font-family:inherit"></textarea>
+        </div>
       </div>
     </div>
   </div>
@@ -569,6 +591,9 @@ window.openDrawer=id=>{
   document.getElementById("d-placa").value=c.placa||"";
   document.getElementById("d-ac").value=c.ac||"";
   document.getElementById("d-tipo").value=c.tipoCarga||"";
+  document.getElementById("d-cimento").value=c.tipoCimento||"";
+  document.getElementById("d-data").value=c.data||"";
+  document.getElementById("d-obs").value=c.observacao||"";
   document.getElementById("d-setor").value=c.setorAtual||"posto1";
   document.getElementById("d-entrada").value=fmtInput(en);
   document.getElementById("d-trI").value=fmtInput(trI);document.getElementById("d-trF").value=fmtInput(trF);
@@ -598,13 +623,20 @@ window.salvar=async()=>{
   const btn=document.getElementById("btn-save");btn.disabled=true;btn.textContent="Salvando...";
   try{
     const tipoMap={ensacado:"Ensacado",granel:"Granel",bigbag:"Big Bag"};
+    const cimMap={"CP II F":"CP II F","CP III":"CP III","CP V":"CP V"};
     const tipo=document.getElementById("d-tipo").value;
+    const cimento=document.getElementById("d-cimento").value;
+    const dataVal=document.getElementById("d-data").value;
+    const obsVal=document.getElementById("d-obs").value.trim();
     const u={
       placa:(document.getElementById("d-placa").value||"").toUpperCase().replace(/[^A-Z0-9]/g,""),
       ac:document.getElementById("d-ac").value.trim().toUpperCase(),
       tipoCarga:tipo,tipoCargaLabel:tipoMap[tipo]||"",
+      tipoCimento:cimento,tipoCimentoLabel:cimMap[cimento]||"",
       setorAtual:document.getElementById("d-setor").value,
     };
+    if(dataVal)u.data=dataVal;
+    if(obsVal)u.observacao=obsVal;
     const en=tsFromInput("d-entrada"),trI=tsFromInput("d-trI"),trF=tsFromInput("d-trF");
     const caI=tsFromInput("d-caI"),caF=tsFromInput("d-caF");
     const enI=tsFromInput("d-enI"),enF=tsFromInput("d-enF"),sa=tsFromInput("d-sa");
