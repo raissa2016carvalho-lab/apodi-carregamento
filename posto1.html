@@ -372,4 +372,16 @@ window.confirmarJustR=async()=>{
 };
 
 </script>
+<!-- Badge Admin -->
+<script>
+(function(){
+  const ts=parseInt(localStorage.getItem("admin_auth_ts")||"0");
+  if(localStorage.getItem("admin_auth")==="1"&&Date.now()-ts<8*60*60*1000){
+    const b=document.createElement("div");
+    b.style.cssText="position:fixed;bottom:16px;right:16px;z-index:9999;display:flex;align-items:center;gap:8px;background:#0b1524;border:1px solid rgba(255,68,102,.4);border-radius:20px;padding:6px 14px;font-family:system-ui,sans-serif;font-size:11px;font-weight:700;color:#ff4466;box-shadow:0 4px 20px rgba(0,0,0,.4);user-select:none";
+    b.innerHTML='🔧 MODO ADMIN <span style="opacity:.5;margin:0 6px">·</span><a href="/admin" style="color:#00d4ff;text-decoration:none">← Voltar ao Admin</a>';
+    document.body.appendChild(b);
+  }
+})();
+</script>
 </body></html>
