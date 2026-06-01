@@ -409,27 +409,22 @@ import{getFirestore,collection,onSnapshot,query,orderBy,updateDoc,deleteDoc,doc,
 const app=initializeApp({apiKey:"AIzaSyCMacFP0kGkgOTCqdWzf6Y65LN2q4tw28Y",authDomain:"cimento-6163b.firebaseapp.com",projectId:"cimento-6163b",storageBucket:"cimento-6163b.firebasestorage.app",messagingSenderId:"773785464621",appId:"1:773785464621:web:02dc9de04a7e2af231ada4"});
 const db=getFirestore(app);
 const CREDS={user:"administrador",pwd:"admin2026"};
-// Verifica sessão: sessionStorage (aba atual) OU localStorage (navegação entre abas)
+// Verifica sess-o: sessionStorage (aba atual) OU localStorage (navega--o entre abas)
 // Token de admin expira em 8 horas
 function isAdminLogado(){
-  // Verifica sessão atual primeiro
   if(sessionStorage.getItem("admin_auth")==="1")return true;
-  // Verifica localStorage com validade de 8h
   try{
     const ts=parseInt(localStorage.getItem("admin_auth_ts")||"0");
-    if(localStorage.getItem("admin_auth")==="1"&&ts>0&&Date.now()-ts<8*60*60*1000){
-      sessionStorage.setItem("admin_auth","1");
-      return true;
-    }
-    // Token expirado — limpa
+    const ok=localStorage.getItem("admin_auth")==="1"&&ts>0&&(Date.now()-ts)<8*60*60*1000;
+    if(ok){sessionStorage.setItem("admin_auth","1");return true;}
     localStorage.removeItem("admin_auth");
     localStorage.removeItem("admin_auth_ts");
-  }catch(e){}
+  }catch(ignore){}
   return false;
 }
 let logado=isAdminLogado();
 let ALL=[],MP="hoje",MDIA="t",MT="t",MTC="t",MSTATUS="t",SELECTED_ID=null,MDATA=null;
-// calendário
+// calend-rio
 let CAL_Y=0,CAL_M=0;
 function calInit(){
   const tz=new Date(new Date().toLocaleString("en-US",{timeZone:"America/Fortaleza"}));
@@ -442,7 +437,7 @@ function calRender(){
   const MESES=["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
   const DOWS=["D","S","T","Q","Q","S","S"];
   document.getElementById("cal-title").textContent=`${MESES[CAL_M]} ${CAL_Y}`;
-  // datas com dados no mês
+  // datas com dados no m-s
   const pad=n=>String(n).padStart(2,"0");
   const prefix=`${CAL_Y}-${pad(CAL_M+1)}-`;
   const comDados=new Set(ALL.filter(c=>c.data&&c.data.startsWith(prefix)).map(c=>parseInt(c.data.split("-")[2])));
@@ -471,14 +466,14 @@ function calRender(){
 window.calSelect=d=>{
   const pad=n=>String(n).padStart(2,"0");
   MDATA=`${CAL_Y}-${pad(CAL_M+1)}-${pad(d)}`;
-  // quando seleciona data específica, reseta o filtro de período para não conflitar
+  // quando seleciona data espec-fica, reseta o filtro de per-odo para n-o conflitar
   MP="ano";document.querySelectorAll(".pb-periodo").forEach(b=>b.classList.remove("on"));
   calRender();
   document.getElementById("cal-clear").style.display="block";
   render();
 };
 
-// ── helpers ────────────────────────────────────────────────────────────────
+// -- helpers ----------------------------------------------------------------
 function periodDates(p){
   const now=new Date();
   const tz=new Date(now.toLocaleString("en-US",{timeZone:"America/Fortaleza"}));
@@ -522,7 +517,7 @@ function pill(s){
   if(!s||s==="posto1")return`<span class="pill p-bl">🔵 Entrada</span>`;
   if(s==="portaria_inicio")return`<span class="pill p-bl">🏛️ Em Portaria</span>`;
   if(s==="portaria_fim")return`<span class="pill p-bl">🏛️ Portaria OK</span>`;
-  if(s==="triagem_inicio")return`<span class="pill p-ye">`🟡 Em Triagem</span>`;
+  if(s==="triagem_inicio")return`<span class="pill p-ye">🟡 Em Triagem</span>`;
   if(s==="triagem_fim")return`<span class="pill p-ye">🟡 Triagem OK</span>`;
   if(s==="carregamento_inicio")return`<span class="pill p-rd">🔴 Carregando</span>`;
   if(s==="carregamento_fim")return`<span class="pill p-rd">🔴 Carregado</span>`;
@@ -534,10 +529,10 @@ function pill(s){
 }
 function cellT(d){return d?`<span class="d">${fmtT(d)}</span>`:`<span class="w">—</span>`;}
 
-// ── filtros ────────────────────────────────────────────────────────────────
+// -- filtros ----------------------------------------------------------------
 function getFiltered(){
   const{s,e}=periodDates(MP);
-  // Se data específica selecionada no calendário, usa ela; senão usa período
+  // Se data espec-fica selecionada no calend-rio, usa ela; sen-o usa per-odo
   let list=MDATA?ALL.filter(c=>c.data===MDATA):ALL.filter(c=>c.data>=s&&c.data<=e);
   // Dia da semana
   if(MDIA!=="t")list=list.filter(c=>String(getDiaSemana(c))===MDIA);
@@ -548,7 +543,7 @@ function getFiltered(){
   // Status
   if(MSTATUS==="a")list=list.filter(c=>c.setorAtual!=="concluido");
   if(MSTATUS==="c")list=list.filter(c=>c.setorAtual==="concluido");
-  // Setor específico
+  // Setor espec-fico
   const setor=document.getElementById("f-setor-filter")?.value||"";
   if(setor)list=list.filter(c=>c.setorAtual===setor);
   // Busca global
@@ -599,7 +594,7 @@ window.render=()=>{
   }).join("");
 };
 
-// ── drawer ─────────────────────────────────────────────────────────────────
+// -- drawer -----------------------------------------------------------------
 window.openDrawer=id=>{
   const c=ALL.find(x=>x.id===id);if(!c)return;
   SELECTED_ID=id;render();
@@ -641,7 +636,7 @@ function showMsg(type,txt){
   if(type==="ok")setTimeout(()=>{el.className="dmsg";el.textContent="";},4000);
 }
 
-// ── ações ──────────────────────────────────────────────────────────────────
+// -- a--es ------------------------------------------------------------------
 window.salvar=async()=>{
   if(!SELECTED_ID)return;
   const btn=document.getElementById("btn-save");btn.disabled=true;btn.textContent="Salvando...";
@@ -731,14 +726,14 @@ window.exportExcel=()=>{
   XLSX.writeFile(wb,s===e?`admin_${s}.xlsx`:`admin_${s}_${e}.xlsx`);
 };
 
-// ── setters de filtro ──────────────────────────────────────────────────────
+// -- setters de filtro ------------------------------------------------------
 window.setPeriod=(p,el)=>{MP=p;MDATA=null;document.getElementById("cal-clear").style.display="none";calRender();document.querySelectorAll(".pb-periodo").forEach(b=>b.classList.remove("on"));el.classList.add("on");render();};
 window.setDia=(d,el)=>{MDIA=d;document.querySelectorAll(".pb-dia").forEach(b=>b.classList.remove("on"));el.classList.add("on");render();};
 window.setTurno=(t,el)=>{MT=t;document.querySelectorAll("[class*='pb-turno']").forEach(b=>b.classList.remove("on"));el.classList.add("on");render();};
 window.setCarga=(t,el)=>{MTC=t;document.querySelectorAll("[class*='pb-carga']").forEach(b=>b.classList.remove("on"));el.classList.add("on");render();};
 window.setStatus=(s,el)=>{MSTATUS=s;document.querySelectorAll(".pb-status").forEach(b=>b.classList.remove("on"));el.classList.add("on");render();};
 
-// ── auth + init ────────────────────────────────────────────────────────────
+// -- auth + init ------------------------------------------------------------
 window.doLogin=()=>{
   const u=document.getElementById("l-user").value.trim();
   const p=document.getElementById("l-pwd").value;
@@ -768,12 +763,12 @@ function iniciar(){
     ALL=snap.docs.map(d=>({id:d.id,...d.data()}));
     document.getElementById("ld").style.display="none";
     document.getElementById("tbl").style.display="block";
-    calRender(); // atualiza pontos de dados no calendário
+    calRender(); // atualiza pontos de dados no calend-rio
     render();
     if(SELECTED_ID){const still=ALL.find(x=>x.id===SELECTED_ID);if(still)openDrawer(SELECTED_ID);}
   });
 }
-// Inicializa tela de acordo com estado de autenticação
+// Inicializa tela de acordo com estado de autentica--o
 if(logado){
   document.getElementById("login-screen").style.display="none";
   document.getElementById("app-screen").style.display="block";
