@@ -250,7 +250,9 @@ tr.data-row.selected td:first-child{border-left:3px solid var(--rd)}
             <select class="dselect-filter" id="f-setor-filter" onchange="render()">
               <option value="">— Setor Atual —</option>
               <option value="posto1">Entrada</option>
-              <option value="triagem_inicio">Em Triagem</option>
+              <option value="portaria_inicio">Em Portaria</option>
+            <option value="portaria_fim">Portaria OK</option>
+            <option value="triagem_inicio">Em Triagem</option>
               <option value="triagem_fim">Triagem OK</option>
               <option value="carregamento_inicio">Carregando</option>
               <option value="carregamento_fim">Carregado</option>
@@ -293,6 +295,8 @@ tr.data-row.selected td:first-child{border-left:3px solid var(--rd)}
             <th><div class="th-plain">Tipo Carga</div></th>
             <th><div class="th-plain">Entrada</div></th>
             <th><div class="th-plain">Setor Atual</div></th>
+            <th><div class="th-plain">🏛️ Portaria Ini</div></th>
+            <th><div class="th-plain">🏛️ Portaria Fim</div></th>
             <th><div class="th-plain">📦 Triagem Ini</div></th>
             <th><div class="th-plain">📦 Triagem Fim</div></th>
             <th><div class="th-plain">🏗️ Carga Ini</div></th>
@@ -351,6 +355,8 @@ tr.data-row.selected td:first-child{border-left:3px solid var(--rd)}
           <label>Setor Atual</label>
           <select class="dselect" id="d-setor">
             <option value="posto1">Entrada</option>
+            <option value="portaria_inicio">Em Portaria</option>
+            <option value="portaria_fim">Portaria OK</option>
             <option value="triagem_inicio">Em Triagem</option>
             <option value="triagem_fim">Triagem OK</option>
             <option value="carregamento_inicio">Carregando</option>
@@ -367,6 +373,8 @@ tr.data-row.selected td:first-child{border-left:3px solid var(--rd)}
       <div class="dsec-title">Timestamps das Etapas</div>
       <div class="drow">
         <div class="dfield"><label>Entrada</label><input class="dinput" id="d-entrada" type="datetime-local"/></div>
+        <div class="dfield"><label>Portaria — Início</label><input class="dinput" id="d-ptI" type="datetime-local"/></div>
+        <div class="dfield"><label>Portaria — Fim</label><input class="dinput" id="d-ptF" type="datetime-local"/></div>
         <div class="dfield"><label>Triagem — Início</label><input class="dinput" id="d-trI" type="datetime-local"/></div>
         <div class="dfield"><label>Triagem — Fim</label><input class="dinput" id="d-trF" type="datetime-local"/></div>
         <div class="dfield"><label>Carga — Início</label><input class="dinput" id="d-caI" type="datetime-local"/></div>
@@ -504,7 +512,9 @@ function tipoPill(c){
 }
 function pill(s){
   if(!s||s==="posto1")return`<span class="pill p-bl">🔵 Entrada</span>`;
-  if(s==="triagem_inicio")return`<span class="pill p-ye">🟡 Em Triagem</span>`;
+  if(s==="portaria_inicio")return`<span class="pill p-bl">🏛️ Em Portaria</span>`;
+  if(s==="portaria_fim")return`<span class="pill p-bl">🏛️ Portaria OK</span>`;
+  if(s==="triagem_inicio")return`<span class="pill p-ye">`🟡 Em Triagem</span>`;
   if(s==="triagem_fim")return`<span class="pill p-ye">🟡 Triagem OK</span>`;
   if(s==="carregamento_inicio")return`<span class="pill p-rd">🔴 Carregando</span>`;
   if(s==="carregamento_fim")return`<span class="pill p-rd">🔴 Carregado</span>`;
@@ -553,6 +563,7 @@ window.render=()=>{
   tb.innerHTML=list.map(c=>{
     const en=getTS(c,"entrada","ts");
     const trI=getTS(c,"triagem","inicio"),trF=getTS(c,"triagem","fim");
+    const ptI=getTS(c,"portaria","inicio"),ptF=getTS(c,"portaria","fim");
     const caI=getTS(c,"carregamento","inicio"),caF=getTS(c,"carregamento","fim");
     const enI=getTS(c,"enlonamento","inicio"),enF=getTS(c,"enlonamento","fim");
     const sa=getTS(c,"faturamento","ts");
@@ -566,6 +577,8 @@ window.render=()=>{
       <td>${tipoPill(c)||`<span style="color:var(--t3);font-size:10px">—</span>`}</td>
       <td class="ec">${cellT(en)}</td>
       <td>${pill(c.setorAtual)}</td>
+      <td class="ec">${cellT(ptI)}</td>
+      <td class="ec">${cellT(ptF)}</td>
       <td class="ec">${cellT(trI)}</td>
       <td class="ec">${cellT(trF)}</td>
       <td class="ec">${cellT(caI)}</td>
@@ -596,7 +609,9 @@ window.openDrawer=id=>{
   document.getElementById("d-data").value=c.data||"";
   document.getElementById("d-obs").value=c.observacao||"";
   document.getElementById("d-setor").value=c.setorAtual||"posto1";
+  const ptI=getTS(c,"portaria","inicio"),ptF=getTS(c,"portaria","fim");
   document.getElementById("d-entrada").value=fmtInput(en);
+  document.getElementById("d-ptI").value=fmtInput(ptI);document.getElementById("d-ptF").value=fmtInput(ptF);
   document.getElementById("d-trI").value=fmtInput(trI);document.getElementById("d-trF").value=fmtInput(trF);
   document.getElementById("d-caI").value=fmtInput(caI);document.getElementById("d-caF").value=fmtInput(caF);
   document.getElementById("d-enI").value=fmtInput(enI);document.getElementById("d-enF").value=fmtInput(enF);
@@ -642,6 +657,8 @@ window.salvar=async()=>{
     const caI=tsFromInput("d-caI"),caF=tsFromInput("d-caF");
     const enI=tsFromInput("d-enI"),enF=tsFromInput("d-enF"),sa=tsFromInput("d-sa");
     if(en)u["entrada.ts"]=en;
+    const ptI=tsFromInput("d-ptI"),ptF=tsFromInput("d-ptF");
+    if(ptI)u["portaria.inicio"]=ptI;if(ptF)u["portaria.fim"]=ptF;
     if(trI)u["triagem.inicio"]=trI;if(trF)u["triagem.fim"]=trF;
     if(caI)u["carregamento.inicio"]=caI;if(caF)u["carregamento.fim"]=caF;
     if(enI)u["enlonamento.inicio"]=enI;if(enF)u["enlonamento.fim"]=enF;
@@ -690,6 +707,7 @@ window.exportExcel=()=>{
   const rows=list.map(c=>{
     const en=getTS(c,"entrada","ts");
     const trI=getTS(c,"triagem","inicio"),trF=getTS(c,"triagem","fim");
+    const ptI=getTS(c,"portaria","inicio"),ptF=getTS(c,"portaria","fim");
     const caI=getTS(c,"carregamento","inicio"),caF=getTS(c,"carregamento","fim");
     const enI=getTS(c,"enlonamento","inicio"),enF=getTS(c,"enlonamento","fim");
     const sa=getTS(c,"faturamento","ts");
