@@ -158,6 +158,7 @@ tr.alerta .turno{opacity:.7}
   <a href="/analise" style="padding:6px 14px;border:1px solid var(--pu);border-radius:20px;background:rgba(167,139,250,.08);color:var(--pu);font-size:11px;font-weight:700;text-decoration:none;letter-spacing:.4px;white-space:nowrap;transition:all .2s" onmouseover="this.style.background='rgba(167,139,250,.15)'" onmouseout="this.style.background='rgba(167,139,250,.08)'">📊 Análise</a>
   <a href="/placas" style="padding:6px 14px;border:1px solid rgba(167,139,250,.4);border-radius:20px;background:rgba(167,139,250,.07);color:var(--pu);font-size:11px;font-weight:700;text-decoration:none;letter-spacing:.4px;white-space:nowrap;transition:all .2s" onmouseover="this.style.background='rgba(167,139,250,.15)'" onmouseout="this.style.background='rgba(167,139,250,.07)'">🔍 Placas</a>
   <a href="/justificativas" style="padding:6px 14px;border:1px solid rgba(255,68,102,.4);border-radius:20px;background:rgba(255,68,102,.07);color:var(--rd);font-size:11px;font-weight:700;text-decoration:none;letter-spacing:.4px;white-space:nowrap;transition:all .2s" onmouseover="this.style.background='rgba(255,68,102,.15)'" onmouseout="this.style.background='rgba(255,68,102,.07)'">⚠️ Justificativas</a>
+  <a href="/portaria" style="padding:6px 14px;border:1px solid rgba(0,212,255,.4);border-radius:20px;background:rgba(0,212,255,.07);color:var(--bl);font-size:11px;font-weight:700;text-decoration:none;white-space:nowrap;transition:all .2s" onmouseover="this.style.background='rgba(0,212,255,.15)'" onmouseout="this.style.background='rgba(0,212,255,.07)'">🏛️ Portaria</a>
   <a href="/patio" style="padding:6px 14px;border:1px solid rgba(0,232,150,.4);border-radius:20px;background:rgba(0,232,150,.07);color:var(--gr);font-size:11px;font-weight:700;text-decoration:none;letter-spacing:.4px;white-space:nowrap;transition:all .2s" onmouseover="this.style.background='rgba(0,232,150,.15)'" onmouseout="this.style.background='rgba(0,232,150,.07)'">🏭 Pátio</a>
   <a href="/admin" style="padding:6px 14px;border:1px solid rgba(255,68,102,.5);border-radius:20px;background:rgba(255,68,102,.1);color:var(--rd);font-size:11px;font-weight:700;text-decoration:none;letter-spacing:.4px;white-space:nowrap;transition:all .2s" onmouseover="this.style.background='rgba(255,68,102,.2)'" onmouseout="this.style.background='rgba(255,68,102,.1)'">🔧 Admin</a>
   <div class="cal-toggle" id="cal-toggle">
@@ -252,6 +253,8 @@ tr.alerta .turno{opacity:.7}
           <th data-col="data">Data</th>
           <th data-col="entrada">Entrada</th>
           <th data-col="setor">Setor Atual</th>
+          <th data-col="ptI">🏛️ Portaria Ini</th>
+          <th data-col="ptF">🏛️ Portaria Fim</th>
           <th data-col="trI">📦 Triagem Ini</th>
           <th data-col="trF">📦 Triagem Fim</th>
           <th data-col="caI">🏗️ Carga Ini</th>
@@ -326,6 +329,8 @@ function tipoPill(c){
 }
 function pill(s){
   if(!s||s==="posto1")return`<span class="pill p-bl">🔵 Entrada</span>`;
+  if(s==="portaria_inicio")return`<span class="pill p-bl">🏛️ Em Portaria</span>`;
+  if(s==="portaria_fim")return`<span class="pill p-bl">🏛️ Portaria OK</span>`;
   if(s==="triagem_inicio")return`<span class="pill p-ye">🟡 Em Triagem</span>`;
   if(s==="triagem_fim")return`<span class="pill p-ye">🟡 Triagem OK</span>`;
   if(s==="carregamento_inicio")return`<span class="pill p-rd">🔴 Carregando</span>`;
@@ -364,6 +369,7 @@ function getSortVal(c,col){
   switch(col){
     case"placa":return c.placa||"";case"ac":return c.ac||"";case"data":return c.data||"";
     case"entrada":return tsVal(c,"entrada","ts");case"setor":return c.setorAtual||"";
+    case"ptI":return tsVal(c,"portaria","inicio");case"ptF":return tsVal(c,"portaria","fim");
     case"trI":return tsVal(c,"triagem","inicio");case"trF":return tsVal(c,"triagem","fim");
     case"caI":return tsVal(c,"carregamento","inicio");case"caF":return tsVal(c,"carregamento","fim");
     case"enI":return tsVal(c,"enlonamento","inicio");case"enF":return tsVal(c,"enlonamento","fim");
@@ -587,8 +593,10 @@ window.render=()=>{
   document.getElementById("s6").textContent=tmacs.length?durStr(tmacs.reduce((a,b)=>a+b,0)/tmacs.length):"—";
 
   const tmeVals=period.map(c=>{
-    const en=getTS(c,"entrada","ts"),trI=getTS(c,"triagem","inicio");
-    return(en&&trI)?trI-en:null;
+    const en=getTS(c,"entrada","ts");
+    const ptI=getTS(c,"portaria","inicio"),trI=getTS(c,"triagem","inicio");
+    const primeiraEtapa=ptI||trI; // usa portaria se existir
+    return(en&&primeiraEtapa)?primeiraEtapa-en:null;
   }).filter(v=>v!=null);
   document.getElementById("s7").textContent=tmeVals.length?durStr(tmeVals.reduce((a,b)=>a+b,0)/tmeVals.length):"—";
 
@@ -621,6 +629,7 @@ window.render=()=>{
   tb.innerHTML=list.map(c=>{
     const en=getTS(c,"entrada","ts");
     const trI=getTS(c,"triagem","inicio"),trF=getTS(c,"triagem","fim");
+    const ptI=getTS(c,"portaria","inicio"),ptF=getTS(c,"portaria","fim");
     const caI=getTS(c,"carregamento","inicio"),caF=getTS(c,"carregamento","fim");
     const enI=getTS(c,"enlonamento","inicio"),enF=getTS(c,"enlonamento","fim");
     const sa=getTS(c,"faturamento","ts");
@@ -635,6 +644,8 @@ window.render=()=>{
       <td style="color:var(--t2);font-size:10px">${c.data||"—"}</td>
       <td class="ec">${en?`<span class="d">${fmtT(en)}</span>`:"—"}</td>
       <td>${pill(c.setorAtual)}</td>
+      <td class="ec">${cell(ptI,null)}</td>
+      <td class="ec">${cell(ptF,ptI)}</td>
       <td class="ec">${cell(trI,null)}</td>
       <td class="ec">${cell(trF,trI)}</td>
       <td class="ec">${cell(caI,null)}</td>
@@ -652,7 +663,7 @@ window.render=()=>{
     const sa=getTS(c,"faturamento","ts");
     const tmac=calcTMAC(c);
     const alerta=isAlerta(c);
-    const etapas=[["📦 Triagem","triagem"],["🏗️ Carga","carregamento"],["🪢 Enlone","enlonamento"]].map(([lb,sn])=>{
+    const etapas=[["🏛️ Portaria","portaria"],["📦 Triagem","triagem"],["🏗️ Carga","carregamento"],["🪢 Enlone","enlonamento"]].map(([lb,sn])=>{
       const ini=getTS(c,sn,"inicio"),fim=getTS(c,sn,"fim");
       const d=ini&&fim?durStr(fim-ini):"";
       return`<div class="crd-et"><div class="el">${lb}</div>
@@ -679,6 +690,7 @@ window.exportExcel=()=>{
   const rows=list.map(c=>{
     const en=getTS(c,"entrada","ts");
     const trI=getTS(c,"triagem","inicio"),trF=getTS(c,"triagem","fim");
+    const ptI=getTS(c,"portaria","inicio"),ptF=getTS(c,"portaria","fim");
     const caI=getTS(c,"carregamento","inicio"),caF=getTS(c,"carregamento","fim");
     const enI=getTS(c,"enlonamento","inicio"),enF=getTS(c,"enlonamento","fim");
     const sa=getTS(c,"faturamento","ts");
@@ -686,6 +698,7 @@ window.exportExcel=()=>{
     return{
       "Placa":c.placa,"Turno":getTurno(en)||"","AC":c.ac,"Data":c.data||"",
       "Entrada":fmtEx(en),"Setor Atual":c.setorAtual||"",
+      "Portaria Início":fmtEx(getTS(c,"portaria","inicio")),"Portaria Fim":fmtEx(getTS(c,"portaria","fim")),"Duração Portaria":(()=>{const pi=getTS(c,"portaria","inicio"),pf=getTS(c,"portaria","fim");return pi&&pf?durStr(pf-pi):"";})(),
       "Triagem Início":fmtEx(trI),"Triagem Fim":fmtEx(trF),"Duração Triagem":trI&&trF?durStr(trF-trI):"",
       "Carga Início":fmtEx(caI),"Carga Fim":fmtEx(caF),"Duração Carga":caI&&caF?durStr(caF-caI):"",
       "Enlone Início":fmtEx(enI),"Enlone Fim":fmtEx(enF),"Duração Enlone":enI&&enF?durStr(enF-enI):"",
