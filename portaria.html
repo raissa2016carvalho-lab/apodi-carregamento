@@ -56,6 +56,14 @@ body{background:var(--bg);color:var(--tx);font-family:system-ui,-apple-system,sa
 .ok{background:rgba(0,232,150,.1);border:1px solid rgba(0,232,150,.3);color:#00e896}
 .er{background:rgba(255,68,102,.1);border:1px solid rgba(255,68,102,.3);color:#ff4466}
 .section-label{font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px}
+.exp-btn{width:100%;padding:12px;border:1px solid rgba(0,212,255,.4);border-radius:var(--rs);background:rgba(0,212,255,.07);color:#00d4ff;font-size:13px;font-weight:700;cursor:pointer;text-transform:uppercase;letter-spacing:.5px;margin-top:8px;display:flex;align-items:center;justify-content:center;gap:7px;transition:all .2s}
+.exp-btn:hover{background:rgba(0,212,255,.15)}
+@media print{
+  body{background:#fff!important;color:#000!important;padding:0!important;display:block!important;font-family:Arial,sans-serif}
+  .box,.hdr,.cam,.confirm-box,.err-box,.go,.retry,.manual-btn,.manual-box,.msg,.exp-btn{display:none!important}
+  .print-area{display:block!important}
+}
+.print-area{display:none}
 </style>
 </head>
 <body>
@@ -127,6 +135,7 @@ body{background:var(--bg);color:var(--tx);font-family:system-ui,-apple-system,sa
       <div class="manual-hint">Digite a placa e confirme abaixo</div>
     </div>
   </div>
+  <button class="exp-btn" onclick="exportarPDF()">📄 Exportar Controle de Portaria (.pdf)</button>
 </div>
 <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
@@ -255,5 +264,96 @@ window.onManualInput=t=>{
     document.body.appendChild(b);
   }
 })();
+window.exportarPDF=async()=>{
+  // Busca registros do dia do Firestore
+  const hj=hoje();
+  const{getDocs,query,where,orderBy,collection:col2}=await import("https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js");
+  let registros=HD.filter(c=>c.data===hj&&(c.portaria?.inicio||c.portaria?.fim||c.setorAtual==="portaria_inicio"||c.setorAtual==="portaria_fim"||c.setorAtual==="concluido"||c.setorAtual==="triagem_inicio"||c.setorAtual==="triagem_fim"||c.setorAtual==="carregamento_inicio"||c.setorAtual==="carregamento_fim"||c.setorAtual==="enlonamento_inicio"||c.setorAtual==="enlonamento_fim"));
+  
+  if(!registros.length){
+    // Se ainda não tem registros de portaria, usa todos do dia
+    registros=HD.filter(c=>c.data===hj);
+  }
+  
+  // Ordena por entrada na portaria
+  registros.sort((a,b)=>{
+    const ta=a.portaria?.inicio?.toDate?.()?.getTime()||a.entrada?.ts?.toDate?.()?.getTime()||0;
+    const tb=b.portaria?.inicio?.toDate?.()?.getTime()||b.entrada?.ts?.toDate?.()?.getTime()||0;
+    return ta-tb;
+  });
+
+  const dtHj=new Date().toLocaleDateString("pt-BR",{timeZone:"America/Fortaleza"});
+  const turnoAtual=(()=>{
+    const h=new Date(new Date().toLocaleString("en-US",{timeZone:"America/Fortaleza"})).getHours();
+    return h>=23||h<7?"A":h>=7&&h<15?"B":"C";
+  })();
+
+  const fmtDT=ts=>{
+    if(!ts)return"—";
+    const d=ts.toDate?ts.toDate():new Date(ts);
+    return d.toLocaleDateString("pt-BR",{timeZone:"America/Fortaleza",day:"2-digit",month:"2-digit",year:"numeric"})+" "+d.toLocaleTimeString("pt-BR",{timeZone:"America/Fortaleza",hour:"2-digit",minute:"2-digit"});
+  };
+
+  const linhas=registros.map((c,i)=>`
+    <tr>
+      <td style="text-align:center">${i+1}</td>
+      <td style="text-align:center;font-weight:bold;font-family:monospace;letter-spacing:1px">${c.placa||"—"}</td>
+      <td style="text-align:center">${fmtDT(c.portaria?.inicio||c.entrada?.ts)}</td>
+      <td style="text-align:center">${fmtDT(c.portaria?.fim||c.faturamento?.ts)}</td>
+      <td style="text-align:center">${c.notaFiscal||c.ac||"—"}</td>
+    </tr>`).join("");
+
+  const janela=window.open("","_blank","width=900,height=700");
+  janela.document.write(`<!DOCTYPE html>
+<html lang="pt-BR"><head>
+<meta charset="UTF-8"/>
+<title>Controle de Portaria — ${dtHj}</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:Arial,sans-serif;font-size:11pt;padding:24px;color:#000}
+  .header-info{margin-bottom:18pt;border-bottom:2px solid #000;padding-bottom:10pt}
+  .header-info table{width:100%}
+  .header-info td{padding:3px 0;font-size:11pt;vertical-align:top}
+  .header-info td:first-child{font-weight:bold;width:100px}
+  .fill-line{display:inline-block;border-bottom:1px solid #000;min-width:220px}
+  h2{font-size:14pt;font-weight:bold;text-align:center;margin-bottom:14pt;text-transform:uppercase;letter-spacing:1px}
+  table.reg{border-collapse:collapse;width:100%;margin-top:8pt}
+  table.reg th{background:#003366;color:#fff;padding:7px 10px;font-size:10pt;text-align:center;border:1px solid #ccc}
+  table.reg td{padding:7px 10px;font-size:10pt;border:1px solid #ccc}
+  table.reg tr:nth-child(even) td{background:#f0f4fb}
+  .footer{margin-top:20pt;font-size:8pt;color:#888;text-align:center;border-top:1pt solid #ccc;padding-top:6pt}
+  @media print{@page{margin:1.5cm;size:A4 landscape}}
+</style>
+</head>
+<body>
+<h2>Controle de Carregamento</h2>
+<div class="header-info">
+  <table>
+    <tr><td>Portaria:</td><td><span class="fill-line">Apodi Cimentos</span></td></tr>
+    <tr><td>Turno:</td><td><span class="fill-line">Turno ${turnoAtual}</span></td></tr>
+    <tr><td>Data:</td><td><span class="fill-line">${dtHj}</span></td></tr>
+  </table>
+</div>
+<table class="reg">
+  <thead>
+    <tr>
+      <th style="width:40px">Nº</th>
+      <th>Placa</th>
+      <th>Entrada</th>
+      <th>Saída</th>
+      <th>Nota Fiscal / AC</th>
+    </tr>
+  </thead>
+  <tbody>
+    ${linhas||'<tr><td colspan="5" style="text-align:center;color:#888;padding:16px">Nenhum registro no período</td></tr>'}
+  </tbody>
+</table>
+<div class="footer">Documento gerado automaticamente — Sistema de Rastreio de Carregamento · Apodi Cimentos · ${dtHj}</div>
+</body></html>`);
+  janela.document.close();
+  janela.focus();
+  setTimeout(()=>janela.print(),600);
+};
+
 </script>
 </body></html>
