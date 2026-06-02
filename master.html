@@ -53,18 +53,37 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',sans-serif;min-hei
 .ttb-cim-todos.on{border-color:#ffd000;color:#ffd000;background:rgba(255,208,0,.07)}
 .cim-pill{display:inline-block;font-size:9px;font-weight:800;padding:1px 6px;border-radius:4px;margin-left:4px;vertical-align:middle;font-family:monospace;letter-spacing:.3px;background:rgba(255,208,0,.12);color:#ffd000;border:1px solid rgba(255,208,0,.3)}
 .export-btn{margin-left:auto;padding:7px 16px;border:1px solid var(--gr);border-radius:20px;background:rgba(0,232,150,.08);color:var(--gr);font-size:10px;font-weight:700;cursor:pointer;transition:all .2s;text-transform:uppercase;letter-spacing:.4px;display:flex;align-items:center;gap:5px;white-space:nowrap}
+.rel-btn-m{padding:7px 16px;border:1px solid rgba(167,139,250,.4);border-radius:20px;background:rgba(167,139,250,.07);color:var(--pu);font-size:10px;font-weight:700;cursor:pointer;transition:all .2s;text-transform:uppercase;letter-spacing:.4px;display:flex;align-items:center;gap:5px;white-space:nowrap}
+.rel-btn-m:hover{background:rgba(167,139,250,.15)}
+/* Modal relatório master */
+.mrel-overlay{position:fixed;inset:0;z-index:999;display:none;align-items:flex-start;justify-content:center;background:rgba(0,0,0,.8);backdrop-filter:blur(4px);padding:12px;overflow-y:auto}
+.mrel-overlay.show{display:flex}
+.mrel-box{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);width:100%;max-width:1400px;margin:auto;overflow:hidden}
+.mrel-head{padding:14px 18px;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.mrel-title{font-family:'Rajdhani',sans-serif;font-size:16px;font-weight:800;color:var(--tx);flex:1;letter-spacing:1px}
+.mrel-info{font-size:11px;color:var(--t2);width:100%}
+.mrel-body{padding:12px 16px;overflow-x:auto}
+.mrel-foot{padding:10px 16px;border-top:1px solid var(--bd);display:flex;gap:8px;justify-content:flex-end}
+.mrel-close{width:28px;height:28px;border:1px solid var(--bd);border-radius:6px;background:transparent;color:var(--t2);cursor:pointer;font-size:13px}
+.mrel-close:hover{border-color:var(--rd);color:var(--rd)}
+.mrel-table{width:100%;border-collapse:collapse;font-size:9px}
+.mrel-table th{text-align:center;padding:6px 5px;font-size:8px;font-weight:700;color:#fff;background:#003366;text-transform:uppercase;letter-spacing:.4px;border:1px solid #1e3a58;white-space:normal;word-break:break-word;line-height:1.3;vertical-align:bottom}
+.mrel-table td{padding:5px 6px;border:1px solid var(--bd);vertical-align:middle;font-size:9px;color:var(--tx);text-align:center}
+.mrel-table tr:nth-child(even) td{background:rgba(0,212,255,.03)}
+.pdf-btn-m{padding:9px 20px;border:none;border-radius:8px;background:var(--bl);color:#000;font-size:11px;font-weight:800;cursor:pointer;display:flex;align-items:center;gap:5px;text-transform:uppercase}
+.pdf-btn-m:hover{opacity:.88}
 .export-btn:hover{background:rgba(0,232,150,.15)}
 .tcard{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);overflow:hidden;margin-bottom:16px}
 .thead{padding:14px 18px;font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;border-bottom:1px solid var(--bd);display:flex;justify-content:space-between;align-items:center}
 .thead small{font-size:11px;color:var(--t2);font-weight:400;font-family:'Inter',sans-serif}
 .tscroll{overflow-x:auto}
-table{width:100%;border-collapse:collapse;font-size:11px}
-th{text-align:left;font-size:9px;font-weight:600;color:var(--t3);text-transform:uppercase;padding:9px 14px;border-bottom:1px solid var(--bd);white-space:nowrap;cursor:pointer;user-select:none;transition:color .15s}
+table{width:100%;border-collapse:collapse;font-size:10px;table-layout:auto}
+th{text-align:center;font-size:8px;font-weight:700;color:var(--t3);text-transform:uppercase;padding:6px 5px;border-bottom:1px solid var(--bd);white-space:normal;word-break:break-word;line-height:1.3;cursor:pointer;user-select:none;transition:color .15s;vertical-align:bottom}
 th:hover{color:var(--t2)}
 th.sort-asc,th.sort-desc{color:var(--bl)}
 th.sort-asc::after{content:" ▲";font-size:8px}
 th.sort-desc::after{content:" ▼";font-size:8px}
-td{padding:11px 14px;border-bottom:1px solid var(--bd);vertical-align:top}
+td{padding:7px 6px;border-bottom:1px solid var(--bd);vertical-align:middle;font-size:10px}
 tr:last-child td{border-bottom:none}
 tr:hover td{background:var(--bg3)}
 tr.incompleto td{opacity:.45}
@@ -199,6 +218,7 @@ tr.alerta .turno{opacity:.7}
     <button class="pb" onclick="setPeriod('mes',this)">Esse Mês</button>
     <button class="pb" onclick="setPeriod('ano',this)">Esse Ano</button>
     <button class="export-btn" onclick="exportExcel()">📊 <span>Exportar Excel</span></button>
+      <button class="rel-btn-m" onclick="abrirRelatorioMaster()">📋 <span>Relatório PDF</span></button>
   </div>
 
   <div class="filter-row">
@@ -247,23 +267,24 @@ tr.alerta .turno{opacity:.7}
     <div class="tscroll" id="tbl" style="display:none">
       <table>
         <thead><tr id="thead-row">
-          <th data-col="placa">Placa</th>
-          <th data-col="cimento">Cimento</th>
-          <th data-col="ac">AC</th>
-          <th data-col="data">Data</th>
-          <th data-col="entrada">Entrada</th>
-          <th data-col="setor">Setor Atual</th>
-          <th data-col="ptI">🏛️ Portaria Ini</th>
-          <th data-col="ptF">🏛️ Portaria Fim</th>
-          <th data-col="trI">📦 Triagem Ini</th>
-          <th data-col="trF">📦 Triagem Fim</th>
-          <th data-col="caI">🏗️ Carga Ini</th>
-          <th data-col="caF">🏗️ Carga Fim</th>
-          <th data-col="enI">🪢 Enlone Ini</th>
-          <th data-col="enF">🪢 Enlone Fim</th>
-          <th data-col="saida">🧾 Saída</th>
-          <th data-col="tmac">⏱️ TMAC</th>
-          <th data-col="status">Status</th>
+          <th data-col="placa" style="text-align:left;min-width:80px">Placa</th>
+          <th data-col="cimento" style="min-width:52px">Cim.</th>
+          <th data-col="ac" style="min-width:54px">AC</th>
+          <th data-col="data" style="min-width:50px">Data</th>
+          <th data-col="entrada" style="min-width:50px">Entrada</th>
+          <th data-col="setor" style="min-width:70px">Setor<br>Atual</th>
+          <th data-col="ptI" style="min-width:52px">🏛️<br>Port.Ini</th>
+          <th data-col="ptF" style="min-width:52px">🏛️<br>Port.Fim</th>
+          <th data-col="trI" style="min-width:52px">📦<br>Trg.Ini</th>
+          <th data-col="trF" style="min-width:52px">📦<br>Trg.Fim</th>
+          <th data-col="caI" style="min-width:52px">🏗️<br>Carga Ini</th>
+          <th data-col="caF" style="min-width:52px">🏗️<br>Carga Fim</th>
+          <th data-col="enI" style="min-width:52px">🪢<br>Enl.Ini</th>
+          <th data-col="enF" style="min-width:52px">🪢<br>Enl.Fim</th>
+          <th data-col="saida" style="min-width:52px">🧾<br>Saída</th>
+          <th data-col="tmac" style="min-width:48px">⏱️<br>TMAC</th>
+          <th data-col="nf" style="min-width:70px">Nota<br>Fiscal</th>
+          <th data-col="status" style="min-width:60px">Status</th>
         </tr></thead>
         <tbody id="tbody"></tbody>
       </table>
@@ -272,6 +293,23 @@ tr.alerta .turno{opacity:.7}
   </div>
   <div class="cards" id="cards"></div>
 </div>
+
+<!-- MODAL RELATÓRIO MASTER -->
+<div class="mrel-overlay" id="mrel-overlay">
+  <div class="mrel-box">
+    <div class="mrel-head">
+      <div class="mrel-title">📋 RELATÓRIO DE RASTREIO — APODI CIMENTOS</div>
+      <button class="mrel-close" onclick="document.getElementById('mrel-overlay').classList.remove('show')">✕</button>
+      <div class="mrel-info" id="mrel-info"></div>
+    </div>
+    <div class="mrel-body"><div id="mrel-body"></div></div>
+    <div class="mrel-foot">
+      <button class="mrel-close" style="padding:8px 16px;width:auto" onclick="document.getElementById('mrel-overlay').classList.remove('show')">Fechar</button>
+      <button class="pdf-btn-m" onclick="exportarPDFMaster()">📄 Exportar PDF</button>
+    </div>
+  </div>
+</div>
+
 <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
 import{getFirestore,collection,onSnapshot,query,orderBy}from"https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
@@ -654,6 +692,7 @@ window.render=()=>{
       <td class="ec">${cell(enF,enI)}</td>
       <td class="ec">${sa?`<span class="d">${fmtT(sa)}</span>`:`<span class="w">aguardando</span>`}</td>
       <td>${tmac!=null?`<span class="tmac-cell" style="color:${tmac>130*60*1000?'var(--rd)':'var(--gr)'}">${durStr(tmac)}</span>`:`<span class="tmac-cell w">${incompleto?"não concluído":"em processo"}</span>`}</td>
+      <td style="font-size:10px;color:var(--t2);text-align:center">${c.notaFiscal||""}</td>
       <td style="text-align:center;font-size:16px">${statusFinal(c)}</td>
     </tr>`;
   }).join("");
@@ -703,6 +742,7 @@ window.exportExcel=()=>{
       "Carga Início":fmtEx(caI),"Carga Fim":fmtEx(caF),"Duração Carga":caI&&caF?durStr(caF-caI):"",
       "Enlone Início":fmtEx(enI),"Enlone Fim":fmtEx(enF),"Duração Enlone":enI&&enF?durStr(enF-enI):"",
       "Saída (Faturamento)":fmtEx(sa),"TMAC (Entrada→Saída)":tmac!=null?durStr(tmac):"",
+      "Nota Fiscal":c.notaFiscal||"",
     };
   });
   const ws=XLSX.utils.json_to_sheet(rows);
@@ -718,6 +758,131 @@ window.exportExcel=()=>{
 
 // Re-render a cada 60s para atualizar alertas de tempo
 setInterval(()=>{if(typeof render==="function")render();},60000);
+
+// ── RELATÓRIO MASTER ──────────────────────────────────────────────────────
+const fmtRel=ts=>{if(!ts)return"";const d=ts.toDate?ts.toDate():new Date(ts);return d.toLocaleDateString("pt-BR",{timeZone:"America/Fortaleza",day:"2-digit",month:"2-digit"})+" "+d.toLocaleTimeString("pt-BR",{timeZone:"America/Fortaleza",hour:"2-digit",minute:"2-digit"});};
+
+function buildRelRows(list){
+  return list.map((c,i)=>{
+    const en=getTS(c,"entrada","ts");
+    const ptI=getTS(c,"portaria","inicio"),ptF=getTS(c,"portaria","fim");
+    const trI=getTS(c,"triagem","inicio"),trF=getTS(c,"triagem","fim");
+    const caI=getTS(c,"carregamento","inicio"),caF=getTS(c,"carregamento","fim");
+    const enI=getTS(c,"enlonamento","inicio"),enF=getTS(c,"enlonamento","fim");
+    const sa=getTS(c,"faturamento","ts");
+    const tmacMs=sa&&en?sa-en:en?Date.now()-en:null;
+    const over=tmacMs&&tmacMs>LIMITE_MS;
+    return`<tr>
+      <td style="text-align:left;font-weight:700;color:#4da6ff;font-family:monospace">${c.placa||""}</td>
+      <td>${c.ac||""}</td>
+      <td style="font-size:8px">${(c.tipoCimento?c.tipoCimento+" ":"")+({granel:"Granel",ensacado:"Ensacado",bigbag:"Big Bag"}[c.tipoCarga]||c.tipoCarga||"")}</td>
+      <td>${c.data||""}</td>
+      <td>${fmtRel(en)}</td>
+      <td style="font-size:8px">${(c.setorAtual||"").replace(/_/g," ")}</td>
+      <td>${fmtRel(ptI)}</td><td>${fmtRel(ptF)}</td>
+      <td>${fmtRel(trI)}</td><td>${fmtRel(trF)}</td>
+      <td>${fmtRel(caI)}</td><td>${fmtRel(caF)}</td>
+      <td>${fmtRel(enI)}</td><td>${fmtRel(enF)}</td>
+      <td>${fmtRel(sa)}</td>
+      <td style="font-weight:700;color:${over?"#ff4466":"#00e896"}">${tmacMs!=null?durStr(tmacMs):""}</td>
+      <td style="font-size:9px;color:var(--t2)">${c.notaFiscal||""}</td>
+      <td style="text-align:center">${c.setorAtual==="concluido"||c.faturamento?.ts?"✔":""}</td>
+    </tr>`;
+  }).join("");
+}
+
+function buildRelInfo(){
+  const periodos={hoje:"Hoje",ontem:"Ontem",semana:"Esta Semana",mes:"Este Mes",ano:"Este Ano"};
+  const turnos={t:"Todos",A:"Turno A (23h-07h)",B:"Turno B (07h-15h)",C:"Turno C (15h-23h)"};
+  const cargas={t:"Todos",granel:"Granel",ensacado:"Ensacado",bigbag:"Big Bag"};
+  const cimentos={t:"Todos","CP II F":"CP II F","CP III":"CP III","CP V":"CP V"};
+  const status={t:"Todos",a:"Em Processo",c:"Concluidos"};
+  const per=MDATA||periodos[MP]||MP;
+  const list=getFiltered();
+  return{per,list,turno:turnos[MT]||MT,carga:cargas[MTC]||MTC,cim:cimentos[MTCIM]||MTCIM,st:status[MF]||MF};
+}
+
+window.abrirRelatorioMaster=()=>{
+  const{per,list,turno,carga,cim,st}=buildRelInfo();
+  const dtNow=new Date().toLocaleDateString("pt-BR",{timeZone:"America/Fortaleza"});
+  document.getElementById("mrel-info").innerHTML=
+    `Periodo: <b>${per}</b> &nbsp;· Turno: <b>${turno}</b> &nbsp;· Carga: <b>${carga}</b> &nbsp;· Cimento: <b>${cim}</b> &nbsp;· Status: <b>${st}</b> &nbsp;· Total: <b>${list.length} veiculo${list.length!==1?"s":""}</b> &nbsp;· Gerado: <b>${dtNow}</b>`;
+  document.getElementById("mrel-body").innerHTML=!list.length
+    ?`<div style="text-align:center;padding:32px;color:var(--t3)">Nenhum registro com os filtros selecionados.</div>`
+    :`<table class="mrel-table">
+        <thead><tr>
+          <th style="text-align:left">Placa</th><th>AC</th><th>Cim./Carga</th><th>Data</th><th>Entrada</th><th>Setor<br>Atual</th>
+          <th>🏛️<br>Port.Ini</th><th>🏛️<br>Port.Fim</th>
+          <th>📦<br>Trg.Ini</th><th>📦<br>Trg.Fim</th>
+          <th>🏗️<br>Carga Ini</th><th>🏗️<br>Carga Fim</th>
+          <th>🪢<br>Enl.Ini</th><th>🪢<br>Enl.Fim</th>
+          <th>🧾<br>Saida</th><th>⏱️<br>TMAC</th>
+          <th>Nota<br>Fiscal</th><th>Status</th>
+        </tr></thead>
+        <tbody>${buildRelRows(list)}</tbody>
+      </table>`;
+  document.getElementById("mrel-overlay").classList.add("show");
+};
+
+window.exportarPDFMaster=()=>{
+  const{per,list,turno,carga,cim,st}=buildRelInfo();
+  const dtNow=new Date().toLocaleDateString("pt-BR",{timeZone:"America/Fortaleza"});
+  const hora=new Date().toLocaleTimeString("pt-BR",{timeZone:"America/Fortaleza",hour:"2-digit",minute:"2-digit"});
+  const linhas=list.map((c,i)=>{
+    const en=getTS(c,"entrada","ts");
+    const sa=getTS(c,"faturamento","ts");
+    const ptI=getTS(c,"portaria","inicio"),ptF=getTS(c,"portaria","fim");
+    const trI=getTS(c,"triagem","inicio"),trF=getTS(c,"triagem","fim");
+    const caI=getTS(c,"carregamento","inicio"),caF=getTS(c,"carregamento","fim");
+    const enI=getTS(c,"enlonamento","inicio"),enF=getTS(c,"enlonamento","fim");
+    const tmacMs=sa&&en?sa-en:en?Date.now()-en:null;
+    const over=tmacMs&&tmacMs>LIMITE_MS;
+    const bg=i%2===1?"#f5f8ff":"#fff";
+    const td=(v,ex="")=>`<td style="padding:4px 5px;border:1px solid #ccc;font-size:7.5pt;${ex}">${v||""}</td>`;
+    return`<tr style="background:${bg}">
+      ${td(c.placa,"font-weight:bold;color:#003399;font-family:monospace;text-align:left")}
+      ${td(c.ac)}
+      ${td((c.tipoCimento?c.tipoCimento+" ":"")+({granel:"Granel",ensacado:"Ensacado",bigbag:"Big Bag"}[c.tipoCarga]||""),"font-size:7pt")}
+      ${td(c.data)}${td(fmtRel(en))}
+      ${td((c.setorAtual||"").replace(/_/g," "),"font-size:6.5pt")}
+      ${td(fmtRel(ptI))}${td(fmtRel(ptF))}
+      ${td(fmtRel(trI))}${td(fmtRel(trF))}
+      ${td(fmtRel(caI))}${td(fmtRel(caF))}
+      ${td(fmtRel(enI))}${td(fmtRel(enF))}
+      ${td(fmtRel(sa))}
+      ${td(tmacMs!=null?durStr(tmacMs):"",(over?"color:#cc0000":"color:#006600")+";font-weight:bold")}
+      ${td(c.notaFiscal||"")}
+      ${td(c.setorAtual==="concluido"||c.faturamento?.ts?"Concluido":"Em processo","font-size:7pt")}
+    </tr>`;
+  }).join("");
+  const janela=window.open("","_blank","width=1400,height=800");
+  janela.document.write(`<!DOCTYPE html><html lang="pt-BR"><head>
+<meta charset="UTF-8"/><title>Relatorio Rastreio - ${dtNow}</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,sans-serif;font-size:9pt;padding:14px;color:#000}
+h2{font-size:12pt;font-weight:bold;text-align:center;margin-bottom:7pt;text-transform:uppercase;letter-spacing:1px}
+.info{font-size:8pt;color:#444;margin-bottom:10pt;text-align:center;line-height:1.8}
+table{border-collapse:collapse;width:100%}
+th{background:#003366;color:#fff;padding:5px 4px;font-size:7pt;text-align:center;border:1px solid #ccc;white-space:normal;word-break:break-word;line-height:1.3;vertical-align:bottom}
+.footer{margin-top:12pt;font-size:7pt;color:#999;text-align:center;border-top:1pt solid #ccc;padding-top:5pt}
+@media print{@page{margin:.8cm;size:A4 landscape}}
+</style></head><body>
+<h2>Relatorio de Rastreio de Carregamento</h2>
+<div class="info">Apodi Cimentos &nbsp;· Periodo: <b>${per}</b> &nbsp;· Turno: <b>${turno}</b> &nbsp;· Carga: <b>${carga}</b> &nbsp;· Cimento: <b>${cim}</b><br>Status: <b>${st}</b> &nbsp;· Total: <b>${list.length} veiculo${list.length!==1?"s":""}</b> &nbsp;· Gerado em: <b>${dtNow} as ${hora}</b></div>
+<table><thead><tr>
+  <th style="text-align:left">Placa</th><th>AC</th><th>Cim./Carga</th><th>Data</th><th>Entrada</th><th>Setor</th>
+  <th>🏛️ Port.Ini</th><th>🏛️ Port.Fim</th><th>📦 Trg.Ini</th><th>📦 Trg.Fim</th>
+  <th>🏗️ Carga Ini</th><th>🏗️ Carga Fim</th><th>🪢 Enl.Ini</th><th>🪢 Enl.Fim</th>
+  <th>🧾 Saida</th><th>⏱️ TMAC</th><th>Nota Fiscal</th><th>Status</th>
+</tr></thead>
+<tbody>${linhas||"<tr><td colspan='18' style='text-align:center;padding:16px'>Nenhum registro</td></tr>"}</tbody>
+</table>
+<div class="footer">Sistema de Rastreio de Carregamento - Apodi Cimentos - ${dtNow}</div>
+</body></html>`);
+  janela.document.close();janela.focus();
+  setTimeout(()=>janela.print(),700);
+};
 </script>
 <!-- Badge Admin -->
 <script>
