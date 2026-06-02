@@ -406,17 +406,18 @@ function buildRegistros(){
 }
 function buildLinhasHTML(registros,forPrint=false){
   const tdStyle=forPrint?"border:1px solid #ccc;padding:6px 10px":"border:1px solid #1e3558;padding:7px 10px;text-align:center";
-  // Portaria Início e Final: SOMENTE portaria.inicio e portaria.fim
-  // Se não existir, deixa linha pontilhada para preenchimento à caneta
-  const vazio=forPrint?'<span style="display:inline-block;width:120px;border-bottom:1px solid #999">&nbsp;</span>':'<span style="color:#3a6880;font-size:10px">— preencher —</span>';
-  return registros.map((c,i)=>`
-    <tr>
+  const vazio=forPrint?'<span style="display:inline-block;width:120px;border-bottom:1px solid #999">&nbsp;</span>':'<span style="color:#3a6880;font-size:10px">preencher</span>';
+  return registros.map((c,i)=>{
+    // Busca NF: usa c.notaFiscal se existir (gravado pelo faturamento)
+    const nf=c.notaFiscal||"";
+    return`<tr>
       <td style="${tdStyle};text-align:center">${i+1}</td>
-      <td style="${tdStyle};font-weight:bold;font-family:monospace;letter-spacing:1px${forPrint?"":" ;color:#00d4ff"}">${c.placa||"—"}</td>
+      <td style="${tdStyle};font-weight:bold;font-family:monospace;letter-spacing:1px${forPrint?"":" ;color:#00d4ff"}">${c.placa||"-"}</td>
       <td style="${tdStyle}">${c.portaria?.inicio?fmtDT(c.portaria.inicio):vazio}</td>
       <td style="${tdStyle}">${c.portaria?.fim?fmtDT(c.portaria.fim):vazio}</td>
-      <td style="${tdStyle}${forPrint?";min-width:120px;border-bottom:1px solid #ccc":""}">&nbsp;</td>
-    </tr>`).join("");
+      <td style="${tdStyle}${forPrint?";min-width:100px":""}">${nf}</td>
+    </tr>`;
+  }).join("");
 }
 
 window.verRelatorio=()=>{
